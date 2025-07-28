@@ -1,0 +1,43 @@
+{
+    "name": "rncp_monorepo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "lint": "eslint .",
+        "format": "prettier --write .",
+        "prepare": "husky",
+        "dev": "pnpm run dev:all",
+        "dev:front": "pnpm --filter rncp-pwa-front dev",
+        "dev:api": "pnpm --filter rncp_api dev",
+        "dev:all": "pnpm --filter rncp-pwa-front --filter rncp_api --parallel dev"
+    },
+    "lint-staged": {
+        "**/*.{js,ts,tsx}": [
+            "eslint --fix"
+        ],
+        "**/*": "prettier --write --ignore-unknown"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "devDependencies": {
+        "@commitlint/cli": "^19.8.1",
+        "@commitlint/config-conventional": "^19.8.1",
+        "@eslint/js": "^9.32.0",
+        "eslint": "^9.32.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.3",
+        "globals": "^16.3.0",
+        "husky": "^9.1.7",
+        "jiti": "^2.5.1",
+        "lint-staged": "^16.1.2",
+        "typescript-eslint": "^8.38.0"
+    },
+    "dependencies": {
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^5.0.0",
+        "eslint-plugin-react-refresh": "^0.4.18"
+    }
+}
