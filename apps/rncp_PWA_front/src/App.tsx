@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import reactLogo from './assets/react.svg';
-import appLogo from '/favicon.svg';
 import PWABadge from './PWABadge.tsx';
 import './App.css';
 
@@ -10,9 +9,6 @@ function App() {
     return (
         <>
             <div>
-                <a href="https://vite.dev" target="_blank" rel="noreferrer">
-                    <img src={appLogo} className="logo" alt="rncp_PWA_front logo" />
-                </a>
                 <a href="https://react.dev" target="_blank" rel="noreferrer">
                     <img src={reactLogo} className="logo react" alt="React logo" />
                 </a>

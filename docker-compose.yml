@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+    # PWA Frontend
+    rncp-pwa-front:
+        build:
+            context: ./apps/rncp_PWA_front
+            dockerfile: Dockerfile
+        ports:
+            - '3000:80'
+        environment:
+            - NODE_ENV=production
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+
+    # API Gateway (Main API)
+    rncp-api-gateway:
+        build:
+            context: ./apps/rncp_api
+            dockerfile: Dockerfile
+        ports:
+            - '3001:3000'
+        environment:
+            - NODE_ENV=production
+            - PORT=3000
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            - redis
+
+    # User Microservice
+    rncp-user-service:
+        build:
+            context: ./apps/rncp_api
+            dockerfile: Dockerfile
+        ports:
+            - '3002:3001'
+        environment:
+            - NODE_ENV=production
+            - PORT=3001
+            - SERVICE_NAME=user-service
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/users/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            - redis
+
+    # Base de données (à décommenter quand nécessaire)
+    # postgres:
+    #   image: postgres:15-alpine
+    #   environment:
+    #     POSTGRES_DB: rncp_db
+    #     POSTGRES_USER: rncp_user
+    #     POSTGRES_PASSWORD: rncp_password
+    #   ports:
+    #     - "5432:5432"
+    #   volumes:
+    #     - postgres_data:/var/lib/postgresql/data
+    #   restart: unless-stopped
+
+    # Redis (Message Broker for Microservices)
+    redis:
+        image: redis:7-alpine
+        ports:
+            - '6379:6379'
+        volumes:
+            - redis_data:/data
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+# Volumes
+volumes:
+    postgres_data:
+    redis_data:
