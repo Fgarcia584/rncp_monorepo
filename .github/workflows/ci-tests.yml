@@ -23,8 +23,6 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install
-              working-directory: ./rncp_monorepo
-
             - name: Run API tests
               run: pnpm run test
-              working-directory: ./rncp_monorepo/apps/rncp_api
+              working-directory: ./apps/rncp_api
