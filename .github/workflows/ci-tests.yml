@@ -1,17 +1,19 @@
 name: CI Tests
-
 on:
     pull_request:
         branches:
             - develop
-
 jobs:
     install-and-test:
         runs-on: ubuntu-latest
-
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8 # ou la version que tu utilises
 
             - name: Setup Node.js
               uses: actions/setup-node@v3
@@ -19,17 +21,10 @@ jobs:
                   node-version: 18
                   cache: 'pnpm'
 
-            - name: Install pnpm
-              run: npm install -g pnpm
-
             - name: Install dependencies
               run: pnpm install
               working-directory: ./rncp_monorepo
 
             - name: Run API tests
-              run: pnpm test
+              run: pnpm run test
               working-directory: ./rncp_monorepo/apps/rncp_api
-
-            # - name: Run Frontend tests
-            #   run: pnpm test
-            #   working-directory: ./rncp_monorepo/apps/rncp_PWA_front
