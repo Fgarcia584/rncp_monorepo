@@ -1,19 +1,30 @@
 # Build stage
 FROM node:20-alpine AS builder
 
+# Install pnpm globally
+RUN npm install -g pnpm
+
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Copy workspace configuration
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Install ALL dependencies (including devDependencies for build)
-RUN npm install --prefer-offline --no-audit 
-# Copy source code
-COPY . .
+# Copy tools package (shared types)
+COPY tools/ ./tools/
 
-# Build the application
-RUN npm run build
+# Copy current app
+COPY apps/rncp_api/ ./apps/rncp_api/
+
+# Install dependencies using pnpm (handles workspaces correctly)
+RUN pnpm install
+
+# Build shared types first
+RUN pnpm --filter @rncp/types build
+
+# Build the API application
+WORKDIR /app/apps/rncp_api
+RUN pnpm build
 
 # Production stage
 FROM node:20-alpine AS production
@@ -28,14 +39,19 @@ RUN adduser -S nestjs -u 1001
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
+# Install pnpm globally
+RUN npm install -g pnpm
 
-# Install only production dependencies (no devDependencies)
-RUN npm ci --only=production --prefer-offline --no-audit
+# Copy workspace config and package files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY tools/package.json ./tools/package.json
+COPY apps/rncp_api/package.json ./apps/rncp_api/package.json
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/apps/rncp_api/dist ./dist
 
 # Change ownership to app user
 RUN chown -R nestjs:nodejs /app

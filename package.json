@@ -10,7 +10,8 @@
         "dev": "pnpm run dev:all",
         "dev:front": "pnpm --filter rncp-pwa-front dev",
         "dev:api": "pnpm --filter rncp_api dev",
-        "dev:all": "pnpm --filter rncp-pwa-front --filter rncp_api --parallel dev"
+        "dev:all": "pnpm --filter rncp-pwa-front --filter rncp_api --parallel dev",
+        "build": "pnpm --filter rncp-pwa-front build && pnpm --filter rncp_api build"
     },
     "lint-staged": {
         "**/*.{js,ts,tsx}": [
@@ -21,7 +22,6 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "type": "module",
     "devDependencies": {
         "@commitlint/cli": "^19.8.1",
         "@commitlint/config-conventional": "^19.8.1",

@@ -1,11 +1,41 @@
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3000',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, ''),
+            },
+        },
+        fs: {
+            allow: ['..'],
+        },
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers':
+                'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control',
+        },
+    },
+    css: {
+        postcss: {},
+        devSourcemap: true,
+    },
+    define: {
+        __DEV__: true,
+    },
+    optimizeDeps: {
+        include: ['tailwindcss'],
+    },
     plugins: [
         react(),
+        tailwindcss(),
         VitePWA({
             registerType: 'prompt',
             injectRegister: false,

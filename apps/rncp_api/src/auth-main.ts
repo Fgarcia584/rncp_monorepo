@@ -1,10 +1,8 @@
-import { Module } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HttpModule } from '@nestjs/axios';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module } from '@nestjs/common';
 import { AuthModule } from './microservices/auth-service/auth.module';
-import { UserModule } from './microservices/user-service/user.module';
 import { User, RefreshToken } from './entities';
 
 @Module({
@@ -20,11 +18,31 @@ import { User, RefreshToken } from './entities';
             synchronize: process.env.NODE_ENV !== 'production',
             logging: process.env.NODE_ENV !== 'production',
         }),
-        HttpModule,
         AuthModule,
-        UserModule,
     ],
-    controllers: [AppController],
-    providers: [AppService],
 })
-export class AppModule {}
+class AuthServiceModule {}
+
+async function bootstrap() {
+    const app = await NestFactory.create(AuthServiceModule);
+
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+        }),
+    );
+
+    app.enableCors({
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        credentials: true,
+    });
+
+    const port = process.env.PORT || 3001;
+    await app.listen(port);
+
+    console.log(`🔐 Auth Service is running on port ${port}`);
+}
+
+bootstrap();
