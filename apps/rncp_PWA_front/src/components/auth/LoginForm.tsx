@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LoginRequest, getErrorMessage } from '@rncp/types';
+import { LoginRequest } from '@rncp/types';
 
 interface LoginFormProps {
     onToggle: () => void;
     onSuccess?: () => void;
+}
+
+// Fonction utilitaire pour extraire le message d'erreur de manière type-safe
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        'data' in error &&
+        typeof error.data === 'object' &&
+        error.data !== null &&
+        'message' in error.data &&
+        typeof error.data.message === 'string'
+    ) {
+        return error.data.message;
+    }
+    return defaultMessage;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => {
