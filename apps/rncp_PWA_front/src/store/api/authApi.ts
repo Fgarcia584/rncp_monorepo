@@ -1,0 +1,52 @@
+import { baseApi } from './baseApi';
+import type {
+    LoginRequest,
+    RegisterRequest,
+    AuthResponse,
+    TokenPair,
+    RefreshTokenRequest,
+    AuthUser,
+} from '@rncp/types';
+
+export const authApi = baseApi.injectEndpoints({
+    endpoints: (builder) => ({
+        login: builder.mutation<AuthResponse, LoginRequest>({
+            query: (credentials) => ({
+                url: '/auth/login',
+                method: 'POST',
+                body: credentials,
+            }),
+            invalidatesTags: ['Auth'],
+        }),
+        register: builder.mutation<AuthResponse, RegisterRequest>({
+            query: (userData) => ({
+                url: '/auth/register',
+                method: 'POST',
+                body: userData,
+            }),
+            invalidatesTags: ['Auth'],
+        }),
+        refresh: builder.mutation<TokenPair, RefreshTokenRequest>({
+            query: (refreshData) => ({
+                url: '/auth/refresh',
+                method: 'POST',
+                body: refreshData,
+            }),
+        }),
+        logout: builder.mutation<void, RefreshTokenRequest>({
+            query: (refreshData) => ({
+                url: '/auth/logout',
+                method: 'POST',
+                body: refreshData,
+            }),
+            invalidatesTags: ['Auth'],
+        }),
+        getProfile: builder.query<AuthUser, void>({
+            query: () => '/auth/profile',
+            providesTags: ['Auth'],
+        }),
+    }),
+});
+
+export const { useLoginMutation, useRegisterMutation, useRefreshMutation, useLogoutMutation, useGetProfileQuery } =
+    authApi;
