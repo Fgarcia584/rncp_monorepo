@@ -13,7 +13,7 @@ jobs:
             - name: Install pnpm
               uses: pnpm/action-setup@v2
               with:
-                  version: 8 # ou la version que tu utilises
+                  version: 8
 
             - name: Setup Node.js
               uses: actions/setup-node@v3
@@ -23,6 +23,8 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install
+            - name: build types
+              run: pnpm run build:types
             - name: Run API tests
               run: pnpm run test
               working-directory: ./apps/rncp_api
