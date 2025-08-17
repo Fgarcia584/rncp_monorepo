@@ -5,9 +5,8 @@ services:
             context: .
             dockerfile: ./apps/rncp_PWA_front/Dockerfile
         ports:
-            - '3000:80'
-        environment:
-            - NODE_ENV=production
+            - '${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}'
+        env_file: .env
         restart: unless-stopped
         healthcheck:
             test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/health']
@@ -22,22 +21,21 @@ services:
             context: .
             dockerfile: ./apps/rncp_api/Dockerfile
         ports:
-            - '3001:3000'
+            - '${API_GATEWAY_PORT}:${API_GATEWAY_INTERNAL_PORT}'
+        env_file: .env
         environment:
-            - NODE_ENV=production
-            - PORT=3000
-            - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
-            - JWT_EXPIRES_IN=15m
-            - JWT_REFRESH_EXPIRES_IN=7d
-            - DB_HOST=postgres
-            - DB_PORT=5432
-            - DB_NAME=rncp_db
-            - DB_USER=rncp_user
-            - DB_PASSWORD=rncp_password
-            - REDIS_URL=redis://redis:6379
+            - PORT=${API_GATEWAY_INTERNAL_PORT}
         restart: unless-stopped
         healthcheck:
-            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${API_GATEWAY_INTERNAL_PORT}/health',
+                ]
             interval: 30s
             timeout: 10s
             retries: 3
@@ -52,20 +50,22 @@ services:
             context: .
             dockerfile: ./apps/rncp_api/Dockerfile
         ports:
-            - '3002:3001'
+            - '${USER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
         environment:
-            - NODE_ENV=production
-            - PORT=3001
+            - PORT=${SERVICE_INTERNAL_PORT}
             - SERVICE_NAME=user-service
-            - DB_HOST=postgres
-            - DB_PORT=5432
-            - DB_NAME=rncp_db
-            - DB_USER=rncp_user
-            - DB_PASSWORD=rncp_password
-            - REDIS_URL=redis://redis:6379
         restart: unless-stopped
         healthcheck:
-            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/users/health']
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/users/health',
+                ]
             interval: 30s
             timeout: 10s
             retries: 3
@@ -80,23 +80,22 @@ services:
             context: .
             dockerfile: ./apps/rncp_api/Dockerfile.auth-service
         ports:
-            - '3003:3001'
+            - '${AUTH_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
         environment:
-            - NODE_ENV=production
-            - PORT=3001
+            - PORT=${SERVICE_INTERNAL_PORT}
             - SERVICE_NAME=auth-service
-            - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key}
-            - JWT_EXPIRES_IN=15m
-            - JWT_REFRESH_EXPIRES_IN=7d
-            - DB_HOST=postgres
-            - DB_PORT=5432
-            - DB_NAME=rncp_db
-            - DB_USER=rncp_user
-            - DB_PASSWORD=rncp_password
-            - REDIS_URL=redis://redis:6379
         restart: unless-stopped
         healthcheck:
-            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/auth/health']
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/auth/health',
+                ]
             interval: 30s
             timeout: 10s
             retries: 3
@@ -108,17 +107,14 @@ services:
     # PostgreSQL Database
     postgres:
         image: postgres:15-alpine
-        environment:
-            POSTGRES_DB: rncp_db
-            POSTGRES_USER: rncp_user
-            POSTGRES_PASSWORD: rncp_password
+        env_file: .env
         ports:
-            - '5432:5432'
+            - '${POSTGRES_PORT}:5432'
         volumes:
             - postgres_data:/var/lib/postgresql/data
         restart: unless-stopped
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U rncp_user -d rncp_db']
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
             interval: 30s
             timeout: 10s
             retries: 5
@@ -127,7 +123,7 @@ services:
     redis:
         image: redis:7-alpine
         ports:
-            - '6379:6379'
+            - '${REDIS_PORT}:6379'
         volumes:
             - redis_data:/data
         restart: unless-stopped
