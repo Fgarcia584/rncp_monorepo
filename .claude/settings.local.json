@@ -14,7 +14,8 @@
       "Bash(docker-compose up:*)",
       "Bash(timeout 10 docker-compose logs -f rncp-api-gateway)",
       "Bash(timeout 15 docker-compose logs -f rncp-api-gateway)",
-      "Bash(timeout 10 docker-compose logs -f rncp-user-service)"
+      "Bash(timeout 10 docker-compose logs -f rncp-user-service)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
