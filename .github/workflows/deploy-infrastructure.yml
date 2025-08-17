@@ -1,6 +1,6 @@
 name: Deploy Azure Infrastructure
 
-on:
+'on':
     workflow_dispatch:
         inputs:
             environment:
@@ -52,18 +52,20 @@ jobs:
                   echo "deployment_output=$DEPLOYMENT_OUTPUT" >> $GITHUB_OUTPUT
 
             - name: Display deployment results
-              run: echo "Infrastructure deployment completed for ${{ inputs.environment }} environment"
+              run: |
+                  echo "Infrastructure deployment completed for ${{ inputs.environment }} environment"
                   echo "PostgreSQL Server $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlServerName.value')"
                   echo "Redis Cache redis-rncp-${{ inputs.environment }}"
                   echo "Storage Account $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.storageAccountName.value')"
 
             - name: Test database connectivity
-              run:
+              run: |
                   CONNECTION_STRING=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')
                   echo "Testing database connectivity..."
 
             - name: Update GitHub Environment Secrets
-              run: echo"Update the following secrets in your GitHub environment"
+              run: |
+                  echo "Update the following secrets in your GitHub environment"
                   echo "DATABASE_URL_${{ inputs.environment }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')"
-                  echo "REDIS_URL_${{ inputs.environment  }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.redisConnectionString.value')"
+                  echo "REDIS_URL_${{ inputs.environment }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.redisConnectionString.value')"
                   echo "APPINSIGHTS_INSTRUMENTATIONKEY_${{ inputs.environment }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.applicationInsightsInstrumentationKey.value')"
