@@ -63,7 +63,7 @@ jobs:
                   echo "Testing database connectivity..."
 
             - name: Update GitHub Environment Secrets
-              run: echo "🔒 Update the following secrets in your GitHub environment:"
+              run: echo"Update the following secrets in your GitHub environment"
                   echo "DATABASE_URL_${{ inputs.environment | upper }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')"
                   echo "REDIS_URL_${{ inputs.environment | upper }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.redisConnectionString.value')"
                   echo "APPINSIGHTS_INSTRUMENTATIONKEY_${{ inputs.environment | upper }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.applicationInsightsInstrumentationKey.value')"
