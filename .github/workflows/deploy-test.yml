@@ -42,7 +42,7 @@ jobs:
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name aci-rncp-test-api \
                     --location ${{ env.AZURE_LOCATION }} \
-                    --image "${{ env.REGISTRY }}/rncp-api-gateway:sha-${{ inputs.image_tag }}" \
+                    --image "${{ env.REGISTRY }}/rncp-api-gateway:${{ inputs.image_tag }}" \
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
@@ -64,7 +64,7 @@ jobs:
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name aci-rncp-test-user \
                     --location ${{ env.AZURE_LOCATION }} \
-                    --image "${{ env.REGISTRY }}/rncp-user-service:sha-${{ inputs.image_tag }}" \
+                    --image "${{ env.REGISTRY }}/rncp-user-service:${{ inputs.image_tag }}" \
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
@@ -84,7 +84,7 @@ jobs:
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name aci-rncp-test-auth \
                     --location ${{ env.AZURE_LOCATION }} \
-                    --image "${{ env.REGISTRY }}/rncp-auth-service:sha-${{ inputs.image_tag }}" \
+                    --image "${{ env.REGISTRY }}/rncp-auth-service:${{ inputs.image_tag }}" \
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
@@ -105,7 +105,7 @@ jobs:
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name aci-rncp-test-frontend \
                     --location ${{ env.AZURE_LOCATION }} \
-                    --image "${{ env.REGISTRY }}/rncp-frontend:sha-${{ inputs.image_tag }}" \
+                    --image "${{ env.REGISTRY }}/rncp-frontend:${{ inputs.image_tag }}" \
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
