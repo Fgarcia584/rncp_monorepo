@@ -15,56 +15,7 @@ env:
     REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
 
 jobs:
-    deploy-infrastructure:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Login to Azure
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS_TEST }}
-
-            - name: Create Resource Group
-              run: |
-                  az group create \
-                    --name ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --location ${{ env.AZURE_LOCATION }}
-
-            - name: Deploy PostgreSQL
-              run: |
-                  az postgres flexible-server create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name psql-rncp-test \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --admin-user ${{ secrets.POSTGRES_USER_TEST }} \
-                    --admin-password ${{ secrets.POSTGRES_PASSWORD_TEST }} \
-                    --sku-name Standard_B1ms \
-                    --tier Burstable \
-                    --storage-size 32 \
-                    --version 15 \
-                    --public-access 0.0.0.0 \
-                    --yes
-
-            - name: Create PostgreSQL Database
-              run: |
-                  az postgres flexible-server db create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --server-name psql-rncp-test \
-                    --database-name ${{ secrets.POSTGRES_DB_TEST }}
-
-            - name: Deploy Redis Cache
-              run: |
-                  az redis create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name redis-rncp-test \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --sku Basic \
-                    --vm-size c0
-
     deploy-containers:
-        needs: deploy-infrastructure
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -78,6 +29,7 @@ jobs:
             - name: Get Redis connection string
               id: redis
               run: |
+                  # Utilise Redis déjà provisionné par deploy-infrastructure.yml
                   REDIS_KEY=$(az redis list-keys \
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name redis-rncp-test \

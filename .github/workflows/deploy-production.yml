@@ -24,60 +24,8 @@ jobs:
                   echo "🚀 Production deployment requires manual approval"
                   echo "Image tag: ${{ inputs.image_tag }}"
 
-    deploy-infrastructure:
-        needs: manual-approval
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Login to Azure
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-
-            - name: Create Resource Group
-              run: |
-                  az group create \
-                    --name ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --location ${{ env.AZURE_LOCATION }}
-
-            - name: Deploy PostgreSQL (Production)
-              run: |
-                  az postgres flexible-server create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name psql-rncp-prod \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --admin-user ${{ secrets.POSTGRES_USER_PROD }} \
-                    --admin-password ${{ secrets.POSTGRES_PASSWORD_PROD }} \
-                    --sku-name Standard_D2s_v3 \
-                    --tier GeneralPurpose \
-                    --storage-size 128 \
-                    --version 15 \
-                    --public-access 0.0.0.0 \
-                    --backup-retention 30 \
-                    --geo-redundant-backup Enabled \
-                    --yes
-
-            - name: Create PostgreSQL Database
-              run: |
-                  az postgres flexible-server db create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --server-name psql-rncp-prod \
-                    --database-name ${{ secrets.POSTGRES_DB_PROD }}
-
-            - name: Deploy Redis Cache (Production)
-              run: |
-                  az redis create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name redis-rncp-prod \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --sku Standard \
-                    --vm-size c1 \
-                    --redis-configuration '{"maxmemory-policy":"allkeys-lru"}'
-
     backup-current-deployment:
-        needs: deploy-infrastructure
+        needs: manual-approval
         runs-on: ubuntu-latest
         steps:
             - name: Login to Azure
@@ -105,7 +53,7 @@ jobs:
                   echo "Previous deployment: ${{ steps.current.outputs.image }}"
 
     deploy-containers:
-        needs: [deploy-infrastructure, backup-current-deployment]
+        needs: backup-current-deployment
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -119,6 +67,7 @@ jobs:
             - name: Get Redis connection string
               id: redis
               run: |
+                  # Utilise Redis déjà provisionné par deploy-infrastructure.yml
                   REDIS_KEY=$(az redis list-keys \
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name redis-rncp-prod \
