@@ -31,10 +31,7 @@ jobs:
                   creds: ${{ inputs.environment == 'prod' && secrets.AZURE_CREDENTIALS_PROD || secrets.AZURE_CREDENTIALS_TEST }}
 
             - name: Create Resource Group
-              run: az group create \
-                  --name ${{ env.AZURE_RESOURCE_GROUP }} \
-                  --location ${{ env.AZURE_LOCATION }}
-                  --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
+              run: az group create --name ${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.AZURE_LOCATION }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
 
             - name: Deploy Bicep template
               id: deploy
