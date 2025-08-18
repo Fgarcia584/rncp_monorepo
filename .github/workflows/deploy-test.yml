@@ -127,11 +127,11 @@ jobs:
 
             - name: Check Frontend Health
               run: |
-                  curl -f https://rncp-test-frontend.francecentral.azurecontainer.io/health || exit 1
+                  curl -f http://rncp-test-frontend.francecentral.azurecontainer.io/health || exit 1
 
             - name: Check API Gateway Health
               run: |
-                  curl -f https://rncp-test-api.francecentral.azurecontainer.io:3001/health || exit 1
+                  curl -f http://rncp-test-api.francecentral.azurecontainer.io:3001/health || exit 1
 
             - name: Run Integration Tests
               run: |
@@ -147,8 +147,8 @@ jobs:
               if: needs.run-health-checks.result == 'success'
               run: |
                   echo " Test deployment successful!"
-                  echo "Frontend: https://rncp-test-frontend.francecentral.azurecontainer.io"
-                  echo "API: https://rncp-test-api.francecentral.azurecontainer.io:3001"
+                  echo "Frontend: http://rncp-test-frontend.francecentral.azurecontainer.io"
+                  echo "API: http://rncp-test-api.francecentral.azurecontainer.io:3001"
 
             - name: Deployment Failure Notification
               if: needs.run-health-checks.result == 'failure'
