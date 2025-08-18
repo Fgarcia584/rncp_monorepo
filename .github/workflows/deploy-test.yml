@@ -36,25 +36,6 @@ jobs:
                     --query primaryKey -o tsv)
                   echo "connection_string=redis-rncp-test.redis.cache.windows.net:6380,password=$REDIS_KEY,ssl=True" >> $GITHUB_OUTPUT
 
-            - name: Deploy Container Group
-              run: |
-                  az container create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name ${{ env.CONTAINER_GROUP_NAME }} \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --image ${{ env.REGISTRY }}/rncp-frontend:${{ inputs.image_tag }} \
-                    --registry-login-server ${{ env.REGISTRY }} \
-                    --registry-username ${{ secrets.ACR_USERNAME }} \
-                    --registry-password ${{ secrets.ACR_PASSWORD }} \
-                    --os-type Linux \
-                    --dns-name-label rncp-test-frontend \
-                    --ports 80 \
-                    --cpu 1 \
-                    --memory 1.5 \
-                    --environment-variables \
-                      NODE_ENV=test \
-                      API_URL=https://rncp-test-api.francecentral.azurecontainer.io
-
             - name: Deploy API Gateway
               run: |
                   az container create \
@@ -129,14 +110,13 @@ jobs:
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
                     --os-type Linux \
+                    --dns-name-label rncp-test-frontend \
+                    --ports 80 \
                     --cpu 1 \
-                    --memory 2 \
+                    --memory 1.5 \
                     --environment-variables \
                       NODE_ENV=test \
-                      PORT=3000 \
-                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
-                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
-                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+                      API_URL=https://rncp-test-api.francecentral.azurecontainer.io
 
     run-health-checks:
         needs: deploy-containers

@@ -71,6 +71,8 @@ jobs:
                       type=ref,event=branch,suffix=-${{ steps.env.outputs.suffix }}
                       type=ref,event=pr,suffix=-${{ steps.env.outputs.suffix }}
                       type=sha,prefix=${{ steps.env.outputs.suffix }}-
+                      type=sha,prefix={{branch}}-
+                      type=sha
                       type=raw,value=latest-${{ steps.env.outputs.suffix }},enable={{is_default_branch}}
 
             - name: Build and push Docker image
