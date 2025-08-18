@@ -146,12 +146,12 @@ jobs:
             - name: Deployment Success Notification
               if: needs.run-health-checks.result == 'success'
               run: |
-                  echo "✅ Test deployment successful!"
+                  echo " Test deployment successful!"
                   echo "Frontend: https://rncp-test-frontend.francecentral.azurecontainer.io"
                   echo "API: https://rncp-test-api.francecentral.azurecontainer.io:3001"
 
             - name: Deployment Failure Notification
               if: needs.run-health-checks.result == 'failure'
               run: |
-                  echo "❌ Test deployment failed!"
+                  echo " Test deployment failed!"
                   exit 1
