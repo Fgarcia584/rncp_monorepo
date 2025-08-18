@@ -53,7 +53,7 @@ jobs:
                     --memory 1.5 \
                     --environment-variables \
                       NODE_ENV=test \
-                      API_URL=https://rncp-test-api.westeurope.azurecontainer.io
+                      API_URL=https://rncp-test-api.francecentral.azurecontainer.io
 
             - name: Deploy API Gateway
               run: |
@@ -147,11 +147,11 @@ jobs:
 
             - name: Check Frontend Health
               run: |
-                  curl -f https://rncp-test-frontend.westeurope.azurecontainer.io/health || exit 1
+                  curl -f https://rncp-test-frontend.francecentral.azurecontainer.io/health || exit 1
 
             - name: Check API Gateway Health
               run: |
-                  curl -f https://rncp-test-api.westeurope.azurecontainer.io:3001/health || exit 1
+                  curl -f https://rncp-test-api.francecentral.azurecontainer.io:3001/health || exit 1
 
             - name: Run Integration Tests
               run: |
@@ -167,8 +167,8 @@ jobs:
               if: needs.run-health-checks.result == 'success'
               run: |
                   echo "✅ Test deployment successful!"
-                  echo "Frontend: https://rncp-test-frontend.westeurope.azurecontainer.io"
-                  echo "API: https://rncp-test-api.westeurope.azurecontainer.io:3001"
+                  echo "Frontend: https://rncp-test-frontend.francecentral.azurecontainer.io"
+                  echo "API: https://rncp-test-api.francecentral.azurecontainer.io:3001"
 
             - name: Deployment Failure Notification
               if: needs.run-health-checks.result == 'failure'

@@ -91,7 +91,7 @@ jobs:
                     --memory 3 \
                     --environment-variables \
                       NODE_ENV=production \
-                      API_URL=https://rncp-prod-api.westeurope.azurecontainer.io
+                      API_URL=https://rncp-prod-api.francecentral.azurecontainer.io
 
             - name: Deploy API Gateway (Blue-Green)
               run: |
@@ -162,11 +162,11 @@ jobs:
 
             - name: Check Frontend Health
               run: |
-                  curl -f https://rncp-prod-frontend-new.westeurope.azurecontainer.io/health || exit 1
+                  curl -f https://rncp-prod-frontend-new.francecentral.azurecontainer.io/health || exit 1
 
             - name: Check API Gateway Health
               run: |
-                  curl -f https://rncp-prod-api-new.westeurope.azurecontainer.io:3001/health || exit 1
+                  curl -f https://rncp-prod-api-new.francecentral.azurecontainer.io:3001/health || exit 1
 
             - name: Run Production Smoke Tests
               run: |
@@ -208,7 +208,7 @@ jobs:
                     --memory 3 \
                     --environment-variables \
                       NODE_ENV=production \
-                      API_URL=https://rncp-prod-api.westeurope.azurecontainer.io
+                      API_URL=https://rncp-prod-api.francecentral.azurecontainer.io
 
             - name: Cleanup temporary containers
               run: |
@@ -226,8 +226,8 @@ jobs:
               if: needs.switch-traffic.result == 'success'
               run: |
                   echo "🎉 Production deployment successful!"
-                  echo "Frontend: https://rncp-prod-frontend.westeurope.azurecontainer.io"
-                  echo "API: https://rncp-prod-api.westeurope.azurecontainer.io:3001"
+                  echo "Frontend: https://rncp-prod-frontend.francecentral.azurecontainer.io"
+                  echo "API: https://rncp-prod-api.francecentral.azurecontainer.io:3001"
 
             - name: Deployment Failure - Rollback
               if: needs.switch-traffic.result == 'failure'
