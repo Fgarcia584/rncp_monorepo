@@ -3,11 +3,11 @@ name: Build and Push Docker Images
 on:
     push:
         branches:
-            - main
+            - master
             - develop
     pull_request:
         branches:
-            - main
+            - master
             - develop
 
 env:
@@ -41,7 +41,7 @@ jobs:
             - name: Set environment suffix
               id: env
               run: |
-                  if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+                  if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
                     echo "suffix=prod" >> $GITHUB_OUTPUT
                     echo "environment=production" >> $GITHUB_OUTPUT
                   elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
@@ -87,13 +87,13 @@ jobs:
     trigger-deployment:
         needs: build-and-push
         runs-on: ubuntu-latest
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
 
         steps:
             - name: Set environment
               id: env
               run: |
-                  if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+                  if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
                     echo "environment=production" >> $GITHUB_OUTPUT
                   else
                     echo "environment=test" >> $GITHUB_OUTPUT

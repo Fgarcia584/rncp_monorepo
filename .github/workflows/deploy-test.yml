@@ -10,7 +10,7 @@ on:
 
 env:
     AZURE_RESOURCE_GROUP: rg-rncp-test
-    AZURE_LOCATION: westeurope
+    AZURE_LOCATION: francecentral
     CONTAINER_GROUP_NAME: aci-rncp-test
     REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
 
