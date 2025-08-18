@@ -205,6 +205,5 @@ output redisConnectionString string = '${redisCache.properties.hostName}:${redis
 output storageAccountName string = storageAccount.name
 output storageAccountKey string = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
-output applicationInsightsInstrumentationKey string = reference(applicationInsights.id, applicationInsights.apiVersion).InstrumentationKey
 output vnetId string = vnet.id
 output networkProfileId string = networkProfile.id
