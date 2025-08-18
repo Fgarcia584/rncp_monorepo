@@ -72,11 +72,11 @@ jobs:
                     --cpu 1 \
                     --memory 2 \
                     --environment-variables \
-                      NODE_ENV=test \
-                      PORT=3002 \
-                      SERVICE_NAME=user-service \
-                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
-                      REDIS_URL=${{ steps.redis.outputs.connection_string }}
+                      "NODE_ENV=test" \
+                      "PORT=3002" \
+                      "SERVICE_NAME=user-service" \
+                      "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" \
+                      "REDIS_URL=${{ steps.redis.outputs.connection_string }}"
 
             - name: Deploy Auth Service
               run: |
@@ -92,12 +92,12 @@ jobs:
                     --cpu 1 \
                     --memory 2 \
                     --environment-variables \
-                      NODE_ENV=test \
-                      PORT=3003 \
-                      SERVICE_NAME=auth-service \
-                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
-                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
-                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+                     "NODE_ENV=test" \
+                     "PORT=3003" \
+                     "SERVICE_NAME=auth-service" \
+                     "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" \
+                     "REDIS_URL=${{ steps.redis.outputs.connection_string }}" \
+                     "JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}"
 
             - name: Deploy Frontend
               run: |
@@ -115,8 +115,8 @@ jobs:
                     --cpu 1 \
                     --memory 1.5 \
                     --environment-variables \
-                      NODE_ENV=test \
-                      API_URL=https://rncp-test-api.francecentral.azurecontainer.io
+                      "NODE_ENV=test" \
+                      "API_URL=https://rncp-test-api.francecentral.azurecontainer.io"
 
     run-health-checks:
         needs: deploy-containers
