@@ -46,6 +46,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --dns-name-label rncp-test-frontend \
                     --ports 80 \
                     --cpu 1 \
@@ -64,6 +65,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --dns-name-label rncp-test-api \
                     --ports 3001 \
                     --cpu 1 \
@@ -85,6 +87,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --cpu 1 \
                     --memory 2 \
                     --environment-variables \
@@ -104,12 +107,33 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --cpu 1 \
                     --memory 2 \
                     --environment-variables \
                       NODE_ENV=test \
                       PORT=3003 \
                       SERVICE_NAME=auth-service \
+                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
+                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
+                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+
+            - name: Deploy Frontend
+              run: |
+                  az container create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name aci-rncp-test-frontend \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --image ${{ env.REGISTRY }}/rncp-frontend:${{ inputs.image_tag }} \
+                    --registry-login-server ${{ env.REGISTRY }} \
+                    --registry-username ${{ secrets.ACR_USERNAME }} \
+                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
+                    --cpu 1 \
+                    --memory 2 \
+                    --environment-variables \
+                      NODE_ENV=test \
+                      PORT=3000 \
                       DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
                       REDIS_URL=${{ steps.redis.outputs.connection_string }} \
                       JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
