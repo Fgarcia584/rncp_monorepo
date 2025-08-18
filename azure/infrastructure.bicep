@@ -196,14 +196,14 @@ resource networkProfile 'Microsoft.Network/networkProfiles@2023-09-01' = {
 }
 
 // Outputs
-output postgresqlServerName string = postgresqlServer.name
-output postgresqlConnectionString string = 'postgresql://${postgresqlAdminUsername}:${postgresqlAdminPassword}@${postgresqlServer.properties.fullyQualifiedDomainName}:5432/${databaseName}'
-output postgresqlFqdn string = postgresqlServer.properties.fullyQualifiedDomainName
-output redisHostName string = redisCache.properties.hostName
-output redisPrimaryKey string = listKeys(redisCache.id, redisCache.apiVersion).primaryKey
-output redisConnectionString string = '${redisCache.properties.hostName}:${redisCache.properties.sslPort}'
-output storageAccountName string = storageAccount.name
-output storageAccountKey string = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
+// output postgresqlServerName string = postgresqlServer.name
+// output postgresqlConnectionString string = 'postgresql://${postgresqlAdminUsername}:${postgresqlAdminPassword}@${postgresqlServer.properties.fullyQualifiedDomainName}:5432/${databaseName}'
+// output postgresqlFqdn string = postgresqlServer.properties.fullyQualifiedDomainName
+// output redisHostName string = redisCache.properties.hostName
+// output redisPrimaryKey string = listKeys(redisCache.id, redisCache.apiVersion).primaryKey
+// output redisConnectionString string = '${redisCache.properties.hostName}:${redisCache.properties.sslPort}'
+// output storageAccountName string = storageAccount.name
+// output storageAccountKey string = listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value
 // output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
 // output vnetId string = vnet.id
 // output networkProfileId string = networkProfile.id

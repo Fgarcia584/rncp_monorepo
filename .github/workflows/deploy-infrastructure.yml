@@ -49,18 +49,18 @@ jobs:
 
                   echo "deployment_output=$DEPLOYMENT_OUTPUT" >> $GITHUB_OUTPUT
 
-            - name: Display deployment results
-              run: echo "Infrastructure deployment completed for ${{ inputs.environment }} environment"
-                  echo "PostgreSQL Server $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlServerName.value')"
-                  echo "Redis Cache redis-rncp-${{ inputs.environment }}"
-                  echo "Storage Account $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.storageAccountName.value')"
+            # - name: Display deployment results
+            #   run: echo "Infrastructure deployment completed for ${{ inputs.environment }} environment"
+            #       echo "PostgreSQL Server $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlServerName.value')"
+            #       echo "Redis Cache redis-rncp-${{ inputs.environment }}"
+            #       echo "Storage Account $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.storageAccountName.value')"
 
-            - name: Test database connectivity
-              run:
-                  CONNECTION_STRING=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')
-                  echo "Testing database connectivity..."
+            # - name: Test database connectivity
+            #   run:
+            #       CONNECTION_STRING=$(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')
+            #       echo "Testing database connectivity..."
 
-            - name: Update GitHub Environment Secrets
-              run: echo"Update the following secrets in your GitHub environment"
-                  echo "DATABASE_URL_${{ inputs.environment }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')"
-                  echo "REDIS_URL_${{ inputs.environment  }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.redisConnectionString.value')"
+            # - name: Update GitHub Environment Secrets
+            #   run: echo"Update the following secrets in your GitHub environment"
+            #       echo "DATABASE_URL_${{ inputs.environment }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.postgresqlConnectionString.value')"
+            #       echo "REDIS_URL_${{ inputs.environment  }} $(echo '${{ steps.deploy.outputs.deployment_output }}' | jq -r '.redisConnectionString.value')"
