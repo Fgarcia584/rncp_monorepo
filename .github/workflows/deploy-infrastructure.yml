@@ -35,16 +35,16 @@ jobs:
 
             - name: Deploy Bicep template
               id: deploy
-              run: DEPLOYMENT_OUTPUT=$(az deployment group create \
-                  --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                  --template-file azure/infrastructure.bicep \
-                  --parameters \
-                  environment=${{ inputs.environment }} \
-                  location=${{ env.AZURE_LOCATION }} \
-                  postgresqlAdminUsername=${{ inputs.environment == 'prod' && secrets.POSTGRES_USER_PROD || secrets.POSTGRES_USER_TEST }} \
-                  postgresqlAdminPassword=${{ inputs.environment == 'prod' && secrets.POSTGRES_PASSWORD_PROD || secrets.POSTGRES_PASSWORD_TEST }} \
-                  databaseName=${{ inputs.environment == 'prod' && secrets.POSTGRES_DB_PROD || secrets.POSTGRES_DB_TEST }} \
-                  --query 'properties.outputs' \
+              run: DEPLOYMENT_OUTPUT=$(az deployment group create
+                  --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
+                  --template-file azure/infrastructure.bicep
+                  --parameters
+                  environment=${{ inputs.environment }}
+                  location=${{ env.AZURE_LOCATION }}
+                  postgresqlAdminUsername=${{ inputs.environment == 'prod' && secrets.POSTGRES_USER_PROD || secrets.POSTGRES_USER_TEST }}
+                  postgresqlAdminPassword=${{ inputs.environment == 'prod' && secrets.POSTGRES_PASSWORD_PROD || secrets.POSTGRES_PASSWORD_TEST }}
+                  databaseName=${{ inputs.environment == 'prod' && secrets.POSTGRES_DB_PROD || secrets.POSTGRES_DB_TEST }}
+                  --query 'properties.outputs'
                   --output json)
 
                   echo "deployment_output=$DEPLOYMENT_OUTPUT" >> $GITHUB_OUTPUT
