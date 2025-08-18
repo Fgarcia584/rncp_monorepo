@@ -14,7 +14,7 @@ on:
 
 env:
     AZURE_RESOURCE_GROUP: rg-rncp-${{ inputs.environment }}
-    AZURE_LOCATION: westeurope
+    AZURE_LOCATION: francecentral
 
 jobs:
     deploy-infrastructure:
