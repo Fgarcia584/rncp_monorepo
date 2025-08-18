@@ -72,6 +72,7 @@ jobs:
                       type=ref,event=pr,suffix=-${{ steps.env.outputs.suffix }}
                       type=sha,prefix=${{ steps.env.outputs.suffix }}-
                       type=sha,prefix={{branch}}-
+                      type=sha,prefix=v
                       type=sha
                       type=raw,value=latest-${{ steps.env.outputs.suffix }},enable={{is_default_branch}}
 
@@ -111,6 +112,6 @@ jobs:
                         workflow_id: 'deploy-${{ steps.env.outputs.environment }}.yml',
                         ref: context.ref,
                         inputs: {
-                          image_tag: context.sha.substring(0, 7)
+                          image_tag: `v${context.sha.substring(0, 7)}`
                         }
                       });
