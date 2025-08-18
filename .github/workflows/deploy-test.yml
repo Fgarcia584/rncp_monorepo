@@ -56,7 +56,8 @@ jobs:
                       "PORT=3001" \
                       "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" \
                       "REDIS_URL=${{ steps.redis.outputs.connection_string }}" \
-                      "JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}"
+                      "JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}" \
+                      "FRONTEND_URL=http://rncp-test-frontend.francecentral.azurecontainer.io"
 
             - name: Deploy User Service
               run: |
@@ -116,7 +117,7 @@ jobs:
                     --memory 1.5 \
                     --environment-variables \
                       "NODE_ENV=test" \
-                      "API_URL=https://rncp-test-api.francecentral.azurecontainer.io"
+                      "VITE_API_URL=http://rncp-test-api.francecentral.azurecontainer.io:3001"
 
     run-health-checks:
         needs: deploy-containers

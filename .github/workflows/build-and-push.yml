@@ -86,6 +86,8 @@ jobs:
                   labels: ${{ steps.meta.outputs.labels }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+                  build-args: |
+                      VITE_API_URL=${{ matrix.service.name == 'frontend' && (steps.env.outputs.environment == 'test' && 'http://rncp-test-api.francecentral.azurecontainer.io:3001' || steps.env.outputs.environment == 'production' && 'http://rncp-prod-api.francecentral.azurecontainer.io:3001') || '' }}
 
     trigger-deployment:
         needs: build-and-push
