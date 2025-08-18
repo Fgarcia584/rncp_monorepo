@@ -34,6 +34,7 @@ jobs:
               run: az group create \
                   --name ${{ env.AZURE_RESOURCE_GROUP }} \
                   --location ${{ env.AZURE_LOCATION }}
+                  --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
 
             - name: Deploy Bicep template
               id: deploy
