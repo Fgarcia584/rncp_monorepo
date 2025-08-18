@@ -198,10 +198,11 @@ resource networkProfile 'Microsoft.Network/networkProfiles@2023-09-01' = {
 // Outputs
 output postgresqlServerName string = postgresqlServer.name
 output postgresqlConnectionString string = 'postgresql://${postgresqlAdminUsername}:${postgresqlAdminPassword}@${postgresqlServer.properties.fullyQualifiedDomainName}:5432/${databaseName}'
-output redisConnectionString string = '${redisCache.properties.hostName}:${redisCache.properties.sslPort},password=${listKeys(redisCache.id, redisCache.apiVersion).primaryKey},ssl=True'
+output redisHostName string = redisCache.properties.hostName
+output redisPrimaryKey string = redisCache.listKeys().primaryKey
 output storageAccountName string = storageAccount.name
-output storageAccountConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value};EndpointSuffix=core.windows.net'
+output storageAccountKey string = storageAccount.listKeys().keys[0].value
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
-output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+output applicationInsightsInstrumentationKey string = applicationInsights.properties.InstrumentationKey
 output vnetId string = vnet.id
 output networkProfileId string = networkProfile.id
