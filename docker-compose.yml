@@ -1,15 +1,12 @@
-version: '3.8'
-
 services:
     # PWA Frontend
     rncp-pwa-front:
         build:
-            context: ./apps/rncp_PWA_front
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: ./apps/rncp_PWA_front/Dockerfile
         ports:
-            - '3000:80'
-        environment:
-            - NODE_ENV=production
+            - '${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}'
+        env_file: .env
         restart: unless-stopped
         healthcheck:
             test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost/health']
@@ -21,62 +18,112 @@ services:
     # API Gateway (Main API)
     rncp-api-gateway:
         build:
-            context: ./apps/rncp_api
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: ./apps/rncp_api/Dockerfile
         ports:
-            - '3001:3000'
+            - '${API_GATEWAY_PORT}:${API_GATEWAY_INTERNAL_PORT}'
+        env_file: .env
         environment:
-            - NODE_ENV=production
-            - PORT=3000
+            - PORT=${API_GATEWAY_INTERNAL_PORT}
         restart: unless-stopped
         healthcheck:
-            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3000/health']
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${API_GATEWAY_INTERNAL_PORT}/health',
+                ]
             interval: 30s
             timeout: 10s
             retries: 3
             start_period: 40s
         depends_on:
             - redis
+            - postgres
 
     # User Microservice
     rncp-user-service:
         build:
-            context: ./apps/rncp_api
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: ./apps/rncp_api/Dockerfile
         ports:
-            - '3002:3001'
+            - '${USER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
         environment:
-            - NODE_ENV=production
-            - PORT=3001
+            - PORT=${SERVICE_INTERNAL_PORT}
             - SERVICE_NAME=user-service
         restart: unless-stopped
         healthcheck:
-            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/users/health']
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/users/health',
+                ]
             interval: 30s
             timeout: 10s
             retries: 3
             start_period: 40s
         depends_on:
             - redis
+            - postgres
 
-    # Base de données (à décommenter quand nécessaire)
-    # postgres:
-    #   image: postgres:15-alpine
-    #   environment:
-    #     POSTGRES_DB: rncp_db
-    #     POSTGRES_USER: rncp_user
-    #     POSTGRES_PASSWORD: rncp_password
-    #   ports:
-    #     - "5432:5432"
-    #   volumes:
-    #     - postgres_data:/var/lib/postgresql/data
-    #   restart: unless-stopped
+    # Authentication Microservice
+    rncp-auth-service:
+        build:
+            context: .
+            dockerfile: ./apps/rncp_api/Dockerfile.auth-service
+        ports:
+            - '${AUTH_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
+        environment:
+            - PORT=${SERVICE_INTERNAL_PORT}
+            - SERVICE_NAME=auth-service
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/auth/health',
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            - redis
+            - postgres
+
+    # PostgreSQL Database
+    postgres:
+        image: postgres:15-alpine
+        env_file: .env
+        ports:
+            - '${POSTGRES_PORT}:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+            interval: 30s
+            timeout: 10s
+            retries: 5
 
     # Redis (Message Broker for Microservices)
     redis:
         image: redis:7-alpine
         ports:
-            - '6379:6379'
+            - '${REDIS_PORT}:6379'
         volumes:
             - redis_data:/data
         restart: unless-stopped

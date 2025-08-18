@@ -1,0 +1,201 @@
+name: Deploy to Test Environment
+
+on:
+    workflow_dispatch:
+        inputs:
+            image_tag:
+                description: 'Image tag to deploy'
+                required: true
+                default: 'latest-test'
+
+env:
+    AZURE_RESOURCE_GROUP: rg-rncp-test
+    AZURE_LOCATION: westeurope
+    CONTAINER_GROUP_NAME: aci-rncp-test
+    REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
+
+jobs:
+    deploy-infrastructure:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Login to Azure
+              uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS_TEST }}
+
+            - name: Create Resource Group
+              run: |
+                  az group create \
+                    --name ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --location ${{ env.AZURE_LOCATION }}
+
+            - name: Deploy PostgreSQL
+              run: |
+                  az postgres flexible-server create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name psql-rncp-test \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --admin-user ${{ secrets.POSTGRES_USER_TEST }} \
+                    --admin-password ${{ secrets.POSTGRES_PASSWORD_TEST }} \
+                    --sku-name Standard_B1ms \
+                    --tier Burstable \
+                    --storage-size 32 \
+                    --version 15 \
+                    --public-access 0.0.0.0 \
+                    --yes
+
+            - name: Create PostgreSQL Database
+              run: |
+                  az postgres flexible-server db create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --server-name psql-rncp-test \
+                    --database-name ${{ secrets.POSTGRES_DB_TEST }}
+
+            - name: Deploy Redis Cache
+              run: |
+                  az redis create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name redis-rncp-test \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --sku Basic \
+                    --vm-size c0
+
+    deploy-containers:
+        needs: deploy-infrastructure
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Login to Azure
+              uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS_TEST }}
+
+            - name: Get Redis connection string
+              id: redis
+              run: |
+                  REDIS_KEY=$(az redis list-keys \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name redis-rncp-test \
+                    --query primaryKey -o tsv)
+                  echo "connection_string=redis-rncp-test.redis.cache.windows.net:6380,password=$REDIS_KEY,ssl=True" >> $GITHUB_OUTPUT
+
+            - name: Deploy Container Group
+              run: |
+                  az container create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name ${{ env.CONTAINER_GROUP_NAME }} \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --image ${{ env.REGISTRY }}/rncp-frontend:${{ inputs.image_tag }} \
+                    --registry-login-server ${{ env.REGISTRY }} \
+                    --registry-username ${{ secrets.ACR_USERNAME }} \
+                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --dns-name-label rncp-test-frontend \
+                    --ports 80 \
+                    --cpu 1 \
+                    --memory 1.5 \
+                    --environment-variables \
+                      NODE_ENV=test \
+                      API_URL=https://rncp-test-api.westeurope.azurecontainer.io
+
+            - name: Deploy API Gateway
+              run: |
+                  az container create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name aci-rncp-test-api \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --image ${{ env.REGISTRY }}/rncp-api-gateway:${{ inputs.image_tag }} \
+                    --registry-login-server ${{ env.REGISTRY }} \
+                    --registry-username ${{ secrets.ACR_USERNAME }} \
+                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --dns-name-label rncp-test-api \
+                    --ports 3001 \
+                    --cpu 1 \
+                    --memory 2 \
+                    --environment-variables \
+                      NODE_ENV=test \
+                      PORT=3001 \
+                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
+                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
+                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+
+            - name: Deploy User Service
+              run: |
+                  az container create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name aci-rncp-test-user \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --image ${{ env.REGISTRY }}/rncp-user-service:${{ inputs.image_tag }} \
+                    --registry-login-server ${{ env.REGISTRY }} \
+                    --registry-username ${{ secrets.ACR_USERNAME }} \
+                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --cpu 1 \
+                    --memory 2 \
+                    --environment-variables \
+                      NODE_ENV=test \
+                      PORT=3002 \
+                      SERVICE_NAME=user-service \
+                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
+                      REDIS_URL=${{ steps.redis.outputs.connection_string }}
+
+            - name: Deploy Auth Service
+              run: |
+                  az container create \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --name aci-rncp-test-auth \
+                    --location ${{ env.AZURE_LOCATION }} \
+                    --image ${{ env.REGISTRY }}/rncp-auth-service:${{ inputs.image_tag }} \
+                    --registry-login-server ${{ env.REGISTRY }} \
+                    --registry-username ${{ secrets.ACR_USERNAME }} \
+                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --cpu 1 \
+                    --memory 2 \
+                    --environment-variables \
+                      NODE_ENV=test \
+                      PORT=3003 \
+                      SERVICE_NAME=auth-service \
+                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
+                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
+                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+
+    run-health-checks:
+        needs: deploy-containers
+        runs-on: ubuntu-latest
+        steps:
+            - name: Wait for services to start
+              run: sleep 60
+
+            - name: Check Frontend Health
+              run: |
+                  curl -f https://rncp-test-frontend.westeurope.azurecontainer.io/health || exit 1
+
+            - name: Check API Gateway Health
+              run: |
+                  curl -f https://rncp-test-api.westeurope.azurecontainer.io:3001/health || exit 1
+
+            - name: Run Integration Tests
+              run: |
+                  # Ici vous pouvez ajouter vos tests d'intégration
+                  echo "Integration tests would run here"
+
+    notify-deployment:
+        needs: [deploy-containers, run-health-checks]
+        runs-on: ubuntu-latest
+        if: always()
+        steps:
+            - name: Deployment Success Notification
+              if: needs.run-health-checks.result == 'success'
+              run: |
+                  echo "✅ Test deployment successful!"
+                  echo "Frontend: https://rncp-test-frontend.westeurope.azurecontainer.io"
+                  echo "API: https://rncp-test-api.westeurope.azurecontainer.io:3001"
+
+            - name: Deployment Failure Notification
+              if: needs.run-health-checks.result == 'failure'
+              run: |
+                  echo "❌ Test deployment failed!"
+                  exit 1

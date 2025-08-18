@@ -1,20 +1,29 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
-
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Install dependencies without sharp
+# Set working directory
+WORKDIR /app
+
+# Copy workspace configuration
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy tools package (shared types)
+COPY tools/ ./tools/
+
+# Copy current app
+COPY apps/rncp_PWA_front/ ./apps/rncp_PWA_front/
+
+# Install dependencies using pnpm (handles workspaces correctly)
 RUN pnpm install --ignore-scripts
 
-# Copy source code
-COPY . .
+# Build shared types first
+RUN pnpm --filter @rncp/types build
+
+# Build the PWA application
+WORKDIR /app/apps/rncp_PWA_front
 
 # Use the Docker-optimized Vite config
 RUN cp vite.config.docker.ts vite.config.ts
@@ -26,10 +35,10 @@ RUN pnpm build
 FROM nginx:alpine AS production
 
 # Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/rncp_PWA_front/dist /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY apps/rncp_PWA_front/nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80
