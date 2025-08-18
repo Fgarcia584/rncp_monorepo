@@ -39,24 +39,24 @@ jobs:
             - name: Deploy API Gateway
               run: |
                   az container create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name aci-rncp-test-api \
-                    --location ${{ env.AZURE_LOCATION }} \
+                    --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+                    --name "aci-rncp-test-api" \
+                    --location "${{ env.AZURE_LOCATION }}" \
                     --image "${{ env.REGISTRY }}/rncp-api-gateway:${{ inputs.image_tag }}" \
-                    --registry-login-server ${{ env.REGISTRY }} \
-                    --registry-username ${{ secrets.ACR_USERNAME }} \
-                    --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --registry-login-server "${{ env.REGISTRY }}" \
+                    --registry-username "${{ secrets.ACR_USERNAME }}" \
+                    --registry-password "${{ secrets.ACR_PASSWORD }}" \
                     --os-type Linux \
                     --dns-name-label rncp-test-api \
                     --ports 3001 \
                     --cpu 1 \
                     --memory 2 \
                     --environment-variables \
-                      NODE_ENV=test \
-                      PORT=3001 \
-                      DATABASE_URL=${{ secrets.DATABASE_URL_TEST }} \
-                      REDIS_URL=${{ steps.redis.outputs.connection_string }} \
-                      JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}
+                      "NODE_ENV=test" \
+                      "PORT=3001" \
+                      "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" \
+                      "REDIS_URL=${{ steps.redis.outputs.connection_string }}" \
+                      "JWT_SECRET=${{ secrets.JWT_SECRET_TEST }}"
 
             - name: Deploy User Service
               run: |
