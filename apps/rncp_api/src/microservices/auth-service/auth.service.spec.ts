@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User, RefreshToken } from '../../entities';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto/auth.dto';
+import { UserRole, JwtPayload } from '@rncp/types';
 
 // Mock bcrypt
 jest.mock('bcrypt');
@@ -24,6 +25,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         name: 'Test User',
         password: 'hashedPassword123',
+        role: UserRole.DELIVERY_PERSON,
         createdAt: new Date('2023-01-01'),
         updatedAt: new Date('2023-01-01'),
         refreshTokens: [],
@@ -113,6 +115,7 @@ describe('AuthService', () => {
                 email: registerDto.email,
                 name: registerDto.name,
                 password: 'hashedPassword',
+                role: UserRole.DELIVERY_PERSON,
             });
             expect(userRepository.save).toHaveBeenCalledWith(mockUser);
             expect(result).toEqual({
@@ -120,6 +123,7 @@ describe('AuthService', () => {
                     id: mockUser.id,
                     email: mockUser.email,
                     name: mockUser.name,
+                    role: mockUser.role,
                     createdAt: mockUser.createdAt,
                     updatedAt: mockUser.updatedAt,
                 },
@@ -175,6 +179,7 @@ describe('AuthService', () => {
                     id: mockUser.id,
                     email: mockUser.email,
                     name: mockUser.name,
+                    role: mockUser.role,
                     createdAt: mockUser.createdAt,
                     updatedAt: mockUser.updatedAt,
                 },
@@ -311,9 +316,10 @@ describe('AuthService', () => {
     });
 
     describe('validateUser', () => {
-        const jwtPayload = {
+        const jwtPayload: JwtPayload = {
             sub: 1,
             email: 'test@example.com',
+            role: UserRole.DELIVERY_PERSON,
             iat: 1234567890,
             expiresIn: 1234567890 + 900,
         };
