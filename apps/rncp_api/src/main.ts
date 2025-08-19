@@ -6,9 +6,13 @@ async function bootstrap() {
 
     // Enable CORS for cross-origin requests
     app.enableCors({
-        origin: process.env.FRONTEND_URL || '*',
+        origin: [
+            'http://localhost:3000', // Frontend dev
+            'http://rncp-pwa-front', // Docker internal
+            process.env.FRONTEND_URL || '*',
+        ],
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        allowedHeaders: 'Content-Type, Authorization',
+        allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
         credentials: true,
     });
 

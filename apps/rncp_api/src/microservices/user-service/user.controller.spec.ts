@@ -1,36 +1,50 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { UpdateUserDto } from '@rncp/types';
-import { User } from '../../entities';
+import { UserRole, JwtPayload, User } from '@rncp/types';
+import {
+    CreateUserRequestDto,
+    UpdateUserRequestDto,
+    UpdateUserRoleDto,
+} from './dto/user.dto';
 
 describe('UserController', () => {
     let controller: UserController;
-    let userService: jest.Mocked<UserService>;
+    let userService: UserService; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+    const mockUserService = {
+        findAll: jest.fn(),
+        findById: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        updateRole: jest.fn(),
+        remove: jest.fn(),
+    };
+
+    const mockAdminUser: JwtPayload = {
+        sub: 1,
+        email: 'admin@test.com',
+        role: UserRole.ADMIN,
+        iat: Date.now(),
+        expiresIn: Date.now() + 15 * 60 * 1000,
+    };
+
+    const mockRegularUser: JwtPayload = {
+        sub: 2,
+        email: 'user@test.com',
+        role: UserRole.DELIVERY_PERSON,
+        iat: Date.now(),
+        expiresIn: Date.now() + 15 * 60 * 1000,
+    };
 
     const mockUser: User = {
         id: 1,
         email: 'test@example.com',
         name: 'Test User',
-        password: 'hashedPassword123',
-        createdAt: new Date('2023-01-01'),
-        updatedAt: new Date('2023-01-01'),
-        refreshTokens: [],
+        role: UserRole.DELIVERY_PERSON,
+        createdAt: new Date(),
+        updatedAt: new Date(),
     };
-
-    const mockUsers: User[] = [
-        mockUser,
-        {
-            id: 2,
-            email: 'user2@example.com',
-            name: 'User Two',
-            password: 'hashedPassword456',
-            createdAt: new Date('2023-01-02'),
-            updatedAt: new Date('2023-01-02'),
-            refreshTokens: [],
-        },
-    ];
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -38,18 +52,13 @@ describe('UserController', () => {
             providers: [
                 {
                     provide: UserService,
-                    useValue: {
-                        findAll: jest.fn(),
-                        findById: jest.fn(),
-                        update: jest.fn(),
-                        remove: jest.fn(),
-                    },
+                    useValue: mockUserService,
                 },
             ],
         }).compile();
 
         controller = module.get<UserController>(UserController);
-        userService = module.get(UserService);
+        userService = module.get<UserService>(UserService);
     });
 
     afterEach(() => {
@@ -57,224 +66,365 @@ describe('UserController', () => {
     });
 
     describe('findAll', () => {
-        it('should return an array of users', async () => {
-            // Arrange
-            userService.findAll.mockResolvedValue(mockUsers);
+        it('should return all users when called by admin', async () => {
+            const mockUsers: User[] = [mockUser];
+            mockUserService.findAll.mockResolvedValue(mockUsers);
 
-            // Act
             const result = await controller.findAll();
 
-            // Assert
-            expect(userService.findAll).toHaveBeenCalled();
             expect(result).toEqual(mockUsers);
+            expect(mockUserService.findAll).toHaveBeenCalledTimes(1);
         });
 
-        it('should return empty array when no users found', async () => {
-            // Arrange
-            userService.findAll.mockResolvedValue([]);
+        it('should call userService.findAll', async () => {
+            const mockUsers: User[] = [mockUser];
+            mockUserService.findAll.mockResolvedValue(mockUsers);
 
-            // Act
-            const result = await controller.findAll();
+            await controller.findAll();
 
-            // Assert
-            expect(userService.findAll).toHaveBeenCalled();
-            expect(result).toEqual([]);
+            expect(mockUserService.findAll).toHaveBeenCalledWith();
+        });
+    });
+
+    describe('getProfile', () => {
+        it('should return user profile for authenticated user', async () => {
+            mockUserService.findById.mockResolvedValue(mockUser);
+
+            const result = await controller.getProfile(mockRegularUser);
+
+            expect(result).toEqual(mockUser);
+            expect(mockUserService.findById).toHaveBeenCalledWith(
+                mockRegularUser.sub,
+            );
         });
 
-        it('should throw error if service fails', async () => {
-            // Arrange
-            const error = new Error('Database connection failed');
-            userService.findAll.mockRejectedValue(error);
+        it('should return admin profile for admin user', async () => {
+            const adminProfile: User = { ...mockUser, role: UserRole.ADMIN };
+            mockUserService.findById.mockResolvedValue(adminProfile);
 
-            // Act & Assert
-            await expect(controller.findAll()).rejects.toThrow(error);
-            expect(userService.findAll).toHaveBeenCalled();
+            const result = await controller.getProfile(mockAdminUser);
+
+            expect(result).toEqual(adminProfile);
+            expect(mockUserService.findById).toHaveBeenCalledWith(
+                mockAdminUser.sub,
+            );
         });
     });
 
     describe('findById', () => {
-        it('should return a user when found', async () => {
-            // Arrange
-            userService.findById.mockResolvedValue(mockUser);
+        it('should return specific user when called by admin', async () => {
+            mockUserService.findById.mockResolvedValue(mockUser);
 
-            // Act
             const result = await controller.findById(1);
 
-            // Assert
-            expect(userService.findById).toHaveBeenCalledWith(1);
             expect(result).toEqual(mockUser);
+            expect(mockUserService.findById).toHaveBeenCalledWith(1);
         });
 
-        it('should throw NotFoundException when user not found', async () => {
-            // Arrange
-            const error = new NotFoundException('User with ID 999 not found');
-            userService.findById.mockRejectedValue(error);
+        it('should call userService.findById with correct id', async () => {
+            mockUserService.findById.mockResolvedValue(mockUser);
 
-            // Act & Assert
-            await expect(controller.findById(999)).rejects.toThrow(error);
-            expect(userService.findById).toHaveBeenCalledWith(999);
+            await controller.findById(5);
+
+            expect(mockUserService.findById).toHaveBeenCalledWith(5);
+        });
+    });
+
+    describe('create', () => {
+        it('should create a new user when called by admin', async () => {
+            const createUserDto: CreateUserRequestDto = {
+                email: 'new@test.com',
+                name: 'New User',
+                password: 'password123',
+                role: UserRole.MERCHANT,
+            };
+            const createdUser: User = { ...mockUser, ...createUserDto, id: 2 };
+            mockUserService.create.mockResolvedValue(createdUser);
+
+            const result = await controller.create(createUserDto);
+
+            expect(result).toEqual(createdUser);
+            expect(mockUserService.create).toHaveBeenCalledWith(createUserDto);
         });
 
-        it('should handle string id parameter correctly', async () => {
-            // Arrange
-            userService.findById.mockResolvedValue(mockUser);
+        it('should create user with default role when none specified', async () => {
+            const createUserDto: CreateUserRequestDto = {
+                email: 'new@test.com',
+                name: 'New User',
+                password: 'password123',
+            };
+            const createdUser: User = { ...mockUser, ...createUserDto, id: 2 };
+            mockUserService.create.mockResolvedValue(createdUser);
 
-            // Act
-            const result = await controller.findById(1);
+            const result = await controller.create(createUserDto);
 
-            // Assert
-            expect(userService.findById).toHaveBeenCalledWith(1);
-            expect(result).toEqual(mockUser);
+            expect(result).toEqual(createdUser);
+            expect(mockUserService.create).toHaveBeenCalledWith(createUserDto);
         });
     });
 
     describe('update', () => {
-        const updateUserDto: UpdateUserDto = {
+        const updateUserDto: UpdateUserRequestDto = {
             name: 'Updated Name',
-            email: 'updated@example.com',
+            email: 'updated@test.com',
         };
 
-        const updatedUser: User = {
-            ...mockUser,
-            ...updateUserDto,
-            updatedAt: new Date('2023-01-03'),
-        };
+        it('should allow admin to update any user', async () => {
+            const updatedUser: User = { ...mockUser, ...updateUserDto };
+            mockUserService.update.mockResolvedValue(updatedUser);
 
-        it('should successfully update a user', async () => {
-            // Arrange
-            userService.update.mockResolvedValue(updatedUser);
+            const result = await controller.update(
+                2,
+                updateUserDto,
+                mockAdminUser,
+            );
 
-            // Act
-            const result = await controller.update(1, updateUserDto);
-
-            // Assert
-            expect(userService.update).toHaveBeenCalledWith(1, updateUserDto);
             expect(result).toEqual(updatedUser);
-        });
-
-        it('should throw NotFoundException when user to update not found', async () => {
-            // Arrange
-            const error = new NotFoundException('User with ID 999 not found');
-            userService.update.mockRejectedValue(error);
-
-            // Act & Assert
-            await expect(controller.update(999, updateUserDto)).rejects.toThrow(
-                error,
+            expect(mockUserService.update).toHaveBeenCalledWith(
+                2,
+                updateUserDto,
             );
-            expect(userService.update).toHaveBeenCalledWith(999, updateUserDto);
         });
 
-        it('should handle partial updates', async () => {
-            // Arrange
-            const partialUpdateDto: UpdateUserDto = {
-                name: 'Only Name Updated',
+        it('should allow user to update their own profile', async () => {
+            const updatedUser: User = { ...mockUser, ...updateUserDto };
+            mockUserService.update.mockResolvedValue(updatedUser);
+
+            const result = await controller.update(
+                2,
+                updateUserDto,
+                mockRegularUser,
+            );
+
+            expect(result).toEqual(updatedUser);
+            expect(mockUserService.update).toHaveBeenCalledWith(
+                2,
+                updateUserDto,
+            );
+        });
+
+        it('should throw error when non-admin tries to update another user', async () => {
+            await expect(
+                controller.update(999, updateUserDto, mockRegularUser),
+            ).rejects.toThrow(
+                'Forbidden: You can only update your own profile',
+            );
+
+            expect(mockUserService.update).not.toHaveBeenCalled();
+        });
+
+        it('should remove role from update when non-admin tries to change role', async () => {
+            const updateWithRole: UpdateUserRequestDto = {
+                ...updateUserDto,
+                role: UserRole.ADMIN,
             };
-            const partiallyUpdatedUser: User = {
-                ...mockUser,
-                name: 'Only Name Updated',
-                updatedAt: new Date('2023-01-03'),
+            const expectedUpdateDto = { ...updateUserDto };
+            const updatedUser: User = { ...mockUser, ...expectedUpdateDto };
+            mockUserService.update.mockResolvedValue(updatedUser);
+
+            const result = await controller.update(
+                2,
+                updateWithRole,
+                mockRegularUser,
+            );
+
+            expect(result).toEqual(updatedUser);
+            expect(mockUserService.update).toHaveBeenCalledWith(
+                2,
+                expectedUpdateDto,
+            );
+        });
+
+        it('should allow admin to change role in regular update', async () => {
+            const updateWithRole: UpdateUserRequestDto = {
+                ...updateUserDto,
+                role: UserRole.MERCHANT,
             };
+            const updatedUser: User = { ...mockUser, ...updateWithRole };
+            mockUserService.update.mockResolvedValue(updatedUser);
 
-            userService.update.mockResolvedValue(partiallyUpdatedUser);
+            const result = await controller.update(
+                2,
+                updateWithRole,
+                mockAdminUser,
+            );
 
-            // Act
-            const result = await controller.update(1, partialUpdateDto);
+            expect(result).toEqual(updatedUser);
+            expect(mockUserService.update).toHaveBeenCalledWith(
+                2,
+                updateWithRole,
+            );
+        });
+    });
 
-            // Assert
-            expect(userService.update).toHaveBeenCalledWith(
+    describe('updateRole', () => {
+        it('should update user role when called by admin', async () => {
+            const updateRoleDto: UpdateUserRoleDto = {
+                role: UserRole.MERCHANT,
+            };
+            const updatedUser: User = { ...mockUser, role: UserRole.MERCHANT };
+            mockUserService.updateRole.mockResolvedValue(updatedUser);
+
+            const result = await controller.updateRole(1, updateRoleDto);
+
+            expect(result).toEqual(updatedUser);
+            expect(mockUserService.updateRole).toHaveBeenCalledWith(
                 1,
-                partialUpdateDto,
+                UserRole.MERCHANT,
             );
-            expect(result).toEqual(partiallyUpdatedUser);
         });
 
-        it('should handle empty update dto', async () => {
-            // Arrange
-            const emptyUpdateDto: UpdateUserDto = {};
-            userService.update.mockResolvedValue(mockUser);
+        it('should handle all role types correctly', async () => {
+            const roles = [
+                UserRole.ADMIN,
+                UserRole.DELIVERY_PERSON,
+                UserRole.MERCHANT,
+                UserRole.LOGISTICS_TECHNICIAN,
+            ];
 
-            // Act
-            const result = await controller.update(1, emptyUpdateDto);
+            for (const role of roles) {
+                const updateRoleDto: UpdateUserRoleDto = { role };
+                const updatedUser: User = { ...mockUser, role };
+                mockUserService.updateRole.mockResolvedValue(updatedUser);
 
-            // Assert
-            expect(userService.update).toHaveBeenCalledWith(1, emptyUpdateDto);
-            expect(result).toEqual(mockUser);
+                const result = await controller.updateRole(1, updateRoleDto);
+
+                expect(result).toEqual(updatedUser);
+                expect(mockUserService.updateRole).toHaveBeenCalledWith(
+                    1,
+                    role,
+                );
+            }
+
+            expect(mockUserService.updateRole).toHaveBeenCalledTimes(
+                roles.length,
+            );
         });
     });
 
     describe('remove', () => {
-        it('should successfully remove a user', async () => {
-            // Arrange
-            userService.remove.mockResolvedValue(undefined);
+        it('should remove user when called by admin', async () => {
+            mockUserService.remove.mockResolvedValue(undefined);
 
-            // Act
-            await controller.remove(1);
+            const result = await controller.remove(1);
 
-            // Assert
-            expect(userService.remove).toHaveBeenCalledWith(1);
+            expect(result).toBeUndefined();
+            expect(mockUserService.remove).toHaveBeenCalledWith(1);
         });
 
-        it('should throw NotFoundException when user to remove not found', async () => {
-            // Arrange
-            const error = new NotFoundException('User with ID 999 not found');
-            userService.remove.mockRejectedValue(error);
+        it('should call userService.remove with correct id', async () => {
+            mockUserService.remove.mockResolvedValue(undefined);
 
-            // Act & Assert
-            await expect(controller.remove(999)).rejects.toThrow(error);
-            expect(userService.remove).toHaveBeenCalledWith(999);
-        });
+            await controller.remove(5);
 
-        it('should handle service errors gracefully', async () => {
-            // Arrange
-            const error = new Error('Database deletion failed');
-            userService.remove.mockRejectedValue(error);
-
-            // Act & Assert
-            await expect(controller.remove(1)).rejects.toThrow(error);
-            expect(userService.remove).toHaveBeenCalledWith(1);
+            expect(mockUserService.remove).toHaveBeenCalledWith(5);
         });
     });
 
     describe('getHealth', () => {
         it('should return health status', () => {
-            // Arrange
-            const mockDate = new Date('2023-01-01T12:00:00.000Z');
-            jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-
-            // Act
             const result = controller.getHealth();
 
-            // Assert
-            expect(result).toEqual({
-                status: 'ok',
-                service: 'user-service',
-                timestamp: mockDate.toISOString(),
-            });
-
-            // Cleanup
-            jest.restoreAllMocks();
+            expect(result).toHaveProperty('status', 'ok');
+            expect(result).toHaveProperty('service', 'user-service');
+            expect(result).toHaveProperty('timestamp');
+            expect(typeof result.timestamp).toBe('string');
         });
 
         it('should return current timestamp', () => {
-            // Arrange
             const beforeCall = new Date().toISOString();
-
-            // Act
             const result = controller.getHealth();
             const afterCall = new Date().toISOString();
 
-            // Assert
-            expect(result.status).toBe('ok');
-            expect(result.service).toBe('user-service');
-            expect(result.timestamp).toMatch(
-                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+            expect(result.timestamp >= beforeCall).toBe(true);
+            expect(result.timestamp <= afterCall).toBe(true);
+        });
+    });
+
+    describe('Role-based access scenarios', () => {
+        it('should handle logistics technician accessing their own profile', async () => {
+            const logisticsTechUser: JwtPayload = {
+                sub: 3,
+                email: 'logistics@test.com',
+                role: UserRole.LOGISTICS_TECHNICIAN,
+                iat: Date.now(),
+                expiresIn: Date.now() + 15 * 60 * 1000,
+            };
+            mockUserService.findById.mockResolvedValue(mockUser);
+
+            const result = await controller.getProfile(logisticsTechUser);
+
+            expect(result).toEqual(mockUser);
+            expect(mockUserService.findById).toHaveBeenCalledWith(3);
+        });
+
+        it('should handle merchant accessing their own profile', async () => {
+            const merchantUser: JwtPayload = {
+                sub: 4,
+                email: 'merchant@test.com',
+                role: UserRole.MERCHANT,
+                iat: Date.now(),
+                expiresIn: Date.now() + 15 * 60 * 1000,
+            };
+            mockUserService.findById.mockResolvedValue(mockUser);
+
+            const result = await controller.getProfile(merchantUser);
+
+            expect(result).toEqual(mockUser);
+            expect(mockUserService.findById).toHaveBeenCalledWith(4);
+        });
+
+        it('should prevent non-admin from updating another user of different role', async () => {
+            const merchantUser: JwtPayload = {
+                sub: 4,
+                email: 'merchant@test.com',
+                role: UserRole.MERCHANT,
+                iat: Date.now(),
+                expiresIn: Date.now() + 15 * 60 * 1000,
+            };
+
+            await expect(
+                controller.update(2, { name: 'Updated' }, merchantUser),
+            ).rejects.toThrow(
+                'Forbidden: You can only update your own profile',
             );
-            expect(new Date(result.timestamp).getTime()).toBeGreaterThanOrEqual(
-                new Date(beforeCall).getTime(),
+        });
+    });
+
+    describe('Error handling', () => {
+        it('should propagate service errors', async () => {
+            const error = new Error('Service error');
+            mockUserService.findById.mockRejectedValue(error);
+
+            await expect(controller.findById(1)).rejects.toThrow(
+                'Service error',
             );
-            expect(new Date(result.timestamp).getTime()).toBeLessThanOrEqual(
-                new Date(afterCall).getTime(),
+        });
+
+        it('should handle creation errors', async () => {
+            const createUserDto: CreateUserRequestDto = {
+                email: 'test@test.com',
+                name: 'Test User',
+                password: 'password123',
+            };
+            const error = new Error('Creation failed');
+            mockUserService.create.mockRejectedValue(error);
+
+            await expect(controller.create(createUserDto)).rejects.toThrow(
+                'Creation failed',
             );
+        });
+
+        it('should handle update errors', async () => {
+            const updateUserDto: UpdateUserRequestDto = {
+                name: 'Updated Name',
+            };
+            const error = new Error('Update failed');
+            mockUserService.update.mockRejectedValue(error);
+
+            await expect(
+                controller.update(1, updateUserDto, mockAdminUser),
+            ).rejects.toThrow('Update failed');
         });
     });
 });
