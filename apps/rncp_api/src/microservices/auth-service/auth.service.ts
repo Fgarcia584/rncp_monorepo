@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, RefreshToken } from '../../entities';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto/auth.dto';
-import { AuthResponse, JwtPayload, TokenPair } from '@rncp/types';
+import { AuthResponse, JwtPayload, TokenPair, UserRole } from '@rncp/types';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
     ) {}
 
     async register(registerDto: RegisterDto): Promise<AuthResponse> {
-        const { email, password, name } = registerDto;
+        const { email, password, name, role } = registerDto;
 
         const existingUser = await this.userRepository.findOne({
             where: { email },
@@ -38,6 +38,7 @@ export class AuthService {
             email,
             name,
             password: hashedPassword,
+            role: role || UserRole.DELIVERY_PERSON,
         });
 
         const savedUser = await this.userRepository.save(user);
@@ -49,6 +50,7 @@ export class AuthService {
                 id: savedUser.id,
                 email: savedUser.email,
                 name: savedUser.name,
+                role: savedUser.role,
                 createdAt: savedUser.createdAt,
                 updatedAt: savedUser.updatedAt,
             },
@@ -81,6 +83,7 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 name: user.name,
+                role: user.role,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
             },
@@ -135,6 +138,7 @@ export class AuthService {
         const payload: JwtPayload = {
             sub: user.id,
             email: user.email,
+            role: user.role,
             iat: Math.floor(Date.now() / 1000),
             expiresIn: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
         };

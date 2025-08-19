@@ -16,7 +16,17 @@
       "Bash(timeout 15 docker-compose logs -f rncp-api-gateway)",
       "Bash(timeout 10 docker-compose logs -f rncp-user-service)",
       "Bash(git add:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(pnpm --filter @rncp/types build)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:*)",
+      "Bash(npm test:*)",
+      "Bash(pnmp:*)",
+      "Bash(grep:*)",
+      "Bash(docker-compose:*)",
+      "Bash(timeout 10 docker-compose logs -f rncp-pwa-front)",
+      "Bash(curl:*)",
+      "Bash(pnpm lint:*)"
     ],
     "deny": []
   }

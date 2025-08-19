@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
-import { useGetUsersQuery } from './store/api/userApi';
 import { AuthModal } from './components/auth/AuthModal';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RoleBasedRouting } from './components/routing/RoleBasedRouting';
+const getRoleDisplayName = (role: string): string => {
+    switch (role) {
+        case 'admin':
+            return 'Administrateur';
+        case 'logistics_technician':
+            return 'Technicien Logistique';
+        case 'merchant':
+            return 'Commerçant';
+        case 'delivery_person':
+            return 'Livreur';
+        default:
+            return 'Utilisateur';
+    }
+};
 import PWABadge from './PWABadge.tsx';
 
 function App() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const { user, isAuthenticated, logout, isLoading } = useAuth();
-
-    const { data: users, isLoading: usersLoading } = useGetUsersQuery(undefined, {
-        skip: !isAuthenticated,
-    });
 
     if (isLoading) {
         return (
@@ -39,7 +49,12 @@ function App() {
                                             {user?.name?.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
-                                    <span className="text-white text-sm font-medium">Bonjour, {user?.name}</span>
+                                    <div className="text-white text-sm">
+                                        <div className="font-medium">Bonjour, {user?.name}</div>
+                                        <div className="text-xs opacity-90">
+                                            {user?.role && getRoleDisplayName(user.role)}
+                                        </div>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={logout}
@@ -60,96 +75,10 @@ function App() {
                 </div>
             </header>
 
-            <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+            <main className="flex-1">
                 {isAuthenticated ? (
                     <ProtectedRoute>
-                        <div className="space-y-8">
-                            <div className="text-center">
-                                <h2 className="text-3xl font-bold text-gray-900 mb-2">Tableau de bord</h2>
-                                <p className="text-gray-600">Bienvenue dans votre espace personnel</p>
-                            </div>
-
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="card">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                                        Vos informations
-                                    </h3>
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-600 font-medium">Nom:</span>
-                                            <span className="text-gray-900">{user?.name}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-600 font-medium">Email:</span>
-                                            <span className="text-gray-900">{user?.email}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-gray-600 font-medium">Membre depuis:</span>
-                                            <span className="text-gray-900">
-                                                {user?.createdAt &&
-                                                    new Date(user.createdAt).toLocaleDateString('fr-FR')}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="card">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                                        Utilisateurs
-                                    </h3>
-                                    {usersLoading ? (
-                                        <div className="flex items-center justify-center py-8">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="loading-spinner"></div>
-                                                <span className="text-gray-600">Chargement des utilisateurs...</span>
-                                            </div>
-                                        </div>
-                                    ) : users && users.length > 0 ? (
-                                        <div className="space-y-3">
-                                            {users.map((userData) => (
-                                                <div
-                                                    key={userData.id}
-                                                    className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
-                                                >
-                                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                                        <span className="text-primary-700 text-sm font-semibold">
-                                                            {userData.name.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                            {userData.name}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500 truncate">
-                                                            {userData.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center py-8">
-                                            <div className="text-gray-400 mb-2">
-                                                <svg
-                                                    className="mx-auto h-12 w-12"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <p className="text-gray-600">Aucun utilisateur trouvé</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <RoleBasedRouting />
                     </ProtectedRoute>
                 ) : (
                     <div className="max-w-2xl mx-auto text-center py-16">

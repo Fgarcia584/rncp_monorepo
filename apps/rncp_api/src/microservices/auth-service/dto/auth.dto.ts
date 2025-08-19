@@ -1,5 +1,12 @@
-import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
-import { LoginRequest, RegisterRequest } from '@rncp/types';
+import {
+    IsEmail,
+    IsString,
+    MinLength,
+    IsNotEmpty,
+    IsEnum,
+    IsOptional,
+} from 'class-validator';
+import { LoginRequest, RegisterRequest, UserRole } from '@rncp/types';
 
 export class LoginDto implements LoginRequest {
     @IsEmail()
@@ -21,6 +28,10 @@ export class RegisterDto implements RegisterRequest {
     @IsString()
     @MinLength(6)
     password: string;
+
+    @IsOptional()
+    @IsEnum(UserRole)
+    role?: UserRole;
 }
 
 export class RefreshTokenDto {

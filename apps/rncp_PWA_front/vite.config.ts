@@ -11,6 +11,18 @@ export default defineConfig({
             '@rncp/types': path.resolve(__dirname, '../../tools/dist'),
         },
     },
+    build: {
+        rollupOptions: {
+            external: [],
+            output: {
+                globals: {},
+            },
+        },
+        commonjsOptions: {
+            include: [/@rncp\/types/, /node_modules/],
+            transformMixedEsModules: true,
+        },
+    },
     server: {
         proxy: {
             '/api': {
@@ -37,7 +49,8 @@ export default defineConfig({
         __DEV__: true,
     },
     optimizeDeps: {
-        include: ['tailwindcss'],
+        include: ['tailwindcss', '@rncp/types'],
+        force: true,
     },
     plugins: [
         react(),
