@@ -1,6 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { AuthUser } from '@rncp/types';
 
+// Temporary workaround for CommonJS import issue in Vite build
+const UserRole = {
+    ADMIN: 'admin' as const,
+    DELIVERY_PERSON: 'delivery_person' as const,
+    MERCHANT: 'merchant' as const,
+    LOGISTICS_TECHNICIAN: 'logistics_technician' as const,
+} as const;
+
+type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
 interface AuthState {
     user: AuthUser | null;
     token: string | null;
@@ -55,5 +65,16 @@ const authSlice = createSlice({
 });
 
 export const { setCredentials, logout, setLoading, updateUser } = authSlice.actions;
+
+// Selectors
+export const selectCurrentUser = (state: { auth: AuthState }) => state.auth.user;
+export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;
+export const selectUserRole = (state: { auth: AuthState }) => state.auth.user?.role;
+export const selectIsAdmin = (state: { auth: AuthState }) => state.auth.user?.role === UserRole.ADMIN;
+export const selectIsLogisticsTechnician = (state: { auth: AuthState }) =>
+    state.auth.user?.role === UserRole.LOGISTICS_TECHNICIAN;
+export const selectIsMerchant = (state: { auth: AuthState }) => state.auth.user?.role === UserRole.MERCHANT;
+export const selectIsDeliveryPerson = (state: { auth: AuthState }) =>
+    state.auth.user?.role === UserRole.DELIVERY_PERSON;
 
 export default authSlice.reducer;

@@ -10,7 +10,7 @@ on:
 
 env:
     AZURE_RESOURCE_GROUP: rg-rncp-prod
-    AZURE_LOCATION: westeurope
+    AZURE_LOCATION: francecentral
     CONTAINER_GROUP_NAME: aci-rncp-prod
     REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
 
@@ -24,60 +24,8 @@ jobs:
                   echo "🚀 Production deployment requires manual approval"
                   echo "Image tag: ${{ inputs.image_tag }}"
 
-    deploy-infrastructure:
-        needs: manual-approval
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Login to Azure
-              uses: azure/login@v1
-              with:
-                  creds: ${{ secrets.AZURE_CREDENTIALS_PROD }}
-
-            - name: Create Resource Group
-              run: |
-                  az group create \
-                    --name ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --location ${{ env.AZURE_LOCATION }}
-
-            - name: Deploy PostgreSQL (Production)
-              run: |
-                  az postgres flexible-server create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name psql-rncp-prod \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --admin-user ${{ secrets.POSTGRES_USER_PROD }} \
-                    --admin-password ${{ secrets.POSTGRES_PASSWORD_PROD }} \
-                    --sku-name Standard_D2s_v3 \
-                    --tier GeneralPurpose \
-                    --storage-size 128 \
-                    --version 15 \
-                    --public-access 0.0.0.0 \
-                    --backup-retention 30 \
-                    --geo-redundant-backup Enabled \
-                    --yes
-
-            - name: Create PostgreSQL Database
-              run: |
-                  az postgres flexible-server db create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --server-name psql-rncp-prod \
-                    --database-name ${{ secrets.POSTGRES_DB_PROD }}
-
-            - name: Deploy Redis Cache (Production)
-              run: |
-                  az redis create \
-                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                    --name redis-rncp-prod \
-                    --location ${{ env.AZURE_LOCATION }} \
-                    --sku Standard \
-                    --vm-size c1 \
-                    --redis-configuration '{"maxmemory-policy":"allkeys-lru"}'
-
     backup-current-deployment:
-        needs: deploy-infrastructure
+        needs: manual-approval
         runs-on: ubuntu-latest
         steps:
             - name: Login to Azure
@@ -105,7 +53,7 @@ jobs:
                   echo "Previous deployment: ${{ steps.current.outputs.image }}"
 
     deploy-containers:
-        needs: [deploy-infrastructure, backup-current-deployment]
+        needs: backup-current-deployment
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
@@ -119,6 +67,7 @@ jobs:
             - name: Get Redis connection string
               id: redis
               run: |
+                  # Utilise Redis déjà provisionné par deploy-infrastructure.yml
                   REDIS_KEY=$(az redis list-keys \
                     --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
                     --name redis-rncp-prod \
@@ -136,13 +85,14 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --dns-name-label rncp-prod-frontend-new \
                     --ports 80 \
                     --cpu 2 \
                     --memory 3 \
                     --environment-variables \
                       NODE_ENV=production \
-                      API_URL=https://rncp-prod-api.westeurope.azurecontainer.io
+                      API_URL=https://rncp-prod-api.francecentral.azurecontainer.io
 
             - name: Deploy API Gateway (Blue-Green)
               run: |
@@ -154,6 +104,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --dns-name-label rncp-prod-api-new \
                     --ports 3001 \
                     --cpu 2 \
@@ -175,6 +126,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --cpu 2 \
                     --memory 4 \
                     --environment-variables \
@@ -194,6 +146,7 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --cpu 2 \
                     --memory 4 \
                     --environment-variables \
@@ -213,11 +166,11 @@ jobs:
 
             - name: Check Frontend Health
               run: |
-                  curl -f https://rncp-prod-frontend-new.westeurope.azurecontainer.io/health || exit 1
+                  curl -f https://rncp-prod-frontend-new.francecentral.azurecontainer.io/health || exit 1
 
             - name: Check API Gateway Health
               run: |
-                  curl -f https://rncp-prod-api-new.westeurope.azurecontainer.io:3001/health || exit 1
+                  curl -f https://rncp-prod-api-new.francecentral.azurecontainer.io:3001/health || exit 1
 
             - name: Run Production Smoke Tests
               run: |
@@ -253,13 +206,14 @@ jobs:
                     --registry-login-server ${{ env.REGISTRY }} \
                     --registry-username ${{ secrets.ACR_USERNAME }} \
                     --registry-password ${{ secrets.ACR_PASSWORD }} \
+                    --os-type Linux \
                     --dns-name-label rncp-prod-frontend \
                     --ports 80 \
                     --cpu 2 \
                     --memory 3 \
                     --environment-variables \
                       NODE_ENV=production \
-                      API_URL=https://rncp-prod-api.westeurope.azurecontainer.io
+                      API_URL=https://rncp-prod-api.francecentral.azurecontainer.io
 
             - name: Cleanup temporary containers
               run: |
@@ -277,8 +231,8 @@ jobs:
               if: needs.switch-traffic.result == 'success'
               run: |
                   echo "🎉 Production deployment successful!"
-                  echo "Frontend: https://rncp-prod-frontend.westeurope.azurecontainer.io"
-                  echo "API: https://rncp-prod-api.westeurope.azurecontainer.io:3001"
+                  echo "Frontend: https://rncp-prod-frontend.francecentral.azurecontainer.io"
+                  echo "API: https://rncp-prod-api.francecentral.azurecontainer.io:3001"
 
             - name: Deployment Failure - Rollback
               if: needs.switch-traffic.result == 'failure'

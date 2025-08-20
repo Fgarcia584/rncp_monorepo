@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { RefreshToken } from './refresh-token.entity';
+import { UserRole } from '@rncp/types';
 
 @Entity('users')
 export class User {
@@ -19,6 +20,13 @@ export class User {
 
     @Column()
     name: string;
+
+    @Column({
+        type: 'enum',
+        enum: UserRole,
+        default: UserRole.DELIVERY_PERSON,
+    })
+    role: UserRole;
 
     @Column()
     @Exclude()

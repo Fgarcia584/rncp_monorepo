@@ -8,7 +8,19 @@ import path from 'path';
 export default defineConfig({
     resolve: {
         alias: {
-            '@rncp/types': path.resolve(__dirname, '../../tools/dist'),
+            '@rncp/types': path.resolve(__dirname, '../../tools/dist/esm'),
+        },
+    },
+    build: {
+        rollupOptions: {
+            external: [],
+            output: {
+                globals: {},
+            },
+        },
+        commonjsOptions: {
+            include: [/@rncp\/types/, /node_modules/],
+            transformMixedEsModules: true,
         },
     },
     server: {
@@ -37,7 +49,8 @@ export default defineConfig({
         __DEV__: true,
     },
     optimizeDeps: {
-        include: ['tailwindcss'],
+        include: ['tailwindcss', '@rncp/types'],
+        force: true,
     },
     plugins: [
         react(),

@@ -29,7 +29,13 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
-/.claude
+
+# Claude Code configurations (local development)
+/.claude/
+.claude/
+.mcp.json
+
+# Project documentation (generated)
 /CLAUDE.md
 /DEPLOYMENT.md
 QUICK_START.md
@@ -59,4 +65,7 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Test credentials (sensitive information)
+comptes-test.md
 

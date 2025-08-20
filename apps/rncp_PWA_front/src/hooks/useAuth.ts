@@ -1,6 +1,12 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { useLoginMutation, useRegisterMutation, useLogoutMutation, useGetProfileQuery } from '../store/api/authApi';
+import {
+    useLoginMutation,
+    useRegisterMutation,
+    useLogoutMutation,
+    useGetProfileQuery,
+    authApi,
+} from '../store/api/authApi';
 import { setCredentials, logout, setLoading } from '../store/slices/authSlice';
 import type { LoginRequest, RegisterRequest } from '@rncp/types';
 
@@ -94,6 +100,8 @@ export const useAuth = () => {
             dispatch(logout());
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
+            // Clear RTK Query cache to prevent old user data from persisting
+            dispatch(authApi.util.resetApiState());
         }
     }, [dispatch, logoutMutation, refreshToken]);
 

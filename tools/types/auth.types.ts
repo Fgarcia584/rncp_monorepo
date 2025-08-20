@@ -1,7 +1,10 @@
+import { UserRole } from './role.types';
+
 export interface AuthUser {
     id: number;
     email: string;
     name: string;
+    role: UserRole;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -15,6 +18,7 @@ export interface RegisterRequest {
     email: string;
     password: string;
     name: string;
+    role?: UserRole;
 }
 
 export interface AuthResponse {
@@ -26,6 +30,7 @@ export interface AuthResponse {
 export interface JwtPayload {
     sub: number;
     email: string;
+    role: UserRole;
     iat: number;
     expiresIn: number;
 }

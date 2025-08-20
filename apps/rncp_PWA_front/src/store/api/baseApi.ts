@@ -4,8 +4,14 @@ import { logout, setCredentials } from '../slices/authSlice';
 import type { RootState } from '../store';
 import { TokenPair } from '@rncp/types';
 
+// Type-safe access to import.meta.env
+const getApiUrl = (): string => {
+    const env = (import.meta as { env?: { VITE_API_URL?: string } }).env;
+    return env?.VITE_API_URL || '/api';
+};
+
 const baseQuery = fetchBaseQuery({
-    baseUrl: '/api',
+    baseUrl: getApiUrl(),
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).auth.token;
         if (token) {
@@ -63,6 +69,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['User', 'Auth'],
+    tagTypes: ['User', 'Auth', 'Order'],
     endpoints: () => ({}),
 });
