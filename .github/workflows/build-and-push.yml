@@ -47,9 +47,13 @@ jobs:
                   elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
                     echo "suffix=test" >> $GITHUB_OUTPUT
                     echo "environment=test" >> $GITHUB_OUTPUT
-                  else
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
                     echo "suffix=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
                     echo "environment=pr" >> $GITHUB_OUTPUT
+                  else
+                    # Fallback pour les autres cas (push sur feature branch)
+                    echo "suffix=dev" >> $GITHUB_OUTPUT
+                    echo "environment=dev" >> $GITHUB_OUTPUT
                   fi
 
             - name: Login to Azure Container Registry
@@ -70,11 +74,11 @@ jobs:
                   tags: |
                       type=ref,event=branch,suffix=-${{ steps.env.outputs.suffix }}
                       type=ref,event=pr,suffix=-${{ steps.env.outputs.suffix }}
-                      type=sha,prefix=${{ steps.env.outputs.suffix }}-
-                      type=sha,prefix={{branch}}-
                       type=sha,prefix=v
-                      type=sha
-                      type=raw,value=latest-${{ steps.env.outputs.suffix }},enable={{is_default_branch}}
+                      type=sha,prefix=sha-
+                      type=raw,value=latest-prod,enable={{is_default_branch}}
+                      type=raw,value=latest-test,enable=${{ github.ref == 'refs/heads/develop' }}
+                      type=raw,value=${{ steps.env.outputs.suffix }}-{{sha}}
 
             - name: Build and push Docker image
               uses: docker/build-push-action@v5

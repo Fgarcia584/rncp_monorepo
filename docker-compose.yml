@@ -104,6 +104,35 @@ services:
             - redis
             - postgres
 
+    rncp-order-service:
+        build:
+            context: .
+            dockerfile: ./apps/rncp_api/Dockerfile.order-service
+        ports:
+            - '${ORDER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
+        environment:
+            - PORT=${SERVICE_INTERNAL_PORT}
+            - SERVICE_NAME=order-service
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/orders/health',
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            - redis
+            - postgres
+
     # PostgreSQL Database
     postgres:
         image: postgres:15-alpine

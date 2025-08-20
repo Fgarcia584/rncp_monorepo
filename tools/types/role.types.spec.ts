@@ -1,4 +1,12 @@
-import { UserRole, ROLE_PERMISSIONS, hasPermission, getRoleDisplayName, isValidRole } from './role.types';
+import {
+    UserRole,
+    ROLE_PERMISSIONS,
+    hasPermission,
+    getRoleDisplayName,
+    isValidRole,
+    OrderStatus,
+    OrderPriority,
+} from './role.types';
 
 describe('Role Types', () => {
     describe('UserRole enum', () => {
@@ -105,6 +113,93 @@ describe('Role Types', () => {
             expect(isValidRole('')).toBe(false);
             expect(isValidRole(null as unknown)).toBe(false);
             expect(isValidRole(undefined as unknown)).toBe(false);
+        });
+    });
+
+    describe('OrderStatus enum', () => {
+        it('should have correct enum values', () => {
+            expect(OrderStatus.PENDING).toBe('pending');
+            expect(OrderStatus.ACCEPTED).toBe('accepted');
+            expect(OrderStatus.IN_TRANSIT).toBe('in_transit');
+            expect(OrderStatus.DELIVERED).toBe('delivered');
+            expect(OrderStatus.CANCELLED).toBe('cancelled');
+        });
+
+        it('should contain all expected statuses', () => {
+            const expectedStatuses = ['pending', 'accepted', 'in_transit', 'delivered', 'cancelled'];
+            const actualStatuses = Object.values(OrderStatus);
+
+            expect(actualStatuses).toHaveLength(expectedStatuses.length);
+            expectedStatuses.forEach((status) => {
+                expect(actualStatuses).toContain(status);
+            });
+        });
+
+        it('should allow type checking', () => {
+            const testStatus: OrderStatus = OrderStatus.PENDING;
+            expect(testStatus).toBe('pending');
+
+            const isValidStatus = (status: string): status is OrderStatus => {
+                return Object.values(OrderStatus).includes(status as OrderStatus);
+            };
+
+            expect(isValidStatus('pending')).toBe(true);
+            expect(isValidStatus('invalid_status')).toBe(false);
+        });
+
+        it('should support workflow transitions', () => {
+            // Test typical order workflow
+            const workflowOrder = [
+                OrderStatus.PENDING,
+                OrderStatus.ACCEPTED,
+                OrderStatus.IN_TRANSIT,
+                OrderStatus.DELIVERED,
+            ];
+
+            expect(workflowOrder).toEqual(['pending', 'accepted', 'in_transit', 'delivered']);
+        });
+    });
+
+    describe('OrderPriority enum', () => {
+        it('should have correct enum values', () => {
+            expect(OrderPriority.LOW).toBe('low');
+            expect(OrderPriority.NORMAL).toBe('normal');
+            expect(OrderPriority.HIGH).toBe('high');
+            expect(OrderPriority.URGENT).toBe('urgent');
+        });
+
+        it('should contain all expected priorities', () => {
+            const expectedPriorities = ['low', 'normal', 'high', 'urgent'];
+            const actualPriorities = Object.values(OrderPriority);
+
+            expect(actualPriorities).toHaveLength(expectedPriorities.length);
+            expectedPriorities.forEach((priority) => {
+                expect(actualPriorities).toContain(priority);
+            });
+        });
+
+        it('should allow type checking', () => {
+            const testPriority: OrderPriority = OrderPriority.HIGH;
+            expect(testPriority).toBe('high');
+
+            const isValidPriority = (priority: string): priority is OrderPriority => {
+                return Object.values(OrderPriority).includes(priority as OrderPriority);
+            };
+
+            expect(isValidPriority('high')).toBe(true);
+            expect(isValidPriority('invalid_priority')).toBe(false);
+        });
+
+        it('should support priority ordering', () => {
+            // Test that priorities can be ordered logically
+            const priorityOrder = [OrderPriority.LOW, OrderPriority.NORMAL, OrderPriority.HIGH, OrderPriority.URGENT];
+
+            expect(priorityOrder).toEqual(['low', 'normal', 'high', 'urgent']);
+        });
+
+        it('should have default priority', () => {
+            // NORMAL should be the default priority
+            expect(OrderPriority.NORMAL).toBe('normal');
         });
     });
 });

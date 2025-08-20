@@ -26,7 +26,10 @@ export default tseslint.config(
     },
     {
         rules: {
-            '@typescript-eslint/no-explicit-any': 'off',
+            // RÈGLE STRICTE : L'utilisation d'`any` est interdite
+            // Toujours définir des interfaces ou types spécifiques
+            // Utiliser `unknown` si le type est vraiment inconnu
+            '@typescript-eslint/no-explicit-any': 'error',
             '@typescript-eslint/no-floating-promises': 'warn',
             '@typescript-eslint/no-unsafe-argument': 'warn',
         },

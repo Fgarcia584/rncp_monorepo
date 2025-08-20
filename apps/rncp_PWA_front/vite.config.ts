@@ -8,7 +8,7 @@ import path from 'path';
 export default defineConfig({
     resolve: {
         alias: {
-            '@rncp/types': path.resolve(__dirname, '../../tools/dist'),
+            '@rncp/types': path.resolve(__dirname, '../../tools/dist/esm'),
         },
     },
     build: {
