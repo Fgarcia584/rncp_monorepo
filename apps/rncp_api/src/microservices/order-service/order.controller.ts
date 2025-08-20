@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth-service/guards/jwt-auth.guard';
 import { OrderService } from './order.service';
-import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, UpdateOrderDto, OrderFilters } from './dto/order.dto';
 import { OrderStatus, OrderPriority, UserRole } from '@rncp/types';
 
 @Controller('orders')
@@ -29,7 +29,7 @@ export class OrderController {
         if (req.user.role !== UserRole.MERCHANT) {
             throw new ForbiddenException('Only merchants can create orders');
         }
-        return this.orderService.create(req.user.id, createOrderDto);
+        return this.orderService.create(req.user.userId, createOrderDto);
     }
 
     @Get()
@@ -44,15 +44,15 @@ export class OrderController {
         @Query('deliveryPersonId', new ParseIntPipe({ optional: true }))
         deliveryPersonId?: number,
     ) {
-        let filters;
+        const filters: OrderFilters = {};
 
         // Apply role-based filtering
         if (req.user.role === UserRole.MERCHANT) {
             // Merchants can only see their own orders
-            filters.merchantId = req.user.id;
+            filters.merchantId = req.user.userId;
         } else if (req.user.role === UserRole.DELIVERY_PERSON) {
             // Delivery persons can only see their assigned orders
-            filters.deliveryPersonId = req.user.id;
+            filters.deliveryPersonId = req.user.userId;
         }
 
         // Apply query filters (admins can filter by any criteria)
@@ -96,7 +96,7 @@ export class OrderController {
         return this.orderService.update(
             id,
             updateOrderDto,
-            req.user.id,
+            req.user.userId,
             req.user.role,
         );
     }
@@ -109,12 +109,12 @@ export class OrderController {
                 'Only delivery persons can accept orders',
             );
         }
-        return this.orderService.acceptOrder(id, req.user.id);
+        return this.orderService.acceptOrder(id, req.user.userId);
     }
 
     @Delete(':id')
     remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        return this.orderService.remove(id, req.user.id, req.user.role);
+        return this.orderService.remove(id, req.user.userId, req.user.role);
     }
 
     @Get('health')

@@ -88,3 +88,10 @@ export class UpdateOrderDto implements UpdateOrderRequest {
     @Transform(({ value }) => parseInt(value))
     estimatedDeliveryDuration?: number;
 }
+
+export interface OrderFilters {
+    status?: OrderStatus;
+    priority?: OrderPriority;
+    merchantId?: number;
+    deliveryPersonId?: number;
+}

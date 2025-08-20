@@ -29,7 +29,7 @@ export default [
         languageOptions: {
             // other options...
             parserOptions: {
-                project: ['./tsconfig.node.json', './tsconfig.app.json', './tsconfig.test.json'],
+                project: ['./tsconfig.node.json', './tsconfig.app.json', './tsconfig.test.json', './vitest.config.ts'],
                 tsconfigRootDir: './apps/rncp_PWA_front',
             },
         },
