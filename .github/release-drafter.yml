@@ -1,0 +1,121 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+    ## 🎉 What's Changed
+
+    $CHANGES
+
+    **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+categories:
+    - title: '🚀 Features'
+      labels:
+          - 'feature'
+          - 'enhancement'
+          - 'feat'
+      collapse-after: 5
+    - title: '🐛 Bug Fixes'
+      labels:
+          - 'fix'
+          - 'bugfix'
+          - 'bug'
+      collapse-after: 5
+    - title: '🔧 Maintenance'
+      labels:
+          - 'chore'
+          - 'dependencies'
+          - 'refactor'
+          - 'perf'
+      collapse-after: 3
+    - title: '📝 Documentation'
+      labels:
+          - 'documentation'
+          - 'docs'
+      collapse-after: 3
+    - title: '🧪 Tests'
+      labels:
+          - 'test'
+          - 'tests'
+      collapse-after: 3
+    - title: '🎨 Style'
+      labels:
+          - 'style'
+      collapse-after: 3
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+    major:
+        labels:
+            - 'major'
+            - 'breaking'
+    minor:
+        labels:
+            - 'minor'
+            - 'feature'
+            - 'feat'
+            - 'enhancement'
+    patch:
+        labels:
+            - 'patch'
+            - 'fix'
+            - 'bugfix'
+            - 'bug'
+            - 'chore'
+            - 'dependencies'
+    default: patch
+
+autolabeler:
+    - label: 'feat'
+      title:
+          - '/^feat(\(.+\))?!?:/'
+    - label: 'fix'
+      title:
+          - '/^fix(\(.+\))?!?:/'
+    - label: 'chore'
+      title:
+          - '/^chore(\(.+\))?!?:/'
+    - label: 'docs'
+      title:
+          - '/^docs(\(.+\))?!?:/'
+    - label: 'test'
+      title:
+          - '/^test(\(.+\))?!?:/'
+    - label: 'refactor'
+      title:
+          - '/^refactor(\(.+\))?!?:/'
+    - label: 'perf'
+      title:
+          - '/^perf(\(.+\))?!?:/'
+    - label: 'style'
+      title:
+          - '/^style(\(.+\))?!?:/'
+    - label: 'breaking'
+      title:
+          - '/!:/'
+
+exclude-labels:
+    - 'skip-changelog'
+    - 'duplicate'
+    - 'question'
+    - 'invalid'
+    - 'wontfix'
+
+replacers:
+    - search: '/feat(\(.+\))?!?:/g'
+      replace: '🚀'
+    - search: '/fix(\(.+\))?!?:/g'
+      replace: '🐛'
+    - search: '/chore(\(.+\))?!?:/g'
+      replace: '🔧'
+    - search: '/docs(\(.+\))?!?:/g'
+      replace: '📝'
+    - search: '/test(\(.+\))?!?:/g'
+      replace: '🧪'
+    - search: '/refactor(\(.+\))?!?:/g'
+      replace: '♻️'
+    - search: '/perf(\(.+\))?!?:/g'
+      replace: '⚡'
+    - search: '/style(\(.+\))?!?:/g'
+      replace: '🎨'
