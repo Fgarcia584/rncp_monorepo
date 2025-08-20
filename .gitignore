@@ -39,6 +39,8 @@ lerna-debug.log*
 /CLAUDE.md
 /DEPLOYMENT.md
 QUICK_START.md
+LEAFLET_INTEGRATION_GUIDE.md
+DEV_TESTING_GUIDE.md
 
 # IDE - VSCode
 .vscode/*

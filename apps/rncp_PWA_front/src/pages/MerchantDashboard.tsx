@@ -1,11 +1,28 @@
 import { useState } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
-import { useCreateOrderMutation } from '../store/api/orderApi';
-import { OrderPriority } from '@rncp/types';
+import { useCreateOrderMutation, useGetOrdersQuery } from '../store/api/orderApi';
+import { MerchantTrackingMap } from '../components/map';
+import { OrderPriority, Coordinates } from '@rncp/types';
 
 export function MerchantDashboard() {
     const [showOrderForm, setShowOrderForm] = useState(false);
+    const [showTrackingMap, setShowTrackingMap] = useState(false);
     const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
+
+    // ID du commerçant (à récupérer de l'état d'authentification)
+    const merchantId = 1; // TODO: Récupérer depuis le state auth
+
+    // Position du commerce (à configurer dans les paramètres du commerçant)
+    const merchantLocation: Coordinates = {
+        latitude: 48.8566,
+        longitude: 2.3522,
+    }; // TODO: Récupérer depuis les paramètres du commerçant
+
+    // Récupérer les commandes du commerçant
+    const { data: ordersData } = useGetOrdersQuery({
+        merchantId,
+        limit: 100,
+    });
     const [orderForm, setOrderForm] = useState({
         customerName: '',
         customerPhone: '',
@@ -170,80 +187,111 @@ export function MerchantDashboard() {
                         Gérer l&apos;Inventaire
                     </button>
 
-                    <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                    <button
+                        onClick={() => setShowTrackingMap(!showTrackingMap)}
+                        className={`flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white transition-colors ${
+                            showTrackingMap
+                                ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500'
+                                : 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500'
+                        } focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                    >
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                         </svg>
-                        Voir les Rapports
+                        {showTrackingMap ? '📋 Vue Standard' : '🚚 Tracking Livraisons'}
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Recent Orders */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">Commandes Récentes</h3>
+                {/* Vue Tracking des Livraisons */}
+                {showTrackingMap && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-medium text-gray-900">🚚 Tracking des Livraisons</h3>
+                            <div className="text-sm text-gray-500">Suivi temps réel de vos commandes</div>
                         </div>
 
-                        <div className="p-6">
-                            <div className="space-y-4">
-                                {recentOrders.map((order) => (
-                                    <div
-                                        key={order.id}
-                                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                                    >
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-sm font-medium text-gray-900">{order.id}</div>
-                                                <div className="text-sm text-gray-500">{order.time}</div>
+                        <MerchantTrackingMap
+                            orders={ordersData?.orders || []}
+                            merchantLocation={merchantLocation}
+                            height="500px"
+                            className="w-full"
+                            onDeliveryUpdate={(orderId, tracking) => {
+                                console.log(`Mise à jour livraison ${orderId}:`, tracking);
+                                // TODO: Synchroniser avec l'état local ou afficher des notifications
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* Vue Standard (par défaut) */}
+                {!showTrackingMap && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Recent Orders */}
+                        <div className="bg-white border border-gray-200 rounded-lg">
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">Commandes Récentes</h3>
+                            </div>
+
+                            <div className="p-6">
+                                <div className="space-y-4">
+                                    {recentOrders.map((order) => (
+                                        <div
+                                            key={order.id}
+                                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                                        >
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="text-sm font-medium text-gray-900">{order.id}</div>
+                                                    <div className="text-sm text-gray-500">{order.time}</div>
+                                                </div>
+                                                <div className="text-sm text-gray-600">{order.customer}</div>
+                                                <div className="text-sm font-medium text-green-600">
+                                                    {order.amount.toFixed(2)}€
+                                                </div>
                                             </div>
-                                            <div className="text-sm text-gray-600">{order.customer}</div>
-                                            <div className="text-sm font-medium text-green-600">
-                                                {order.amount.toFixed(2)}€
+                                            <div className="ml-4">
+                                                <span
+                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        order.status === 'Livrée'
+                                                            ? 'bg-green-100 text-green-800'
+                                                            : order.status === 'Expédiée'
+                                                              ? 'bg-blue-100 text-blue-800'
+                                                              : order.status === 'Préparation'
+                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                : 'bg-gray-100 text-gray-800'
+                                                    }`}
+                                                >
+                                                    {order.status}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div className="ml-4">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                    order.status === 'Livrée'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : order.status === 'Expédiée'
-                                                          ? 'bg-blue-100 text-blue-800'
-                                                          : order.status === 'Préparation'
-                                                            ? 'bg-yellow-100 text-yellow-800'
-                                                            : 'bg-gray-100 text-gray-800'
-                                                }`}
-                                            >
-                                                {order.status}
-                                            </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Top Products */}
+                        <div className="bg-white border border-gray-200 rounded-lg">
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">Produits les Plus Vendus</h3>
+                            </div>
+
+                            <div className="p-6">
+                                <div className="space-y-4">
+                                    {topProducts.map((product, index) => (
+                                        <div key={index} className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                <div className="text-sm text-gray-500">{product.sales} ventes</div>
+                                            </div>
+                                            <div className="text-sm font-medium text-gray-900">{product.revenue}€</div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    {/* Top Products */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">Produits les Plus Vendus</h3>
-                        </div>
-
-                        <div className="p-6">
-                            <div className="space-y-4">
-                                {topProducts.map((product, index) => (
-                                    <div key={index} className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                            <div className="text-sm text-gray-500">{product.sales} ventes</div>
-                                        </div>
-                                        <div className="text-sm font-medium text-gray-900">{product.revenue}€</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Order Creation Modal */}

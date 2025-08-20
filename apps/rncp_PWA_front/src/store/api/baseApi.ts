@@ -4,10 +4,26 @@ import { logout, setCredentials } from '../slices/authSlice';
 import type { RootState } from '../store';
 import { TokenPair } from '@rncp/types';
 
-// Type-safe access to import.meta.env
+// Type-safe access to import.meta.env with environment detection
 const getApiUrl = (): string => {
-    const env = (import.meta as { env?: { VITE_API_URL?: string } }).env;
-    return env?.VITE_API_URL || '/api';
+    const env = (import.meta as { env?: { VITE_API_URL?: string; MODE?: string } }).env;
+
+    // Si VITE_API_URL est défini, l'utiliser
+    if (env?.VITE_API_URL) {
+        console.log(`🔗 API URL configured: ${env.VITE_API_URL} (mode: ${env?.MODE || 'unknown'})`);
+        return env.VITE_API_URL;
+    }
+
+    // Fallback basé sur l'environnement de développement
+    // En développement avec Vite dev server, utiliser le proxy
+    if (env?.MODE === 'development' || (typeof window !== 'undefined' && window.location.port === '3000')) {
+        console.log('🔗 Using Vite proxy: /api');
+        return '/api';
+    }
+
+    // En production ou dans les conteneurs
+    console.log('🔗 Using production API: /api');
+    return '/api';
 };
 
 const baseQuery = fetchBaseQuery({
@@ -17,6 +33,7 @@ const baseQuery = fetchBaseQuery({
         if (token) {
             headers.set('authorization', `Bearer ${token}`);
         }
+        headers.set('Content-Type', 'application/json');
         return headers;
     },
 });
@@ -26,7 +43,23 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
     api,
     extraOptions,
 ) => {
+    console.group('🌐 API Request');
+    console.log('Args:', args);
+    console.log('Base URL:', getApiUrl());
+    console.groupEnd();
+
     let result = await baseQuery(args, api, extraOptions);
+
+    // Log des résultats pour débugger
+    if (result.error) {
+        console.group('❌ API Error');
+        console.log('Status:', result.error.status);
+        console.log('Data:', result.error.data);
+        console.log('Args:', args);
+        console.groupEnd();
+    } else if (result.data) {
+        console.log('✅ API Success:', typeof args === 'string' ? args : args.url);
+    }
 
     if (result.error && result.error.status === 401) {
         // Try to get a new token

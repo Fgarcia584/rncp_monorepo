@@ -1,10 +1,16 @@
 import { useState, useMemo } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
 import { useGetAvailableOrdersQuery, useAcceptOrderMutation, useGetOrdersQuery } from '../store/api/orderApi';
+import { DeliveryPersonMap } from '../components/map';
+import { MapErrorBoundary } from '../components/map/MapErrorBoundary';
 import { OrderStatus, OrderPriority } from '@rncp/types';
 
 export function DeliveryPersonDashboard() {
     const [showAvailableOrders, setShowAvailableOrders] = useState(false);
+    const [showMapView, setShowMapView] = useState(false);
+
+    // ID du livreur (à récupérer de l'état d'authentification)
+    const deliveryPersonId = 1; // TODO: Récupérer depuis le state auth
     const {
         data: availableOrdersData,
         isLoading,
@@ -192,11 +198,23 @@ export function DeliveryPersonDashboard() {
                         Commencer la Tournée
                     </button>
 
-                    <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button
+                        onClick={() => {
+                            console.log('🗺️ Toggling map view from', showMapView, 'to', !showMapView);
+                            console.log('📊 Current assigned orders:', assignedOrders.length);
+                            console.log('👤 Delivery person ID:', deliveryPersonId);
+                            setShowMapView(!showMapView);
+                        }}
+                        className={`flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white transition-colors ${
+                            showMapView
+                                ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500'
+                                : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                        } focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                    >
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                         </svg>
-                        Voir l&apos;Itinéraire
+                        {showMapView ? '📋 Vue Liste' : '🗺️ Carte Interactive'}
                     </button>
 
                     <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
@@ -207,203 +225,238 @@ export function DeliveryPersonDashboard() {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Assigned Deliveries */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">Livraisons Assignées</h3>
+                {/* Vue Carte Interactive */}
+                {showMapView && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-medium text-gray-900">🗺️ Carte Interactive</h3>
+                            <div className="text-sm text-gray-500">
+                                {assignedOrders.length} commande{assignedOrders.length !== 1 ? 's' : ''} assignée
+                                {assignedOrders.length !== 1 ? 's' : ''}
+                            </div>
                         </div>
 
-                        <div className="p-6">
-                            {isLoadingOrders ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <div className="loading-spinner mx-auto mb-2"></div>
-                                    Chargement des livraisons...
-                                </div>
-                            ) : assignedOrders.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Aucune livraison assignée pour le moment
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {assignedOrders.map((order) => {
-                                        const formatPriority = (priority: string) => {
-                                            switch (priority) {
-                                                case 'urgent':
-                                                    return 'Urgente';
-                                                case 'high':
-                                                    return 'Haute';
-                                                case 'normal':
-                                                    return 'Normale';
-                                                case 'low':
-                                                    return 'Basse';
-                                                default:
-                                                    return priority;
-                                            }
-                                        };
+                        <MapErrorBoundary>
+                            <DeliveryPersonMap
+                                deliveryPersonId={deliveryPersonId}
+                                assignedOrders={assignedOrders}
+                                height="600px"
+                                className="w-full"
+                                onStatusUpdate={(orderId, status) => {
+                                    console.log(`Statut mis à jour pour la commande ${orderId}:`, status);
+                                    // TODO: Synchroniser avec l'API pour mettre à jour le statut de la commande
+                                }}
+                            />
+                        </MapErrorBoundary>
+                    </div>
+                )}
 
-                                        const formatStatus = (status: string) => {
-                                            switch (status) {
-                                                case 'accepted':
-                                                    return 'Acceptée';
-                                                case 'in_transit':
-                                                    return 'En cours';
-                                                case 'delivered':
-                                                    return 'Terminée';
-                                                default:
-                                                    return status;
-                                            }
-                                        };
+                {/* Vue Liste (par défaut) */}
+                {!showMapView && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Assigned Deliveries */}
+                        <div className="bg-white border border-gray-200 rounded-lg">
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">Livraisons Assignées</h3>
+                            </div>
 
-                                        const formatDateTime = (dateTime: string | Date) => {
-                                            return new Date(dateTime).toLocaleString('fr-FR', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            });
-                                        };
+                            <div className="p-6">
+                                {isLoadingOrders ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="loading-spinner mx-auto mb-2"></div>
+                                        Chargement des livraisons...
+                                    </div>
+                                ) : assignedOrders.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        Aucune livraison assignée pour le moment
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {assignedOrders.map((order) => {
+                                            const formatPriority = (priority: string) => {
+                                                switch (priority) {
+                                                    case 'urgent':
+                                                        return 'Urgente';
+                                                    case 'high':
+                                                        return 'Haute';
+                                                    case 'normal':
+                                                        return 'Normale';
+                                                    case 'low':
+                                                        return 'Basse';
+                                                    default:
+                                                        return priority;
+                                                }
+                                            };
 
-                                        return (
-                                            <div key={order.id} className="border border-gray-200 rounded-lg p-4">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="text-sm font-medium text-gray-900">
-                                                        CMD-{order.id}
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <span
-                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                                order.priority === OrderPriority.URGENT
-                                                                    ? 'bg-red-100 text-red-800'
-                                                                    : order.priority === OrderPriority.HIGH
-                                                                      ? 'bg-orange-100 text-orange-800'
-                                                                      : order.priority === OrderPriority.NORMAL
-                                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                                        : 'bg-green-100 text-green-800'
-                                                            }`}
-                                                        >
-                                                            {formatPriority(order.priority)}
-                                                        </span>
-                                                        <span
-                                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                                order.status === OrderStatus.IN_TRANSIT
-                                                                    ? 'bg-blue-100 text-blue-800'
-                                                                    : 'bg-gray-100 text-gray-800'
-                                                            }`}
-                                                        >
-                                                            {formatStatus(order.status)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm text-gray-600 mb-2">{order.customerName}</div>
-                                                {order.customerPhone && (
-                                                    <div className="text-sm text-gray-500 mb-2">
-                                                        {order.customerPhone}
-                                                    </div>
-                                                )}
-                                                <div className="text-sm text-gray-500 mb-3">
-                                                    {order.deliveryAddress}
-                                                </div>
-                                                <div className="flex items-center justify-between">
-                                                    <div className="text-sm text-gray-500">
-                                                        Livraison: {formatDateTime(order.scheduledDeliveryTime)}
-                                                    </div>
-                                                    <div className="flex space-x-2">
-                                                        {order.customerPhone && (
-                                                            <a
-                                                                href={`tel:${order.customerPhone}`}
-                                                                className="text-blue-600 hover:text-blue-900 text-sm"
+                                            const formatStatus = (status: string) => {
+                                                switch (status) {
+                                                    case 'accepted':
+                                                        return 'Acceptée';
+                                                    case 'in_transit':
+                                                        return 'En cours';
+                                                    case 'delivered':
+                                                        return 'Terminée';
+                                                    default:
+                                                        return status;
+                                                }
+                                            };
+
+                                            const formatDateTime = (dateTime: string | Date) => {
+                                                return new Date(dateTime).toLocaleString('fr-FR', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                });
+                                            };
+
+                                            return (
+                                                <div key={order.id} className="border border-gray-200 rounded-lg p-4">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            CMD-{order.id}
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <span
+                                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                    order.priority === OrderPriority.URGENT
+                                                                        ? 'bg-red-100 text-red-800'
+                                                                        : order.priority === OrderPriority.HIGH
+                                                                          ? 'bg-orange-100 text-orange-800'
+                                                                          : order.priority === OrderPriority.NORMAL
+                                                                            ? 'bg-yellow-100 text-yellow-800'
+                                                                            : 'bg-green-100 text-green-800'
+                                                                }`}
                                                             >
-                                                                Appeler
+                                                                {formatPriority(order.priority)}
+                                                            </span>
+                                                            <span
+                                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                    order.status === OrderStatus.IN_TRANSIT
+                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        : 'bg-gray-100 text-gray-800'
+                                                                }`}
+                                                            >
+                                                                {formatStatus(order.status)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600 mb-2">
+                                                        {order.customerName}
+                                                    </div>
+                                                    {order.customerPhone && (
+                                                        <div className="text-sm text-gray-500 mb-2">
+                                                            {order.customerPhone}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-sm text-gray-500 mb-3">
+                                                        {order.deliveryAddress}
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="text-sm text-gray-500">
+                                                            Livraison: {formatDateTime(order.scheduledDeliveryTime)}
+                                                        </div>
+                                                        <div className="flex space-x-2">
+                                                            {order.customerPhone && (
+                                                                <a
+                                                                    href={`tel:${order.customerPhone}`}
+                                                                    className="text-blue-600 hover:text-blue-900 text-sm"
+                                                                >
+                                                                    Appeler
+                                                                </a>
+                                                            )}
+                                                            <a
+                                                                href={`https://maps.google.com/maps?q=${encodeURIComponent(order.deliveryAddress)}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-green-600 hover:text-green-900 text-sm"
+                                                            >
+                                                                Naviguer
                                                             </a>
-                                                        )}
-                                                        <a
-                                                            href={`https://maps.google.com/maps?q=${encodeURIComponent(order.deliveryAddress)}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-green-600 hover:text-green-900 text-sm"
-                                                        >
-                                                            Naviguer
-                                                        </a>
+                                                        </div>
+                                                    </div>
+                                                    {order.notes && (
+                                                        <div className="mt-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
+                                                            <strong>Notes:</strong> {order.notes}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Completed Deliveries */}
+                        <div className="bg-white border border-gray-200 rounded-lg">
+                            <div className="px-6 py-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">Livraisons Terminées</h3>
+                            </div>
+
+                            <div className="p-6">
+                                {isLoadingOrders ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="loading-spinner mx-auto mb-2"></div>
+                                        Chargement des livraisons terminées...
+                                    </div>
+                                ) : completedOrders.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-500">
+                                        Aucune livraison terminée pour le moment
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {completedOrders.map((order) => {
+                                            const formatDateTime = (dateTime: string | Date) => {
+                                                return new Date(dateTime).toLocaleString('fr-FR', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                });
+                                            };
+
+                                            return (
+                                                <div
+                                                    key={order.id}
+                                                    className="flex items-center justify-between p-4 bg-green-50 rounded-lg"
+                                                >
+                                                    <div className="flex-1">
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            CMD-{order.id}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600">
+                                                            {order.customerName}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {order.deliveryAddress}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            Terminé le {formatDateTime(order.updatedAt)}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-1">
+                                                        {/* TODO: Add rating system when available */}
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <svg
+                                                                key={i}
+                                                                className="w-4 h-4 text-yellow-400"
+                                                                fill="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                                            </svg>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                                {order.notes && (
-                                                    <div className="mt-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
-                                                        <strong>Notes:</strong> {order.notes}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-
-                    {/* Completed Deliveries */}
-                    <div className="bg-white border border-gray-200 rounded-lg">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h3 className="text-lg font-medium text-gray-900">Livraisons Terminées</h3>
-                        </div>
-
-                        <div className="p-6">
-                            {isLoadingOrders ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <div className="loading-spinner mx-auto mb-2"></div>
-                                    Chargement des livraisons terminées...
-                                </div>
-                            ) : completedOrders.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Aucune livraison terminée pour le moment
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {completedOrders.map((order) => {
-                                        const formatDateTime = (dateTime: string | Date) => {
-                                            return new Date(dateTime).toLocaleString('fr-FR', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            });
-                                        };
-
-                                        return (
-                                            <div
-                                                key={order.id}
-                                                className="flex items-center justify-between p-4 bg-green-50 rounded-lg"
-                                            >
-                                                <div className="flex-1">
-                                                    <div className="text-sm font-medium text-gray-900">
-                                                        CMD-{order.id}
-                                                    </div>
-                                                    <div className="text-sm text-gray-600">{order.customerName}</div>
-                                                    <div className="text-sm text-gray-500">{order.deliveryAddress}</div>
-                                                    <div className="text-sm text-gray-500">
-                                                        Terminé le {formatDateTime(order.updatedAt)}
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center space-x-1">
-                                                    {/* TODO: Add rating system when available */}
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <svg
-                                                            key={i}
-                                                            className="w-4 h-4 text-yellow-400"
-                                                            fill="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                        </svg>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Available Orders Modal */}

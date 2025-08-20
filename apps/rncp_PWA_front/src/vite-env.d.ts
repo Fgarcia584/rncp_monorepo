@@ -8,3 +8,16 @@ interface ImportMetaEnv {
 interface ImportMeta {
     readonly env: ImportMetaEnv;
 }
+
+// Leaflet CSS and asset declarations for Vite
+declare module 'leaflet/dist/leaflet.css';
+
+declare module 'leaflet/dist/images/marker-icon.png' {
+    const src: string;
+    export default src;
+}
+
+declare module 'leaflet/dist/images/marker-shadow.png' {
+    const src: string;
+    export default src;
+}

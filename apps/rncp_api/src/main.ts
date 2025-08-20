@@ -7,15 +7,23 @@ async function bootstrap() {
     // Enable CORS for cross-origin requests
     app.enableCors({
         origin: [
-            'http://localhost:3000', // Frontend dev
+            'http://localhost:3000', // Frontend dev (Vite dev server)
+            'http://localhost:3001', // Frontend dev (alternative port)
             'http://rncp-pwa-front', // Docker internal
+            'http://localhost:80', // Docker compose frontend
             process.env.FRONTEND_URL || '*',
         ],
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-        allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+        allowedHeaders:
+            'Content-Type, Authorization, X-Requested-With, Origin, Accept',
         credentials: true,
+        exposedHeaders: ['Authorization'],
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
     });
 
-    await app.listen(process.env.PORT ?? 3000);
+    const port = process.env.PORT ?? 3001;
+    await app.listen(port);
+    console.log(`🚀 API Gateway is running on port ${port}`);
 }
 bootstrap();
