@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(GatewayModule);
 
     // Enable CORS for cross-origin requests
     app.enableCors({
@@ -25,5 +25,18 @@ async function bootstrap() {
     const port = process.env.PORT ?? 3001;
     await app.listen(port);
     console.log(`🚀 API Gateway is running on port ${port}`);
+    console.log(`📡 Proxying requests to microservices:`);
+    console.log(
+        `  - Auth: ${process.env.AUTH_SERVICE_URL || 'http://localhost:3002'}`,
+    );
+    console.log(
+        `  - Users: ${process.env.USER_SERVICE_URL || 'http://localhost:3002'}`,
+    );
+    console.log(
+        `  - Orders: ${process.env.ORDER_SERVICE_URL || 'http://localhost:3003'}`,
+    );
+    console.log(
+        `  - Geo: ${process.env.GEO_SERVICE_URL || 'http://localhost:3004'}`,
+    );
 }
 bootstrap();

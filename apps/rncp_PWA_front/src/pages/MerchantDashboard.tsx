@@ -296,7 +296,7 @@ export function MerchantDashboard() {
 
             {/* Order Creation Modal */}
             {showOrderForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                     {/* Overlay */}
                     <div
                         className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"

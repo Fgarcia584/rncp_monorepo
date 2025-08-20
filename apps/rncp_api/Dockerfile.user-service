@@ -24,7 +24,7 @@ RUN pnpm --filter @rncp/types build
 
 # Build the API application
 WORKDIR /app/apps/rncp_api
-RUN pnpm build
+RUN pnpm build:users
 
 # Production stage
 FROM node:20-alpine AS production
@@ -82,4 +82,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application from the API directory
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main"] 
+CMD ["node", "dist/src/user-main.js"] 

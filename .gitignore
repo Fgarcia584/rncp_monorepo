@@ -37,10 +37,12 @@ lerna-debug.log*
 
 # Project documentation (generated)
 /CLAUDE.md
+CLAUDE.md
 /DEPLOYMENT.md
 QUICK_START.md
 LEAFLET_INTEGRATION_GUIDE.md
 DEV_TESTING_GUIDE.md
+MICROSERVICES_MIGRATION.md
 
 # IDE - VSCode
 .vscode/*
