@@ -4,8 +4,14 @@ import { logout, setCredentials } from '../slices/authSlice';
 import type { RootState } from '../store';
 import { TokenPair } from '@rncp/types';
 
+// Type-safe access to import.meta.env
+const getApiUrl = (): string => {
+    const env = (import.meta as { env?: { VITE_API_URL?: string } }).env;
+    return env?.VITE_API_URL || '/api';
+};
+
 const baseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env?.VITE_API_URL || '/api',
+    baseUrl: getApiUrl(),
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).auth.token;
         if (token) {

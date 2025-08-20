@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
 import { useCreateOrderMutation } from '../store/api/orderApi';
-import { OrderPriority } from '../../../../tools/dist/order.types';
+import { OrderPriority } from '@rncp/types';
 
 export function MerchantDashboard() {
     const [showOrderForm, setShowOrderForm] = useState(false);
