@@ -9,6 +9,7 @@ export default tseslint.config(
     {
         extends: [js.configs.recommended, ...tseslint.configs.recommended],
         files: ['**/*.{ts,tsx}'],
+        ignores: ['**/*.{test,spec}.{ts,tsx}'], // Exclude test files from main config
         languageOptions: {
             ecmaVersion: 2020,
             globals: globals.browser,
@@ -20,6 +21,21 @@ export default tseslint.config(
         rules: {
             ...reactHooks.configs.recommended.rules,
             'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+        },
+    },
+    // Separate configuration for test files
+    {
+        extends: [js.configs.recommended, ...tseslint.configs.recommended],
+        files: ['**/*.{test,spec}.{ts,tsx}'],
+        languageOptions: {
+            ecmaVersion: 2020,
+            globals: globals.browser,
+            parserOptions: {
+                project: './tsconfig.test.json',
+            },
+        },
+        rules: {
+            // Test-specific rules can be added here
         },
     },
 );

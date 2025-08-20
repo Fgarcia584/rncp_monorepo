@@ -26,8 +26,16 @@
       "Bash(docker-compose:*)",
       "Bash(timeout 10 docker-compose logs -f rncp-pwa-front)",
       "Bash(curl:*)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm migration:run:*)",
+      "Bash(DB_HOST=localhost DB_PORT=5432 DB_USER=rncp_user DB_PASSWORD=rncp_password DB_NAME=rncp_db npx typeorm migration:run -d dist/data-source.js)",
+      "Bash(pnpm install:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
-  }
+  },
+  "outputStyle": "Explanatory"
 }

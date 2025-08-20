@@ -13,6 +13,7 @@ const UserRole = {
 
 export function RoleBasedRouting() {
     const { user, isLoading } = useAuth();
+    console.log('User role:', user?.role);
 
     if (isLoading) {
         return (

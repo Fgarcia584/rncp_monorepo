@@ -1,6 +1,21 @@
+import { useState } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
+import { useCreateOrderMutation } from '../store/api/orderApi';
+import { OrderPriority } from '../../../../tools/dist/order.types';
 
 export function MerchantDashboard() {
+    const [showOrderForm, setShowOrderForm] = useState(false);
+    const [createOrder, { isLoading: isCreating }] = useCreateOrderMutation();
+    const [orderForm, setOrderForm] = useState({
+        customerName: '',
+        customerPhone: '',
+        deliveryAddress: '',
+        scheduledDeliveryTime: '',
+        priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
+        notes: '',
+        estimatedDeliveryDuration: '',
+    });
+
     // Mock data for demonstration
     const businessStats = {
         todayOrders: 24,
@@ -22,6 +37,48 @@ export function MerchantDashboard() {
         { name: 'Produit C', sales: 28, revenue: 420 },
         { name: 'Produit D', sales: 22, revenue: 330 },
     ];
+
+    const handleOrderSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            const orderData = {
+                customerName: orderForm.customerName,
+                customerPhone: orderForm.customerPhone || undefined,
+                deliveryAddress: orderForm.deliveryAddress,
+                scheduledDeliveryTime: new Date(orderForm.scheduledDeliveryTime),
+                priority: orderForm.priority as OrderPriority,
+                notes: orderForm.notes || undefined,
+                estimatedDeliveryDuration: orderForm.estimatedDeliveryDuration
+                    ? parseInt(orderForm.estimatedDeliveryDuration)
+                    : undefined,
+            };
+
+            await createOrder(orderData).unwrap();
+
+            // Reset form and close modal
+            setOrderForm({
+                customerName: '',
+                customerPhone: '',
+                deliveryAddress: '',
+                scheduledDeliveryTime: '',
+                priority: 'normal',
+                notes: '',
+                estimatedDeliveryDuration: '',
+            });
+            setShowOrderForm(false);
+
+            // Show success message
+            alert('Commande créée avec succès !');
+        } catch (error) {
+            console.error('Error creating order:', error);
+            alert('Erreur lors de la création de la commande');
+        }
+    };
+
+    const handleFormChange = (field: string, value: string) => {
+        setOrderForm((prev) => ({ ...prev, [field]: value }));
+    };
 
     return (
         <DashboardLayout title="Espace Commerçant" description="Gestion de votre boutique et de vos ventes">
@@ -88,7 +145,17 @@ export function MerchantDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <button
+                        onClick={() => setShowOrderForm(true)}
+                        className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Nouvelle Livraison
+                    </button>
+
                     <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
@@ -178,6 +245,146 @@ export function MerchantDashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Order Creation Modal */}
+            {showOrderForm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Overlay */}
+                    <div
+                        className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                        onClick={() => setShowOrderForm(false)}
+                    ></div>
+
+                    {/* Modal Content */}
+                    <div
+                        className="relative bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <form onSubmit={handleOrderSubmit}>
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                        Nouvelle Commande à Livrer
+                                    </h3>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Nom du client *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={orderForm.customerName}
+                                                onChange={(e) => handleFormChange('customerName', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Téléphone du client
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                value={orderForm.customerPhone}
+                                                onChange={(e) => handleFormChange('customerPhone', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Adresse de livraison *
+                                            </label>
+                                            <textarea
+                                                required
+                                                value={orderForm.deliveryAddress}
+                                                onChange={(e) => handleFormChange('deliveryAddress', e.target.value)}
+                                                rows={3}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Heure de livraison souhaitée *
+                                            </label>
+                                            <input
+                                                type="datetime-local"
+                                                required
+                                                value={orderForm.scheduledDeliveryTime}
+                                                onChange={(e) =>
+                                                    handleFormChange('scheduledDeliveryTime', e.target.value)
+                                                }
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Priorité</label>
+                                            <select
+                                                value={orderForm.priority}
+                                                onChange={(e) => handleFormChange('priority', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            >
+                                                <option value="low">Basse</option>
+                                                <option value="normal">Normale</option>
+                                                <option value="high">Haute</option>
+                                                <option value="urgent">Urgente</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Durée estimée (minutes)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={orderForm.estimatedDeliveryDuration}
+                                                onChange={(e) =>
+                                                    handleFormChange('estimatedDeliveryDuration', e.target.value)
+                                                }
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                Notes (optionnel)
+                                            </label>
+                                            <textarea
+                                                value={orderForm.notes}
+                                                onChange={(e) => handleFormChange('notes', e.target.value)}
+                                                rows={2}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button
+                                    type="submit"
+                                    disabled={isCreating}
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isCreating ? 'Création...' : 'Créer la commande'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowOrderForm(false)}
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    Annuler
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }

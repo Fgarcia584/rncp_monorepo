@@ -5,7 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './microservices/auth-service/auth.module';
 import { UserModule } from './microservices/user-service/user.module';
-import { User, RefreshToken } from './entities';
+import { OrderModule } from './microservices/order-service/order.module';
+import { User, RefreshToken, Order } from './entities';
 
 @Module({
     imports: [
@@ -16,13 +17,14 @@ import { User, RefreshToken } from './entities';
             username: process.env.DB_USER || 'rncp_user',
             password: process.env.DB_PASSWORD || 'rncp_password',
             database: process.env.DB_NAME || 'rncp_db',
-            entities: [User, RefreshToken],
+            entities: [User, RefreshToken, Order],
             synchronize: process.env.NODE_ENV !== 'production',
             logging: process.env.NODE_ENV !== 'production',
         }),
         HttpModule,
         AuthModule,
         UserModule,
+        OrderModule,
     ],
     controllers: [AppController],
     providers: [AppService],
