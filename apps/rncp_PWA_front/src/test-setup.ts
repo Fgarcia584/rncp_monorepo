@@ -23,10 +23,14 @@ global.alert = vi.fn();
 global.console.error = vi.fn();
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn(() => ({
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
     disconnect: vi.fn(),
     observe: vi.fn(),
     unobserve: vi.fn(),
+    root: null,
+    rootMargin: '',
+    thresholds: [],
+    takeRecords: vi.fn().mockReturnValue([]),
 }));
 
 // Mock ResizeObserver

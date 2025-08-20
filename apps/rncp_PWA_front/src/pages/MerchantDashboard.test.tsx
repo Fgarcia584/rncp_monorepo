@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, beforeEach, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -286,6 +287,7 @@ describe('MerchantDashboard', () => {
         it('should update delivery time when changed', async () => {
             const dateInput = document.querySelector('input[type="datetime-local"]');
             expect(dateInput).toBeInTheDocument();
+            if (!dateInput) throw new Error('Date input not found');
 
             await user.type(dateInput, '2024-01-15T14:30');
             expect(dateInput).toHaveValue('2024-01-15T14:30');
@@ -306,7 +308,9 @@ describe('MerchantDashboard', () => {
             const textboxes = screen.getAllByRole('textbox');
             await user.type(textboxes[0], 'John Doe'); // Customer name
             await user.type(textboxes[2], '123 Main Street'); // Address
-            await user.type(document.querySelector('input[type="datetime-local"]'), '2024-01-15T14:30');
+            const dateInput = document.querySelector('input[type="datetime-local"]');
+            if (!dateInput) throw new Error('Date input not found');
+            await user.type(dateInput, '2024-01-15T14:30');
 
             const submitButton = screen.getByRole('button', { name: /créer la commande/i });
             await user.click(submitButton);
@@ -337,7 +341,9 @@ describe('MerchantDashboard', () => {
             const textboxes = screen.getAllByRole('textbox');
             await user.type(textboxes[0], 'John Doe'); // Customer name
             await user.type(textboxes[2], '123 Main Street, Paris'); // Address
-            await user.type(document.querySelector('input[type="datetime-local"]'), '2024-01-15T14:30');
+            const dateInput = document.querySelector('input[type="datetime-local"]');
+            if (!dateInput) throw new Error('Date input not found');
+            await user.type(dateInput, '2024-01-15T14:30');
         };
 
         const fillAllFields = async () => {

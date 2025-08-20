@@ -26,7 +26,7 @@ export default tseslint.config(
     // Separate configuration for test files
     {
         extends: [js.configs.recommended, ...tseslint.configs.recommended],
-        files: ['**/*.{test,spec}.{ts,tsx}'],
+        files: ['**/*.{test,spec}.{ts,tsx}', 'src/test-setup.ts'],
         languageOptions: {
             ecmaVersion: 2020,
             globals: globals.browser,

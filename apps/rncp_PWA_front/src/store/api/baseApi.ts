@@ -5,7 +5,7 @@ import type { RootState } from '../store';
 import { TokenPair } from '@rncp/types';
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || '/api',
+    baseUrl: import.meta.env?.VITE_API_URL || '/api',
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).auth.token;
         if (token) {
