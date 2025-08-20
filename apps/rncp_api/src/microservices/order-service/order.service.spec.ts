@@ -72,7 +72,7 @@ describe('OrderService', () => {
             skip: jest.fn().mockReturnThis(),
             take: jest.fn().mockReturnThis(),
             getManyAndCount: jest.fn(),
-        } as jest.Mocked<SelectQueryBuilder<Order>>;
+        } as unknown as jest.Mocked<SelectQueryBuilder<Order>>;
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [

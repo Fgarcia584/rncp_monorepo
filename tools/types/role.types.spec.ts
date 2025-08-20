@@ -1,4 +1,12 @@
-import { UserRole, ROLE_PERMISSIONS, hasPermission, getRoleDisplayName, isValidRole, OrderStatus, OrderPriority } from './role.types';
+import {
+    UserRole,
+    ROLE_PERMISSIONS,
+    hasPermission,
+    getRoleDisplayName,
+    isValidRole,
+    OrderStatus,
+    OrderPriority,
+} from './role.types';
 
 describe('Role Types', () => {
     describe('UserRole enum', () => {
@@ -120,9 +128,9 @@ describe('Role Types', () => {
         it('should contain all expected statuses', () => {
             const expectedStatuses = ['pending', 'accepted', 'in_transit', 'delivered', 'cancelled'];
             const actualStatuses = Object.values(OrderStatus);
-            
+
             expect(actualStatuses).toHaveLength(expectedStatuses.length);
-            expectedStatuses.forEach(status => {
+            expectedStatuses.forEach((status) => {
                 expect(actualStatuses).toContain(status);
             });
         });
@@ -145,15 +153,10 @@ describe('Role Types', () => {
                 OrderStatus.PENDING,
                 OrderStatus.ACCEPTED,
                 OrderStatus.IN_TRANSIT,
-                OrderStatus.DELIVERED
+                OrderStatus.DELIVERED,
             ];
 
-            expect(workflowOrder).toEqual([
-                'pending',
-                'accepted', 
-                'in_transit',
-                'delivered'
-            ]);
+            expect(workflowOrder).toEqual(['pending', 'accepted', 'in_transit', 'delivered']);
         });
     });
 
@@ -168,9 +171,9 @@ describe('Role Types', () => {
         it('should contain all expected priorities', () => {
             const expectedPriorities = ['low', 'normal', 'high', 'urgent'];
             const actualPriorities = Object.values(OrderPriority);
-            
+
             expect(actualPriorities).toHaveLength(expectedPriorities.length);
-            expectedPriorities.forEach(priority => {
+            expectedPriorities.forEach((priority) => {
                 expect(actualPriorities).toContain(priority);
             });
         });
@@ -189,19 +192,9 @@ describe('Role Types', () => {
 
         it('should support priority ordering', () => {
             // Test that priorities can be ordered logically
-            const priorityOrder = [
-                OrderPriority.LOW,
-                OrderPriority.NORMAL,
-                OrderPriority.HIGH,
-                OrderPriority.URGENT
-            ];
+            const priorityOrder = [OrderPriority.LOW, OrderPriority.NORMAL, OrderPriority.HIGH, OrderPriority.URGENT];
 
-            expect(priorityOrder).toEqual([
-                'low',
-                'normal',
-                'high',
-                'urgent'
-            ]);
+            expect(priorityOrder).toEqual(['low', 'normal', 'high', 'urgent']);
         });
 
         it('should have default priority', () => {
