@@ -3,7 +3,7 @@ services:
     rncp-pwa-front:
         build:
             context: .
-            dockerfile: ./apps/rncp_PWA_front/Dockerfile
+            dockerfile: ./apps/rncp_PWA_front/Dockerfile.local
         ports:
             - '${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}'
         env_file: .env
@@ -21,7 +21,7 @@ services:
     rncp-api-gateway:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile
+            dockerfile: ./apps/rncp_api/Dockerfile.local
         ports:
             - '${API_GATEWAY_PORT}:${API_GATEWAY_INTERNAL_PORT}'
         env_file: .env

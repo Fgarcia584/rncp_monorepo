@@ -7,20 +7,17 @@ nixPkgs = ['nodejs_20', 'python3']
 
 [phases.install]
 cmds = [
-    'cd ../..',
     'corepack enable',
     'corepack prepare pnpm@latest-9 --activate',
     'pnpm config set store-dir /tmp/pnpm-store',
-    'pnpm install --frozen-lockfile'
+    'cd ../.. && pnpm install --frozen-lockfile'
 ]
 
 [phases.build]
 cmds = [
-    'cd ../..',
-    'pnpm build:types',
-    'cd apps/rncp_api',
-    'pnpm build'
+    'cd ../.. && pnpm build:types',
+    'cd ../../apps/rncp_api && pnpm build'
 ]
 
 [start]
-cmd = 'cd apps/rncp_api && npm run start:gateway'
+cmd = 'npm run start:gateway'
