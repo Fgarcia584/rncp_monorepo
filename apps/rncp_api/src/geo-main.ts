@@ -3,7 +3,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
 import { GeoModule } from './microservices/geo-service/geo.module';
 import { User, RefreshToken, Order } from './entities';
 
@@ -24,7 +23,6 @@ import { User, RefreshToken, Order } from './entities';
             synchronize: process.env.NODE_ENV !== 'production',
             logging: process.env.NODE_ENV !== 'production',
         }),
-        HttpModule,
         GeoModule,
     ],
 })
