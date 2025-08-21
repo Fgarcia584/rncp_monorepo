@@ -1,23 +1,14 @@
 [variables]
-NPM_CONFIG_UPDATE_NOTIFIER = 'false'
-PNPM_HOME = '/layers/pnpm'
+NODE_ENV = 'production'
 
 [phases.setup]
-nixPkgs = ['nodejs_20', 'python3']
+nixPkgs = ['nodejs_20']
 
 [phases.install]
-cmds = [
-    'corepack enable',
-    'corepack prepare pnpm@latest-9 --activate',
-    'pnpm config set store-dir /tmp/pnpm-store',
-    'cd ../.. && pnpm install --frozen-lockfile'
-]
+cmd = 'cd ../.. && npm install -g pnpm && pnpm install --frozen-lockfile'
 
 [phases.build]
-cmds = [
-    'cd ../.. && pnpm build:types',
-    'cd ../../apps/rncp_api && pnpm build'
-]
+cmd = 'cd ../.. && pnpm build:types && cd apps/rncp_api && pnpm build'
 
 [start]
-cmd = 'npm run start:gateway'
+cmd = 'pnpm start:gateway'
