@@ -5,7 +5,7 @@ NODE_ENV = 'production'
 nixPkgs = ['nodejs_20']
 
 [phases.install]
-cmd = 'cd ../.. && npm install -g pnpm && pnpm install --frozen-lockfile'
+cmd = 'cd ../.. && npm install -g pnpm && node scripts/prepare-railway.js && pnpm install --frozen-lockfile'
 
 [phases.build]
 cmd = 'cd ../.. && pnpm build:types && cd apps/rncp_PWA_front && pnpm build'

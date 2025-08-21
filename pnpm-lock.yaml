@@ -64,7 +64,7 @@ importers:
         specifier: ^2.5.0
         version: 2.8.2(react-redux@9.2.0(@types/react@19.1.8)(react@19.1.1)(redux@5.0.1))(react@19.1.1)
       '@rncp/types':
-        specifier: workspace:^1.0.0
+        specifier: file:../../tools
         version: link:../../tools
       '@tailwindcss/vite':
         specifier: ^4.1.11
@@ -206,7 +206,7 @@ importers:
         specifier: ^11.0.0
         version: 11.0.0(@nestjs/common@11.1.5(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.5(@nestjs/common@11.1.5(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.5)(@nestjs/platform-express@11.1.5)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.25(pg@8.16.3)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.13.2)(@types/node@22.16.5)(typescript@5.7.3)))
       '@rncp/types':
-        specifier: workspace:^1.0.0
+        specifier: file:../../tools
         version: link:../../tools
       axios:
         specifier: ^1.7.9
