@@ -40,20 +40,20 @@ export function extractRouteCoordinates(directionsResult: google.maps.Directions
     
     console.log('📍 Route trouvée:', {
         hasOverviewPolyline: !!route.overview_polyline,
-        hasPoints: !!(route.overview_polyline?.points),
-        pointsLength: route.overview_polyline?.points?.length || 0,
+        hasPoints: !!(route.overview_polyline as any)?.points,
+        pointsLength: (route.overview_polyline as any)?.points?.length || 0,
         legsCount: route.legs?.length || 0
     });
     
-    if (!route.overview_polyline || !route.overview_polyline.points) {
+    if (!route.overview_polyline || !(route.overview_polyline as any).points) {
         console.warn('⚠️ Pas de overview_polyline, tentative avec les polylines individuelles des legs');
         return extractRouteCoordinatesFromLegs(directionsResult);
     }
     
-    console.log('🔗 Polyline overview trouvée:', route.overview_polyline.points.substring(0, 100) + '...');
+    console.log('🔗 Polyline overview trouvée:', (route.overview_polyline as any).points.substring(0, 100) + '...');
     
     try {
-        const coordinates = decodeGooglePolyline(route.overview_polyline.points);
+        const coordinates = decodeGooglePolyline((route.overview_polyline as any).points);
         console.log('✅ Coordonnées extraites de overview_polyline:', coordinates.length, 'points');
         return coordinates;
     } catch (error) {

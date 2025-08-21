@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LeafletRouteMap } from '../components/delivery/LeafletRouteMap';
 import { DeliveryStepsList } from '../components/delivery/DeliveryStepsList';
 import { StartDeliveryRoundModal } from '../components/delivery/StartDeliveryRoundModal';
@@ -6,7 +6,7 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { OrderResponse, OrderStatus, OrderPriority } from '@rncp/types';
 
 // Données de test pour la démonstration
-const testOrders: OrderResponse[] = [
+const testOrders: any[] = [
     {
         id: 1001,
         orderNumber: 'DEMO001',
@@ -15,9 +15,9 @@ const testOrders: OrderResponse[] = [
         deliveryAddress: '1 Rue de Rivoli, 75001 Paris',
         status: OrderStatus.ACCEPTED,
         priority: OrderPriority.NORMAL,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        scheduledDeliveryTime: new Date(Date.now() + 3600000),
+        createdAt: new Date().toISOString() as any,
+        updatedAt: new Date().toISOString() as any,
+        scheduledDeliveryTime: new Date(Date.now() + 3600000) as any,
         distanceKm: 5.2,
         estimatedDeliveryDuration: 25,
     },
@@ -29,9 +29,9 @@ const testOrders: OrderResponse[] = [
         deliveryAddress: '75 Avenue des Champs-Élysées, 75008 Paris',
         status: OrderStatus.ACCEPTED,
         priority: OrderPriority.HIGH,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        scheduledDeliveryTime: new Date(Date.now() + 5400000),
+        createdAt: new Date().toISOString() as any,
+        updatedAt: new Date().toISOString() as any,
+        scheduledDeliveryTime: new Date(Date.now() + 5400000) as any,
         distanceKm: 8.7,
         estimatedDeliveryDuration: 35,
     },
@@ -43,9 +43,9 @@ const testOrders: OrderResponse[] = [
         deliveryAddress: '20 Avenue de l\'Opéra, 75001 Paris',
         status: OrderStatus.ACCEPTED,
         priority: OrderPriority.URGENT,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        scheduledDeliveryTime: new Date(Date.now() + 7200000),
+        createdAt: new Date().toISOString() as any,
+        updatedAt: new Date().toISOString() as any,
+        scheduledDeliveryTime: new Date(Date.now() + 7200000) as any,
         distanceKm: 3.4,
         estimatedDeliveryDuration: 20,
     },
