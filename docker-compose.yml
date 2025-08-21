@@ -43,7 +43,7 @@ services:
     rncp-user-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.user-service
+            dockerfile: ./apps/rncp_api/Dockerfile.user-service.local
         ports:
             - '${USER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -73,7 +73,7 @@ services:
     rncp-auth-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.auth-service
+            dockerfile: ./apps/rncp_api/Dockerfile.auth-service.local
         ports:
             - '${AUTH_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -102,7 +102,7 @@ services:
     rncp-order-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.order-service
+            dockerfile: ./apps/rncp_api/Dockerfile.order-service.local
         ports:
             - '${ORDER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -125,7 +125,7 @@ services:
     rncp-geo-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.geo-service
+            dockerfile: ./apps/rncp_api/Dockerfile.geo-service.local
         ports:
             - '${GEO_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env

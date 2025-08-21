@@ -1,6 +1,5 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd ../.. && pnpm install && pnpm build:types && cd apps/rncp_api && pnpm build"
 
 [deploy]
 startCommand = "cd apps/rncp_api && npm run start:gateway"

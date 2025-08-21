@@ -1,6 +1,5 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd ../.. && pnpm install && pnpm build:types && cd apps/rncp_PWA_front && pnpm build"
 
 [deploy]
 startCommand = "pnpm preview --host 0.0.0.0 --port $PORT"
