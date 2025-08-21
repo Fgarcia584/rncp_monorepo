@@ -9,7 +9,7 @@ import {
     Coordinates,
 } from '@rncp/types';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
 
 export const geoApi = createApi({
     reducerPath: 'geoApi',

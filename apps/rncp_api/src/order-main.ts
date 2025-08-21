@@ -82,6 +82,7 @@ async function bootstrap() {
                 origin: [
                     'http://localhost:3000', // Frontend dev
                     'http://localhost:3001', // Dev Gateway
+                    'http://192.168.1.14:3000', // Network access for mobile testing
                     'http://rncp-pwa-front', // Docker frontend
                     process.env.FRONTEND_URL,
                 ].filter(Boolean),

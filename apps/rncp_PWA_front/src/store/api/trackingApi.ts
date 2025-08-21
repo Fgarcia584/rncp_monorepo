@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { DeliveryTracking, DeliveryTrackingEvent, Position, Coordinates } from '@rncp/types';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001';
 
 export const trackingApi = createApi({
     reducerPath: 'trackingApi',

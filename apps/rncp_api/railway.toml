@@ -1,0 +1,19 @@
+[build]
+builder = "nixpacks"
+buildCommand = "cd ../.. && pnpm install && pnpm build:types && cd apps/rncp_api && pnpm build"
+
+[deploy]
+startCommand = "cd apps/rncp_api && npm run start:gateway"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+
+[variables]
+NODE_ENV = "production"
+PORT = "3001"
+HOST = "0.0.0.0"
+JWT_SECRET = "your-super-secret-jwt-key-for-production"
+DB_HOST = "postgresql-host"
+DB_PORT = "5432"
+DB_USER = "postgres"
+DB_PASSWORD = "password"
+DB_NAME = "rncp_db"

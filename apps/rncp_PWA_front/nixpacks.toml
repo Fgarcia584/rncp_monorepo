@@ -1,0 +1,26 @@
+[variables]
+NPM_CONFIG_UPDATE_NOTIFIER = 'false'
+PNPM_HOME = '/layers/pnpm'
+
+[phases.setup]
+nixPkgs = ['nodejs_20']
+
+[phases.install]
+cmds = [
+    'cd ../..',
+    'corepack enable',
+    'corepack prepare pnpm@latest-9 --activate',
+    'pnpm config set store-dir /tmp/pnpm-store',
+    'pnpm install --frozen-lockfile'
+]
+
+[phases.build]
+cmds = [
+    'cd ../..',
+    'pnpm build:types',
+    'cd apps/rncp_PWA_front',
+    'pnpm build'
+]
+
+[start]
+cmd = 'cd apps/rncp_PWA_front && pnpm preview --host 0.0.0.0 --port $PORT'

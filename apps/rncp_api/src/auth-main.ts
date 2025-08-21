@@ -38,6 +38,7 @@ async function bootstrap() {
         origin: [
             'http://localhost:5174', // Frontend dev (alternative port)
             'http://localhost:3000', // Frontend dev (Vite dev server)
+            'http://192.168.1.14:3000', // Network access for mobile testing
             'http://rncp-pwa-front', // Docker internal
             'http://localhost:80', // Docker compose frontend
             process.env.FRONTEND_URL,

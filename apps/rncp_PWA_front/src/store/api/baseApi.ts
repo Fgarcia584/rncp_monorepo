@@ -12,7 +12,13 @@ let isRefreshing = false;
 const getApiUrl = (): string => {
     const env = (import.meta as { env?: { VITE_API_URL?: string; MODE?: string } }).env;
 
-    // PRIORITÉ: En développement avec Vite dev server, utiliser l'API Gateway Docker directement
+    // PRIORITÉ 1: Si VITE_API_URL est défini, l'utiliser (pour accès réseau)
+    if (env?.VITE_API_URL && env.VITE_API_URL !== 'http://localhost:3000') {
+        console.log(`🔗 API URL configured: ${env.VITE_API_URL} (mode: ${env?.MODE || 'unknown'})`);
+        return env.VITE_API_URL;
+    }
+
+    // PRIORITÉ 2: En développement avec Vite dev server, utiliser l'API Gateway local
     if (
         env?.MODE === 'development' ||
         (typeof window !== 'undefined' && ['3000', '5173', '5174', '5175'].includes(window.location.port))
@@ -21,13 +27,7 @@ const getApiUrl = (): string => {
         return 'http://localhost:3001';
     }
 
-    // Si VITE_API_URL est défini pour production, l'utiliser
-    if (env?.VITE_API_URL && env?.VITE_API_URL !== 'http://localhost:3000') {
-        console.log(`🔗 API URL configured: ${env.VITE_API_URL} (mode: ${env?.MODE || 'unknown'})`);
-        return env.VITE_API_URL;
-    }
-
-    // En production ou dans les conteneurs, nginx ajoute déjà le préfixe /api
+    // PRIORITÉ 3: En production ou dans les conteneurs, nginx ajoute déjà le préfixe /api
     console.log('🔗 Using production API: empty baseUrl (nginx handles /api prefix)');
     return '';
 };

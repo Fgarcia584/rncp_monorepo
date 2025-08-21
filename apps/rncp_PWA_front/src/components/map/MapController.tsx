@@ -8,7 +8,6 @@ interface MapControllerProps {
     onMapReady?: (map: L.Map) => void;
 }
 
-// eslint-disable-next-line react/prop-types
 export const MapController: React.FC<MapControllerProps> = ({ center, zoom, onMapReady }) => {
     const map = useMap();
 
@@ -21,7 +20,6 @@ export const MapController: React.FC<MapControllerProps> = ({ center, zoom, onMa
     useEffect(() => {
         console.log('🎮 MapController - Center changed:', center);
         if (center && map) {
-            // eslint-disable-next-line react/prop-types
             const { latitude, longitude } = center;
             console.log('📍 MapController - Validating coordinates:', { latitude, longitude });
             if (

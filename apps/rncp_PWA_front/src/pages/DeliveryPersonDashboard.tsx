@@ -1,20 +1,68 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
 import { useGetAvailableOrdersQuery, useAcceptOrderMutation, useGetOrdersQuery } from '../store/api/orderApi';
 import { DeliveryPersonMap } from '../components/map';
 import { MapErrorBoundary } from '../components/map/MapErrorBoundary';
-import { OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderStatus, OrderPriority, Coordinates, OrderResponse } from '@rncp/types';
 import { useAuth } from '../hooks/useAuth';
+import { StartDeliveryRoundModal } from '../components/delivery/StartDeliveryRoundModal';
+import { LeafletRouteMap } from '../components/delivery/LeafletRouteMap';
+import { DeliveryStepsList } from '../components/delivery/DeliveryStepsList';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 export function DeliveryPersonDashboard() {
     const [showAvailableOrders, setShowAvailableOrders] = useState(false);
     const [showMapView, setShowMapView] = useState(false);
+    const [showDeliveryRoundModal, setShowDeliveryRoundModal] = useState(false);
+    const [activeDeliveryRound, setActiveDeliveryRound] = useState<{
+        orders: OrderResponse[];
+        optimizedOrder: number[];
+        currentStep: number;
+        startingAddress?: string;
+    } | null>(null);
 
     // Récupérer les informations d'authentification
     const { user } = useAuth();
+    const { position: currentPosition, getCurrentPosition, error: geoError } = useGeolocation({
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 300000,
+        autoStart: true
+    });
 
     // ID du livreur depuis l'état d'authentification
     const deliveryPersonId = user?.id || 1;
+    
+    // Démarrer automatiquement la géolocalisation au montage du composant
+    useEffect(() => {
+        console.log('🌍 DeliveryPersonDashboard monté - Demande d\'autorisation géolocalisation');
+        console.log('📍 Position actuelle:', currentPosition);
+        console.log('❌ Erreur géolocalisation:', geoError);
+        
+        if (!currentPosition && !geoError) {
+            console.log('🔍 Demande explicite de géolocalisation...');
+            getCurrentPosition()
+                .then((position) => {
+                    console.log('✅ Position obtenue:', position);
+                    console.log('📍 Coordonnées:', {
+                        latitude: position.latitude,
+                        longitude: position.longitude,
+                        accuracy: position.accuracy
+                    });
+                })
+                .catch((error) => {
+                    console.error('❌ Erreur obtention position:', error);
+                    console.log('🔧 Vérification des permissions navigateur...');
+                    navigator.permissions.query({ name: 'geolocation' })
+                        .then((result) => {
+                            console.log('🔐 Statut permission géolocalisation:', result.state);
+                        })
+                        .catch((permError) => {
+                            console.warn('⚠️ Impossible de vérifier les permissions:', permError);
+                        });
+                });
+        }
+    }, [currentPosition, geoError, getCurrentPosition]);
     const {
         data: availableOrdersData,
         isLoading,
@@ -33,9 +81,7 @@ export function DeliveryPersonDashboard() {
         const allOrders = allOrdersData?.orders || [];
 
         // Filter assigned orders (accepted, in_transit)
-        const assigned = allOrders.filter(
-            (order) => order.status === OrderStatus.ACCEPTED || order.status === OrderStatus.IN_TRANSIT,
-        );
+        const assigned = allOrders.filter((order) => order.status === OrderStatus.ACCEPTED || order.status === OrderStatus.IN_TRANSIT);
 
         // Filter completed orders
         const completed = allOrders.filter((order) => order.status === OrderStatus.DELIVERED);
@@ -81,8 +127,85 @@ export function DeliveryPersonDashboard() {
         }
     };
 
+    // Gestion du démarrage de tournée
+    const handleStartDeliveryRound = async (orders: OrderResponse[], startingAddress?: string) => {
+        try {
+            console.log('🚀 Démarrage de la tournée avec', orders.length, 'commandes');
+            if (startingAddress) {
+                console.log('📍 Point de départ:', startingAddress);
+            }
+            
+            setActiveDeliveryRound({
+                orders,
+                optimizedOrder: [], // Sera mis à jour par Google Maps
+                currentStep: 0,
+                startingAddress,
+            });
+            
+            setShowDeliveryRoundModal(false);
+            setShowMapView(true); // Afficher la vue carte automatiquement
+            
+            console.log('✅ Tournée démarrée avec succès');
+        } catch (error) {
+            console.error('❌ Erreur lors du démarrage de la tournée:', error);
+        }
+    };
+
+    // Gestion de la route calculée
+    const handleRouteCalculated = (route: google.maps.DirectionsResult) => {
+        if (activeDeliveryRound) {
+            const optimizedOrder = route.routes[0].waypoint_order || [];
+            setActiveDeliveryRound({
+                ...activeDeliveryRound,
+                optimizedOrder,
+            });
+            console.log('🗺️ Route calculée, ordre optimisé:', optimizedOrder);
+        }
+    };
+
+    // Gestion de la complétion d'une étape
+    const handleStepComplete = async (orderId: number) => {
+        try {
+            // TODO: Appeler l'API pour marquer la commande comme livrée
+            console.log('✅ Marquage de la commande comme livrée:', orderId);
+            
+            if (activeDeliveryRound) {
+                setActiveDeliveryRound({
+                    ...activeDeliveryRound,
+                    currentStep: activeDeliveryRound.currentStep + 1,
+                });
+            }
+        } catch (error) {
+            console.error('❌ Erreur lors de la complétion de l\'étape:', error);
+        }
+    };
+
+    // Gestion du passage d'une étape
+    const handleStepSkip = async (orderId: number, reason: string) => {
+        try {
+            // TODO: Appeler l'API pour marquer la commande comme annulée/reportée
+            console.log('⏭️ Passage de la commande:', orderId, 'Raison:', reason);
+            
+            if (activeDeliveryRound) {
+                setActiveDeliveryRound({
+                    ...activeDeliveryRound,
+                    currentStep: activeDeliveryRound.currentStep + 1,
+                });
+            }
+        } catch (error) {
+            console.error('❌ Erreur lors du passage de l\'étape:', error);
+        }
+    };
+
+    // Position par défaut si la géolocalisation n'est pas disponible
+    const defaultPosition: Coordinates = {
+        latitude: 48.8566,
+        longitude: 2.3522,
+    };
+
     return (
-        <DashboardLayout title="Espace Livreur" description="Gestion de vos livraisons et tournées">
+        <>
+            <DashboardLayout title="Espace Livreur" description="Gestion de vos livraisons et tournées">
             <div className="space-y-6">
                 {/* Delivery Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -159,11 +282,15 @@ export function DeliveryPersonDashboard() {
                         Voir Commandes Disponibles
                     </button>
 
-                    <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <button 
+                        onClick={() => setShowDeliveryRoundModal(true)}
+                        disabled={assignedOrders.length === 0}
+                        className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
                         </svg>
-                        Commencer la Tournée
+                        Commencer la Tournée ({assignedOrders.length})
                     </button>
 
                     <button
@@ -193,8 +320,8 @@ export function DeliveryPersonDashboard() {
                     </button>
                 </div>
 
-                {/* Vue Carte Interactive */}
-                {showMapView && (
+                {/* Vue Carte Interactive - Masquée quand une tournée est active */}
+                {showMapView && !activeDeliveryRound && (
                     <div className="bg-white border border-gray-200 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-medium text-gray-900">🗺️ Carte Interactive</h3>
@@ -611,6 +738,82 @@ export function DeliveryPersonDashboard() {
                     </div>
                 </div>
             )}
+
+            {/* Modal de démarrage de tournée */}
+            <StartDeliveryRoundModal
+                isOpen={showDeliveryRoundModal}
+                onClose={() => setShowDeliveryRoundModal(false)}
+                orders={assignedOrders}
+                onStartDelivery={handleStartDeliveryRound}
+            />
+
         </DashboardLayout>
+
+        {/* Vue Tournée Active avec Route Optimisée - OVERLAY PLEIN ÉCRAN */}
+        {activeDeliveryRound && (
+            <div className="fixed inset-0 z-[9999] bg-white flex flex-col">
+                {/* En-tête de la tournée active */}
+                <div className="bg-green-600 text-white p-4 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-semibold">🚚 Tournée en cours</h2>
+                                <p className="text-sm text-green-100">
+                                    {activeDeliveryRound.orders.length} livraisons • Étape {activeDeliveryRound.currentStep + 1} sur {activeDeliveryRound.orders.length}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setActiveDeliveryRound(null)}
+                                className="px-4 py-2 bg-white bg-opacity-20 text-white rounded hover:bg-opacity-30"
+                            >
+                                🏁 Terminer la tournée
+                            </button>
+                            <button
+                                onClick={() => setActiveDeliveryRound(null)}
+                                className="p-2 hover:bg-white hover:bg-opacity-20 rounded"
+                            >
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth={2} />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Contenu principal de la tournée */}
+                <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+                    {/* Carte avec trajet optimisé */}
+                    <div className="flex-1 min-w-0 overflow-hidden h-1/2 lg:h-full">
+                        <LeafletRouteMap
+                            orders={activeDeliveryRound.orders}
+                            currentPosition={currentPosition || defaultPosition}
+                            startingAddress={activeDeliveryRound.startingAddress}
+                            onRouteCalculated={handleRouteCalculated}
+                            height="100%"
+                            className="h-full rounded-none border-0"
+                        />
+                    </div>
+
+                    {/* Panel de navigation */}
+                    <div className="h-1/2 lg:h-full lg:w-96 border-t lg:border-t-0 lg:border-l border-gray-200 bg-white overflow-y-auto">
+                        <DeliveryStepsList
+                            orders={activeDeliveryRound.orders}
+                            optimizedOrder={activeDeliveryRound.optimizedOrder}
+                            currentStep={activeDeliveryRound.currentStep}
+                            onStepComplete={handleStepComplete}
+                            onStepSkip={handleStepSkip}
+                        />
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
