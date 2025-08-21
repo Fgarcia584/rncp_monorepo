@@ -25,12 +25,23 @@ export class OrderService {
         merchantId: number,
         createOrderDto: CreateOrderDto,
     ): Promise<OrderResponse> {
+        // Validate and create safe date
+        const scheduledDate = new Date(createOrderDto.scheduledDeliveryTime);
+        if (
+            isNaN(scheduledDate.getTime()) ||
+            scheduledDate.getFullYear() > 3000
+        ) {
+            console.warn(
+                '⚠️ Invalid scheduledDeliveryTime provided:',
+                createOrderDto.scheduledDeliveryTime,
+            );
+            throw new Error('Invalid scheduled delivery time provided');
+        }
+
         const order = this.orderRepository.create({
             merchantId,
             ...createOrderDto,
-            scheduledDeliveryTime: new Date(
-                createOrderDto.scheduledDeliveryTime,
-            ),
+            scheduledDeliveryTime: scheduledDate,
         });
 
         const savedOrder = await this.orderRepository.save(order);
@@ -174,9 +185,18 @@ export class OrderService {
         Object.assign(order, updateOrderDto);
 
         if (updateOrderDto.scheduledDeliveryTime) {
-            order.scheduledDeliveryTime = new Date(
-                updateOrderDto.scheduledDeliveryTime,
-            );
+            const updatedDate = new Date(updateOrderDto.scheduledDeliveryTime);
+            if (
+                isNaN(updatedDate.getTime()) ||
+                updatedDate.getFullYear() > 3000
+            ) {
+                console.warn(
+                    '⚠️ Invalid scheduledDeliveryTime in update:',
+                    updateOrderDto.scheduledDeliveryTime,
+                );
+                throw new Error('Invalid scheduled delivery time provided');
+            }
+            order.scheduledDeliveryTime = updatedDate;
         }
 
         const updatedOrder = await this.orderRepository.save(order);
@@ -232,24 +252,57 @@ export class OrderService {
         order.status = OrderStatus.ACCEPTED;
 
         const updatedOrder = await this.orderRepository.save(order);
+
         return this.mapToResponse(updatedOrder);
     }
 
     private mapToResponse(order: Order): OrderResponse {
-        return {
+        // Validate and correct invalid dates
+        const validateDate = (date: Date, fieldName: string): Date => {
+            if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+                console.warn(
+                    `⚠️ Invalid date in ${fieldName}, using current date`,
+                );
+                return new Date();
+            }
+
+            // Check for unrealistic future dates (year > 3000)
+            if (date.getFullYear() > 3000) {
+                console.warn(
+                    `⚠️ Unrealistic date in ${fieldName}: ${date.toISOString()}, correcting to current date`,
+                );
+                return new Date();
+            }
+
+            return date;
+        };
+
+        const response: OrderResponse = {
             id: order.id,
             merchantId: order.merchantId,
             customerName: order.customerName,
             customerPhone: order.customerPhone,
             deliveryAddress: order.deliveryAddress,
-            scheduledDeliveryTime: order.scheduledDeliveryTime,
+            scheduledDeliveryTime: validateDate(
+                order.scheduledDeliveryTime,
+                'scheduledDeliveryTime',
+            ),
             status: order.status,
             priority: order.priority,
             deliveryPersonId: order.deliveryPersonId,
             notes: order.notes,
             estimatedDeliveryDuration: order.estimatedDeliveryDuration,
-            createdAt: order.createdAt,
-            updatedAt: order.updatedAt,
+            createdAt: validateDate(order.createdAt, 'createdAt'),
+            updatedAt: validateDate(order.updatedAt, 'updatedAt'),
         };
+
+        // Log any undefined fields for debugging, but let TypeORM handle them naturally
+        Object.keys(response).forEach((key) => {
+            if (response[key] === undefined) {
+                console.log(`ℹ️ Optional field is undefined: ${key}`);
+            }
+        });
+
+        return response;
     }
 }

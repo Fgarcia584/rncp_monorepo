@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { Map as LeafletMap } from 'leaflet';
 import { Coordinates } from '@rncp/types';
+import { MapController } from './MapController';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore - Vite handles CSS imports at runtime
 import 'leaflet/dist/leaflet.css';
@@ -81,16 +82,22 @@ export const BaseMap: React.FC<BaseMapProps> = ({
         console.log('🗺️ BaseMap - Map loaded successfully');
         setIsMapLoaded(true);
         setMapError(null);
+    }, []);
 
-        if (mapRef.current && onMapReady) {
-            try {
-                onMapReady(mapRef.current);
-            } catch (error) {
-                console.error('Error in onMapReady callback:', error);
-                setMapError("Erreur lors de l'initialisation de la carte");
+    const handleMapReady = React.useCallback(
+        (map: LeafletMap) => {
+            mapRef.current = map;
+            if (onMapReady) {
+                try {
+                    onMapReady(map);
+                } catch (error) {
+                    console.error('Error in onMapReady callback:', error);
+                    setMapError("Erreur lors de l'initialisation de la carte");
+                }
             }
-        }
-    }, [onMapReady]);
+        },
+        [onMapReady],
+    );
 
     // Removed handleMapError as whenCreated is used instead
 
@@ -138,7 +145,6 @@ export const BaseMap: React.FC<BaseMapProps> = ({
                 scrollWheelZoom={scrollWheelZoom}
                 zoomControl={zoomControl}
                 attributionControl={attribution}
-                ref={mapRef}
                 whenReady={handleMapLoad}
             >
                 <TileLayer
@@ -146,6 +152,7 @@ export const BaseMap: React.FC<BaseMapProps> = ({
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     // TileLayer doesn't support onError prop
                 />
+                <MapController center={center} zoom={zoom} onMapReady={handleMapReady} />
                 {children}
             </MapContainer>
         </div>

@@ -53,6 +53,9 @@ importers:
 
     apps/rncp_PWA_front:
         dependencies:
+            '@googlemaps/js-api-loader':
+                specifier: ^1.16.10
+                version: 1.16.10
             '@googlemaps/polyline-codec':
                 specifier: ^1.0.28
                 version: 1.0.28
@@ -105,6 +108,9 @@ importers:
             '@testing-library/user-event':
                 specifier: ^14.6.1
                 version: 14.6.1(@testing-library/dom@10.4.1)
+            '@types/google.maps':
+                specifier: ^3.58.1
+                version: 3.58.1
             '@types/react':
                 specifier: ^19.0.8
                 version: 19.1.8
@@ -1841,6 +1847,12 @@ packages:
                 integrity: sha512-QjxiJSt8woyPaaQIUUDNL1nRfCEXTiv8KfJSNq/YzKEUVXABT75GLG+Zo267UwOcq70n8OsZbaro5VrY962mJg==,
             }
 
+    '@googlemaps/js-api-loader@1.16.10':
+        resolution:
+            {
+                integrity: sha512-c2erv2k7P2ilYzMmtYcMgAR21AULosQuUHJbStnrvRk2dG93k5cqptDrh9A8p+ZNlyhiqEOgHW7N9PAizdUM7Q==,
+            }
+
     '@googlemaps/polyline-codec@1.0.28':
         resolution:
             {
@@ -3459,6 +3471,12 @@ packages:
         resolution:
             {
                 integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==,
+            }
+
+    '@types/google.maps@3.58.1':
+        resolution:
+            {
+                integrity: sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==,
             }
 
     '@types/graceful-fs@4.1.9':
@@ -12434,6 +12452,8 @@ snapshots:
         transitivePeerDependencies:
             - debug
 
+    '@googlemaps/js-api-loader@1.16.10': {}
+
     '@googlemaps/polyline-codec@1.0.28': {}
 
     '@googlemaps/url-signature@1.0.40':
@@ -13541,6 +13561,8 @@ snapshots:
             '@types/serve-static': 1.15.8
 
     '@types/geojson@7946.0.16': {}
+
+    '@types/google.maps@3.58.1': {}
 
     '@types/graceful-fs@4.1.9':
         dependencies:

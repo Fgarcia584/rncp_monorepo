@@ -5,6 +5,7 @@ export { RoutePolyline, MultiRoutePolyline } from './RoutePolyline';
 export { GeolocationControl } from './GeolocationControl';
 export { DeliveryPersonMap } from './DeliveryPersonMap';
 export { MerchantTrackingMap } from './MerchantTrackingMap';
+export { MapController } from './MapController';
 
 // Types et utilitaires (commentés car non exportés par les modules)
 // export type { MarkerIconProps, CustomMarkerProps, DeliveryPersonMarkerProps, OrderMarkerProps } from './CustomMarkers';

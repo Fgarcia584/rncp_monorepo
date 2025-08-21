@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useMap } from 'react-leaflet';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Position } from '@rncp/types';
 
 interface GeolocationControlProps {
@@ -17,15 +16,35 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
     onLocationError,
     autoStart = false,
     enableHighAccuracy = true,
-    timeout = 10000,
-    maximumAge = 300000,
+    timeout = 5000,
+    maximumAge = 60000,
     className = '',
 }) => {
-    const map = useMap();
     const [isTracking, setIsTracking] = useState(false);
     const [watchId, setWatchId] = useState<number | null>(null);
     const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // Ref pour savoir si le composant est monté
+    const isMountedRef = useRef(true);
+
+    // Refs stables pour les callbacks
+    const onLocationUpdateRef = useRef(onLocationUpdate);
+    const onLocationErrorRef = useRef(onLocationError);
+
+    // Mettre à jour les refs quand les props changent
+    useEffect(() => {
+        onLocationUpdateRef.current = onLocationUpdate;
+        onLocationErrorRef.current = onLocationError;
+    }, [onLocationUpdate, onLocationError]);
+
+    // Mettre à jour isMountedRef lors du montage/démontage
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
     const geolocationOptions: PositionOptions = React.useMemo(
         () => ({
@@ -36,8 +55,8 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
         [enableHighAccuracy, timeout, maximumAge],
     );
 
-    const handleSuccess = React.useCallback(
-        (position: GeolocationPosition) => {
+    const handleSuccess = useCallback((position: GeolocationPosition) => {
+        try {
             const positionData: Position = {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
@@ -52,21 +71,22 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
             setCurrentPosition(positionData);
             setError(null);
 
-            // Centrer la carte sur la nouvelle position
-            if (map) {
-                map.setView([positionData.latitude, positionData.longitude], map.getZoom());
+            // Notifier le parent qui se chargera du recentrage
+            console.log('📡 Notifying parent with position:', positionData);
+            if (onLocationUpdateRef.current) {
+                onLocationUpdateRef.current(positionData);
+                console.log('✅ Parent notified successfully');
+            } else {
+                console.warn('⚠️ No onLocationUpdate callback provided');
             }
+        } catch (error) {
+            console.error('Error in handleSuccess:', error);
+            setError('Erreur lors du traitement de la position');
+        }
+    }, []);
 
-            // Notifier le parent
-            if (onLocationUpdate) {
-                onLocationUpdate(positionData);
-            }
-        },
-        [map, onLocationUpdate],
-    );
-
-    const handleError = React.useCallback(
-        (error: GeolocationPositionError) => {
+    const handleError = useCallback((error: GeolocationPositionError) => {
+        try {
             let errorMessage = '';
 
             switch (error.code) {
@@ -87,65 +107,123 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
             setError(errorMessage);
             setIsTracking(false);
 
-            if (onLocationError) {
-                onLocationError(error);
+            if (onLocationErrorRef.current) {
+                onLocationErrorRef.current(error);
             }
-        },
-        [onLocationError],
-    );
-
-    const startTracking = React.useCallback(() => {
-        if (!navigator.geolocation) {
-            setError('Géolocalisation non supportée par ce navigateur');
-            return;
+        } catch (err) {
+            console.error('Error in handleError:', err);
         }
+    }, []);
 
-        setIsTracking(true);
-        setError(null);
+    const startTracking = useCallback(() => {
+        if (!isMountedRef.current) return;
 
-        const id = navigator.geolocation.watchPosition(handleSuccess, handleError, geolocationOptions);
+        try {
+            if (!navigator || !navigator.geolocation || typeof navigator.geolocation.watchPosition !== 'function') {
+                if (isMountedRef.current) {
+                    setError('Géolocalisation non supportée par ce navigateur');
+                }
+                return;
+            }
 
-        setWatchId(id);
+            setIsTracking(true);
+            setError(null);
+
+            const id = navigator.geolocation.watchPosition(handleSuccess, handleError, geolocationOptions);
+            setWatchId(id);
+        } catch (error) {
+            console.error('Error starting geolocation tracking:', error);
+            if (isMountedRef.current) {
+                setError('Erreur lors du démarrage du suivi géographique');
+                setIsTracking(false);
+            }
+        }
     }, [geolocationOptions, handleSuccess, handleError]);
 
-    const stopTracking = () => {
-        if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-            setWatchId(null);
+    const stopTracking = useCallback(() => {
+        try {
+            if (
+                watchId !== null &&
+                navigator &&
+                navigator.geolocation &&
+                typeof navigator.geolocation.clearWatch === 'function'
+            ) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+            if (isMountedRef.current) {
+                setWatchId(null);
+                setIsTracking(false);
+            }
+        } catch (error) {
+            console.error('Error stopping geolocation tracking:', error);
+            if (isMountedRef.current) {
+                setIsTracking(false);
+            }
         }
-        setIsTracking(false);
-    };
+    }, [watchId]);
 
-    const getCurrentPosition = () => {
-        if (!navigator.geolocation) {
-            setError('Géolocalisation non supportée par ce navigateur');
-            return;
+    const getCurrentPosition = useCallback(async () => {
+        console.log('📍 GeolocationControl - getCurrentPosition called');
+
+        try {
+            if (
+                !navigator ||
+                !navigator.geolocation ||
+                typeof navigator.geolocation.getCurrentPosition !== 'function'
+            ) {
+                console.error('❌ Geolocation not supported');
+                setError('Géolocalisation non supportée par ce navigateur');
+                return;
+            }
+
+            // Vérifier les permissions de géolocalisation
+            if (navigator.permissions) {
+                try {
+                    const permission = await navigator.permissions.query({ name: 'geolocation' });
+                    console.log('🔐 Geolocation permission status:', permission.state);
+
+                    if (permission.state === 'denied') {
+                        console.error('❌ Geolocation permission denied');
+                        setError(
+                            "Géolocalisation refusée. Veuillez autoriser l'accès à votre position dans les paramètres du navigateur.",
+                        );
+                        return;
+                    }
+                } catch (permError) {
+                    console.warn('⚠️ Could not check geolocation permissions:', permError);
+                }
+            }
+
+            console.log('🔄 Requesting current position...');
+            setError(null);
+            navigator.geolocation.getCurrentPosition(handleSuccess, handleError, geolocationOptions);
+        } catch (error) {
+            console.error('❌ Error accessing geolocation:', error);
+            setError("Erreur lors de l'accès à la géolocalisation");
         }
+    }, [handleSuccess, handleError, geolocationOptions]);
 
-        setError(null);
-
-        navigator.geolocation.getCurrentPosition(handleSuccess, handleError, geolocationOptions);
-    };
-
-    // Auto-démarrage si demandé
+    // Effet pour l'auto-démarrage
     useEffect(() => {
         if (autoStart) {
             startTracking();
         }
+    }, [autoStart, startTracking]);
 
-        // Cleanup au démontage
-        return () => {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-            }
-        };
-    }, [autoStart, startTracking, watchId]);
-
-    // Cleanup de watchId
+    // Effet pour le cleanup au démontage uniquement
     useEffect(() => {
         return () => {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
+            if (
+                watchId !== null &&
+                navigator &&
+                navigator.geolocation &&
+                typeof navigator.geolocation.clearWatch === 'function'
+            ) {
+                try {
+                    navigator.geolocation.clearWatch(watchId);
+                } catch (error) {
+                    console.error('Error during cleanup:', error);
+                }
             }
         };
     }, [watchId]);
@@ -160,6 +238,25 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
                         disabled={isTracking}
                     >
                         📍 Position
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            console.log('🧪 Test Paris button clicked');
+                            if (onLocationUpdateRef.current) {
+                                console.log('🗼 Setting position to Paris for testing...');
+                                onLocationUpdateRef.current({
+                                    latitude: 48.8566,
+                                    longitude: 2.3522,
+                                    accuracy: 10,
+                                    timestamp: Date.now(),
+                                });
+                            }
+                        }}
+                        className="px-3 py-2 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                        title="Test de recentrage sur Paris"
+                    >
+                        🗼 Test
                     </button>
 
                     {!isTracking ? (
@@ -186,7 +283,18 @@ export const GeolocationControl: React.FC<GeolocationControlProps> = ({
                     </div>
                 )}
 
-                {error && <div className="text-xs text-red-600 p-2 bg-red-50 rounded">⚠️ {error}</div>}
+                {error && (
+                    <div className="text-xs text-red-600 p-2 bg-red-50 rounded border border-red-200">
+                        <div className="font-medium">⚠️ Erreur de géolocalisation</div>
+                        <div className="mt-1">{error}</div>
+                        {error.includes('refusée') && (
+                            <div className="mt-2 text-xs text-gray-600">
+                                💡 Pour autoriser : Cliquez sur l&apos;icône 🔒 dans la barre d&apos;adresse et
+                                autorisez la géolocalisation
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {currentPosition && (
                     <div className="text-xs text-gray-600 p-2 bg-gray-50 rounded">

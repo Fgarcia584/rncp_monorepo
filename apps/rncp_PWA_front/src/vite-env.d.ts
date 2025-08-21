@@ -3,6 +3,8 @@
 
 interface ImportMetaEnv {
     readonly VITE_API_URL?: string;
+    readonly FRONTEND_URL?: string;
+    readonly VITE_GOOGLE_MAPS_API_KEY?: string;
 }
 
 interface ImportMeta {
@@ -20,4 +22,21 @@ declare module 'leaflet/dist/images/marker-icon.png' {
 declare module 'leaflet/dist/images/marker-shadow.png' {
     const src: string;
     export default src;
+}
+
+// Types pour Google Maps PlaceAutocompleteElement
+declare namespace google.maps.places {
+    interface PlaceResult {
+        formatted_address?: string;
+        formattedAddress?: string;
+        geometry?: {
+            location: {
+                lat(): number;
+                lng(): number;
+            };
+        };
+        address_components?: unknown[];
+        place_id?: string;
+        placeId?: string;
+    }
 }

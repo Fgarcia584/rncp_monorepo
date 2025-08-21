@@ -22,7 +22,7 @@ export const orderApi = baseApi.injectEndpoints({
         // Create a new order (merchants only)
         createOrder: builder.mutation<OrderResponse, CreateOrderRequest>({
             query: (orderData) => ({
-                url: '/orders',
+                url: '/orders/create',
                 method: 'POST',
                 body: orderData,
             }),
@@ -42,7 +42,7 @@ export const orderApi = baseApi.injectEndpoints({
                 if (filters?.deliveryPersonId) params.append('deliveryPersonId', filters.deliveryPersonId.toString());
 
                 return {
-                    url: `/orders?${params.toString()}`,
+                    url: `/orders/all?${params.toString()}`,
                 };
             },
             providesTags: (result) =>
@@ -94,11 +94,18 @@ export const orderApi = baseApi.injectEndpoints({
                 url: `/orders/${orderId}/accept`,
                 method: 'POST',
             }),
-            invalidatesTags: (_result, _error, orderId) => [
-                { type: 'Order', id: orderId },
-                { type: 'Order', id: 'LIST' },
-                { type: 'Order', id: 'AVAILABLE' },
-            ],
+            invalidatesTags: (result, error, orderId) => {
+                // Only invalidate cache if the mutation was successful
+                if (!error && result) {
+                    return [
+                        { type: 'Order', id: orderId },
+                        { type: 'Order', id: 'LIST' },
+                        { type: 'Order', id: 'AVAILABLE' },
+                    ];
+                }
+                // Don't invalidate cache on error to keep orders visible
+                return [];
+            },
         }),
 
         // Delete an order (merchants only, pending orders only)

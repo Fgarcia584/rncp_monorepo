@@ -6,6 +6,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: '/',
     resolve: {
         alias: {
             '@rncp/types': path.resolve(__dirname, '../../tools/dist/esm'),
@@ -24,6 +25,7 @@ export default defineConfig({
         },
     },
     server: {
+        port: 3000,
         proxy: {
             '/api': {
                 target: 'http://localhost:3001',

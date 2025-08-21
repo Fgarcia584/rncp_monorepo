@@ -43,12 +43,12 @@ async function bootstrap() {
 
     app.enableCors({
         origin: [
+            'http://localhost:5174', // Frontend dev (alternative port)
             'http://localhost:3000', // Frontend dev (Vite dev server)
-            'http://localhost:3001', // Frontend dev (alternative port)
             'http://rncp-pwa-front', // Docker internal
             'http://localhost:80', // Docker compose frontend
-            process.env.FRONTEND_URL || '*',
-        ],
+            process.env.FRONTEND_URL,
+        ].filter(Boolean),
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders:
             'Content-Type, Authorization, X-Requested-With, Origin, Accept',

@@ -4,36 +4,45 @@ import { logout, setCredentials } from '../slices/authSlice';
 import type { RootState } from '../store';
 import { TokenPair } from '@rncp/types';
 
+// Flag global pour éviter les refresh parallèles
+let isRefreshing = false;
+// let refreshPromise: Promise<any> | null = null;
+
 // Type-safe access to import.meta.env with environment detection
 const getApiUrl = (): string => {
     const env = (import.meta as { env?: { VITE_API_URL?: string; MODE?: string } }).env;
 
-    // Si VITE_API_URL est défini, l'utiliser
-    if (env?.VITE_API_URL) {
+    // PRIORITÉ: En développement avec Vite dev server, utiliser l'API Gateway Docker directement
+    if (
+        env?.MODE === 'development' ||
+        (typeof window !== 'undefined' && ['3000', '5173', '5174', '5175'].includes(window.location.port))
+    ) {
+        console.log('🔗 Using direct API Gateway: http://localhost:3001');
+        return 'http://localhost:3001';
+    }
+
+    // Si VITE_API_URL est défini pour production, l'utiliser
+    if (env?.VITE_API_URL && env?.VITE_API_URL !== 'http://localhost:3000') {
         console.log(`🔗 API URL configured: ${env.VITE_API_URL} (mode: ${env?.MODE || 'unknown'})`);
         return env.VITE_API_URL;
     }
 
-    // Fallback basé sur l'environnement de développement
-    // En développement avec Vite dev server, utiliser le proxy
-    if (env?.MODE === 'development' || (typeof window !== 'undefined' && window.location.port === '3000')) {
-        console.log('🔗 Using Vite proxy: /api');
-        return '/api';
-    }
-
-    // En production ou dans les conteneurs
-    console.log('🔗 Using production API: /api');
-    return '/api';
+    // En production ou dans les conteneurs, nginx ajoute déjà le préfixe /api
+    console.log('🔗 Using production API: empty baseUrl (nginx handles /api prefix)');
+    return '';
 };
 
 const baseQuery = fetchBaseQuery({
     baseUrl: getApiUrl(),
     prepareHeaders: (headers, { getState }) => {
         const token = (getState() as RootState).auth.token;
-        if (token) {
-            headers.set('authorization', `Bearer ${token}`);
-        }
+
         headers.set('Content-Type', 'application/json');
+
+        if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+
         return headers;
     },
 });
@@ -62,37 +71,72 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
     }
 
     if (result.error && result.error.status === 401) {
-        // Try to get a new token
+        // Ne pas tenter de refresh pour les endpoints d'auth
+        const url = typeof args === 'string' ? args : args.url;
+        if (url?.includes('/auth/refresh') || url?.includes('/auth/login')) {
+            console.log('🚫 Auth endpoint failed, logging out');
+            api.dispatch(logout());
+            // Nettoyer localStorage immédiatement
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            return result;
+        }
+
         const refreshToken = (api.getState() as RootState).auth.refreshToken;
 
-        if (refreshToken) {
-            const refreshResult = await baseQuery(
-                {
-                    url: '/auth/refresh',
-                    method: 'POST',
-                    body: { refreshToken },
-                },
-                api,
-                extraOptions,
-            );
+        if (refreshToken && !isRefreshing) {
+            console.log('🔄 Attempting token refresh...');
+            isRefreshing = true;
 
-            if (refreshResult.data) {
-                const tokens = refreshResult.data as TokenPair;
-                // Store the new tokens
-                api.dispatch(
-                    setCredentials({
-                        user: (api.getState() as RootState).auth.user,
-                        token: tokens.accessToken,
-                        refreshToken: tokens.refreshToken,
-                    }),
+            try {
+                const refreshResult = await baseQuery(
+                    {
+                        url: '/auth/refresh',
+                        method: 'POST',
+                        body: { refreshToken },
+                    },
+                    api,
+                    extraOptions,
                 );
-                // Retry the original query
-                result = await baseQuery(args, api, extraOptions);
-            } else {
-                api.dispatch(logout());
+
+                if (refreshResult.data) {
+                    console.log('✅ Token refresh successful');
+                    const tokens = refreshResult.data as TokenPair;
+                    // Store the new tokens
+                    api.dispatch(
+                        setCredentials({
+                            user: (api.getState() as RootState).auth.user,
+                            token: tokens.accessToken,
+                            refreshToken: tokens.refreshToken,
+                        }),
+                    );
+                    // Update localStorage
+                    localStorage.setItem('token', tokens.accessToken);
+                    localStorage.setItem('refreshToken', tokens.refreshToken);
+
+                    // Retry the original query
+                    result = await baseQuery(args, api, extraOptions);
+                } else {
+                    console.log('❌ Token refresh failed, logging out');
+                    api.dispatch(logout());
+                    // Nettoyer localStorage
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('refreshToken');
+                }
+            } finally {
+                isRefreshing = false;
             }
+        } else if (isRefreshing) {
+            console.log('⏳ Refresh already in progress, skipping...');
+            // Un refresh est déjà en cours, on attend un peu et on réessaye
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            result = await baseQuery(args, api, extraOptions);
         } else {
+            console.log('🚫 No refresh token available, logging out');
             api.dispatch(logout());
+            // Nettoyer localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
         }
     }
 

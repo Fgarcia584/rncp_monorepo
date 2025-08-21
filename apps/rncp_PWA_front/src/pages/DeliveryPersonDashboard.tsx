@@ -4,13 +4,17 @@ import { useGetAvailableOrdersQuery, useAcceptOrderMutation, useGetOrdersQuery }
 import { DeliveryPersonMap } from '../components/map';
 import { MapErrorBoundary } from '../components/map/MapErrorBoundary';
 import { OrderStatus, OrderPriority } from '@rncp/types';
+import { useAuth } from '../hooks/useAuth';
 
 export function DeliveryPersonDashboard() {
     const [showAvailableOrders, setShowAvailableOrders] = useState(false);
     const [showMapView, setShowMapView] = useState(false);
 
-    // ID du livreur (à récupérer de l'état d'authentification)
-    const deliveryPersonId = 1; // TODO: Récupérer depuis le state auth
+    // Récupérer les informations d'authentification
+    const { user } = useAuth();
+
+    // ID du livreur depuis l'état d'authentification
+    const deliveryPersonId = user?.id || 1;
     const {
         data: availableOrdersData,
         isLoading,
@@ -61,55 +65,19 @@ export function DeliveryPersonDashboard() {
         };
     }, [allOrdersData]);
 
-    // Mock available orders for pickup
-    // const availableOrders = [
-    //     {
-    //         id: 'CMD-101',
-    //         customerName: 'Marie Dupont',
-    //         deliveryAddress: '25 Rue de Rivoli, Paris 1er',
-    //         scheduledDeliveryTime: '16:30',
-    //         priority: 'Haute',
-    //         estimatedDuration: '20 min',
-    //         merchant: 'Boulangerie du Coin',
-    //     },
-    //     {
-    //         id: 'CMD-102',
-    //         customerName: 'Jean Leroy',
-    //         deliveryAddress: '8 Avenue Montaigne, Paris 8e',
-    //         scheduledDeliveryTime: '17:00',
-    //         priority: 'Normale',
-    //         estimatedDuration: '25 min',
-    //         merchant: 'Pharmacie Central',
-    //     },
-    //     {
-    //         id: 'CMD-103',
-    //         customerName: 'Sophie Martin',
-    //         deliveryAddress: '15 Boulevard Saint-Michel, Paris 5e',
-    //         scheduledDeliveryTime: '17:30',
-    //         priority: 'Urgente',
-    //         estimatedDuration: '30 min',
-    //         merchant: 'Épicerie Bio+',
-    //     },
-    //     {
-    //         id: 'CMD-104',
-    //         customerName: 'Paul Durand',
-    //         deliveryAddress: '42 Rue de la République, Paris 11e',
-    //         scheduledDeliveryTime: '18:00',
-    //         priority: 'Basse',
-    //         estimatedDuration: '15 min',
-    //         merchant: 'Librairie Moderne',
-    //     },
-    // ];
-
     const handleAcceptOrder = async (orderId: number) => {
         try {
-            await acceptOrder(orderId).unwrap();
-            alert(`Commande ${orderId} acceptée !`);
-            // Refetch available orders to update the list
-            refetch();
+            const result = await acceptOrder(orderId).unwrap();
+            console.log('✅ Order accepted successfully:', result);
+            // Only refetch on success - RTK Query invalidation will handle cache updates
         } catch (error) {
-            console.error('Error accepting order:', error);
-            alert("Erreur lors de l'acceptation de la commande");
+            console.error('❌ Error accepting order:', {
+                orderId,
+                error,
+            });
+
+            // Don't refetch on error to keep orders visible
+            // The order will remain in the list for retry
         }
     };
 
@@ -461,7 +429,7 @@ export function DeliveryPersonDashboard() {
 
             {/* Available Orders Modal */}
             {showAvailableOrders && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-gray-500 bg-opacity-75"
                         onClick={() => setShowAvailableOrders(false)}

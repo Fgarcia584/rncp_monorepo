@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BaseMap, CustomMarker, OrderMarker, RoutePolyline, GeolocationControl } from './';
 import { useGeolocation } from '../../hooks/useGeolocation';
+import { OrderListModal } from '../delivery/OrderListModal';
 import {
     useCalculateOptimizedDeliveryRouteMutation,
     useStartDeliveryTrackingMutation,
@@ -9,6 +10,7 @@ import {
     useGetDeliveryPersonTrackingsQuery,
 } from '../../store/api';
 import { Order, DeliveryStatus, Position, Coordinates, GoogleRoute } from '@rncp/types';
+import { MapErrorBoundary } from './MapErrorBoundary';
 
 interface DeliveryPersonMapProps {
     deliveryPersonId: number;
@@ -44,6 +46,7 @@ export const DeliveryPersonMap: React.FC<DeliveryPersonMapProps> = ({
         latitude: 48.8566,
         longitude: 2.3522, // Paris par défaut
     });
+    const [isOrderListOpen, setIsOrderListOpen] = useState(false);
 
     // Hooks pour la géolocalisation - autoStart désactivé pour éviter les erreurs de permissions
     const { position, error: geolocationError } = useGeolocation({
@@ -203,6 +206,11 @@ export const DeliveryPersonMap: React.FC<DeliveryPersonMapProps> = ({
         handleCalculateRoute(order);
     };
 
+    // Ouvrir la liste des commandes
+    const handleOpenOrderList = () => {
+        setIsOrderListOpen(true);
+    };
+
     // Mise à jour du statut de livraison avec gestion d'erreur renforcée
     const handleStatusUpdate = async (status: DeliveryStatus) => {
         if (!activeOrderId) {
@@ -297,16 +305,30 @@ export const DeliveryPersonMap: React.FC<DeliveryPersonMapProps> = ({
 
                 {/* Contrôle de géolocalisation */}
                 <div className="absolute top-4 right-4 z-[1000]">
-                    <GeolocationControl
-                        onLocationUpdate={(pos) => {
-                            setMapCenter({
-                                latitude: pos.latitude,
-                                longitude: pos.longitude,
-                            });
-                        }}
-                        autoStart={false}
-                        className="bg-white/90 backdrop-blur-sm"
-                    />
+                    <MapErrorBoundary>
+                        <GeolocationControl
+                            onLocationUpdate={(pos) => {
+                                console.log('🗺️ DeliveryPersonMap - Received position update:', pos);
+                                try {
+                                    console.log('📍 Updating mapCenter state to trigger MapController...');
+                                    setMapCenter({
+                                        latitude: pos.latitude,
+                                        longitude: pos.longitude,
+                                    });
+                                    console.log(
+                                        '✅ Map center state updated - MapController should handle recentering',
+                                    );
+                                } catch (error) {
+                                    console.error('❌ Error updating map center:', error);
+                                }
+                            }}
+                            onLocationError={(error) => {
+                                console.error('Geolocation error:', error);
+                            }}
+                            autoStart={false}
+                            className="bg-white/90 backdrop-blur-sm"
+                        />
+                    </MapErrorBoundary>
                 </div>
             </BaseMap>
 
@@ -428,48 +450,31 @@ export const DeliveryPersonMap: React.FC<DeliveryPersonMapProps> = ({
                 </div>
             )}
 
-            {/* Liste des commandes si aucune n'est active */}
+            {/* Bouton pour ouvrir la liste des commandes si aucune n'est active */}
             {!activeOrder && assignedOrders.length > 0 && (
                 <div className="mt-4 p-4 bg-white rounded-lg shadow-lg">
-                    <h3 className="text-lg font-semibold mb-4">Commandes assignées</h3>
-                    <div className="space-y-2">
-                        {assignedOrders.map((order) => (
-                            <button
-                                key={order.id}
-                                onClick={() => handleOrderSelect(order)}
-                                className="w-full p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">
-                                            #{order.id} - {order.customerName}
-                                        </p>
-                                        <p className="text-sm text-gray-600">{order.deliveryAddress}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-medium">
-                                            {new Date(order.scheduledDeliveryTime).toLocaleTimeString('fr-FR')}
-                                        </p>
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                order.priority === 'urgent'
-                                                    ? 'bg-red-100 text-red-800'
-                                                    : order.priority === 'high'
-                                                      ? 'bg-orange-100 text-orange-800'
-                                                      : order.priority === 'normal'
-                                                        ? 'bg-blue-100 text-blue-800'
-                                                        : 'bg-green-100 text-green-800'
-                                            }`}
-                                        >
-                                            {order.priority}
-                                        </span>
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Commandes assignées ({assignedOrders.length})</h3>
+                        <button
+                            onClick={handleOpenOrderList}
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        >
+                            📋 Voir toutes
+                        </button>
                     </div>
+                    <p className="text-sm text-gray-600">
+                        Cliquez sur &ldquo;📋 Voir toutes&rdquo; pour choisir une commande à livrer.
+                    </p>
                 </div>
             )}
+
+            {/* Modal pour la liste des commandes */}
+            <OrderListModal
+                isOpen={isOrderListOpen}
+                onClose={() => setIsOrderListOpen(false)}
+                orders={assignedOrders}
+                onOrderSelect={handleOrderSelect}
+            />
         </div>
     );
 };
