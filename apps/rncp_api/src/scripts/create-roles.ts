@@ -31,7 +31,7 @@ const AppDataSource = new DataSource(
 
 async function createRoleAccounts() {
     try {
-        console.log('🚀 Création des comptes pour chaque rôle...');
+        console.log('🚀 Création des comptes pour chaque rôle...'); // Force rebuild v1
 
         // Connexion à la base de données
         await AppDataSource.initialize();
