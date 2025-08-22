@@ -32,7 +32,13 @@ const AppDataSource = new DataSource(
 
 async function initSchema() {
     try {
-        console.log('🚀 Initialisation du schéma de base de données...'); // v2
+        console.log('🚀 Initialisation du schéma de base de données...');
+        console.log('📊 Configuration de connexion:');
+        console.log(
+            '  - DATABASE_URL:',
+            process.env.DATABASE_URL ? 'PRESENT' : 'MISSING',
+        );
+        console.log('  - NODE_ENV:', process.env.NODE_ENV);
 
         // Connexion à la base de données
         await AppDataSource.initialize();
