@@ -18,7 +18,7 @@ const AppDataSource = new DataSource({
 
 async function initSchema() {
     try {
-        console.log('🚀 Initialisation du schéma de base de données...');
+        console.log('🚀 Initialisation du schéma de base de données...'); // v2
 
         // Connexion à la base de données
         await AppDataSource.initialize();
