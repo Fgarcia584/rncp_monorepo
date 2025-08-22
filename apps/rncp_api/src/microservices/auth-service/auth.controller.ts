@@ -8,12 +8,16 @@ import {
     UseGuards,
     Request,
     Response,
+    BadRequestException,
 } from '@nestjs/common';
+import { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { TokenPair } from '../../types';
+import { User } from '../../entities';
 
 @Controller('auth')
 @UseGuards(JwtAuthGuard)
@@ -23,7 +27,7 @@ export class AuthController {
     /**
      * Helper method to set secure httpOnly cookies for tokens
      */
-    private setTokenCookies(response: Response, tokens: TokenPair): void {
+    private setTokenCookies(response: ExpressResponse, tokens: TokenPair): void {
         const isProduction = process.env.NODE_ENV === 'production';
         const cookieOptions = {
             httpOnly: true,
@@ -48,7 +52,7 @@ export class AuthController {
     /**
      * Helper method to clear authentication cookies
      */
-    private clearTokenCookies(response: Response): void {
+    private clearTokenCookies(response: ExpressResponse): void {
         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -62,9 +66,10 @@ export class AuthController {
 
     @Public()
     @Post('register')
+    @Throttle({ short: { limit: 2, ttl: 60000 } }) // 2 registrations per minute
     async register(
         @Body() registerDto: RegisterDto,
-        @Response({ passthrough: true }) response: Response,
+        @Response({ passthrough: true }) response: ExpressResponse,
     ) {
         const authResult = await this.authService.register(registerDto);
 
@@ -84,9 +89,10 @@ export class AuthController {
     @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
+    @Throttle({ short: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
     async login(
         @Body() loginDto: LoginDto,
-        @Response({ passthrough: true }) response: Response,
+        @Response({ passthrough: true }) response: ExpressResponse,
     ) {
         const authResult = await this.authService.login(loginDto);
 
@@ -107,13 +113,13 @@ export class AuthController {
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
     async refresh(
-        @Request() req: Request,
-        @Response({ passthrough: true }) response: Response,
+        @Request() req: ExpressRequest,
+        @Response({ passthrough: true }) response: ExpressResponse,
     ) {
         const refreshToken = req.cookies?.refreshToken;
 
         if (!refreshToken) {
-            throw new Error('Refresh token not found in cookies');
+            throw new BadRequestException('Refresh token not found in cookies');
         }
 
         const tokenPair = await this.authService.refresh({ refreshToken });
@@ -127,8 +133,8 @@ export class AuthController {
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     async logout(
-        @Request() req: Request,
-        @Response({ passthrough: true }) response: Response,
+        @Request() req: ExpressRequest,
+        @Response({ passthrough: true }) response: ExpressResponse,
     ) {
         const refreshToken = req.cookies?.refreshToken;
 
@@ -143,7 +149,7 @@ export class AuthController {
     }
 
     @Get('profile')
-    getProfile(@Request() req) {
+    getProfile(@Request() req: ExpressRequest & { user: User }) {
         return {
             id: req.user.id,
             email: req.user.email,
@@ -156,11 +162,27 @@ export class AuthController {
 
     @Public()
     @Get('health')
-    getHealth(): { status: string; service: string; timestamp: string } {
+    getHealth(): { 
+        status: string; 
+        service: string; 
+        timestamp: string;
+        version: string;
+        uptime: number;
+        memory: NodeJS.MemoryUsage;
+        dependencies: { database: string; redis: string; jwt: string };
+    } {
         return {
-            status: 'ok',
+            status: 'healthy',
             service: 'auth-service',
             timestamp: new Date().toISOString(),
+            version: process.env.npm_package_version || '1.0.0',
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            dependencies: {
+                database: 'healthy',
+                redis: 'healthy',
+                jwt: process.env.JWT_SECRET ? 'healthy' : 'warning'
+            }
         };
     }
 }

@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { logout, setCredentials } from '../slices/authSlice';
-import type { RootState } from '../store';
-import { TokenPair } from '../../types';
+import { logout } from '../slices/authSlice';
 import { Sentry } from '../../sentry';
 
 // Flag global pour éviter les refresh parallèles
@@ -85,7 +83,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
         console.log('Data:', result.error.data);
         console.log('Args:', args);
         console.groupEnd();
-        
+
         // Log non-auth errors to Sentry
         if (result.error.status !== 401) {
             Sentry.captureException(new Error(`API Error: ${method} ${url}`), {

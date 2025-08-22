@@ -57,8 +57,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
             return;
         }
 
-        if (formData.password.length < 6) {
-            setError('Le mot de passe doit contenir au moins 6 caractères');
+        if (formData.password.length < 12) {
+            setError('Le mot de passe doit contenir au minimum 12 caractères pour votre sécurité');
             return;
         }
 
@@ -88,9 +88,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
             </div>
 
             {error && (
-                <div className="form-error animate-slide-up">
+                <div 
+                    id="register-error" 
+                    className="form-error animate-slide-up" 
+                    role="alert" 
+                    aria-live="polite"
+                >
                     <div className="flex items-center">
-                        <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg 
+                            className="w-5 h-5 mr-2 flex-shrink-0" 
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                        >
                             <path
                                 fillRule="evenodd"
                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -107,6 +117,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                         Nom complet
                     </label>
+                    <p id="name-help" className="text-sm text-gray-500 mb-2">
+                        Indiquez votre prénom et nom de famille complets
+                    </p>
                     <input
                         type="text"
                         id="name"
@@ -118,6 +131,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                         className="input-field"
                         placeholder="Jean Dupont"
                         autoComplete="name"
+                        aria-describedby="name-help"
+                        aria-invalid={error && error.includes('nom') ? 'true' : 'false'}
                     />
                 </div>
 
@@ -125,6 +140,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                         Adresse email
                     </label>
+                    <p id="email-help" className="text-sm text-gray-500 mb-2">
+                        Format requis : nom@domaine.com - Cette adresse servira pour la connexion
+                    </p>
                     <input
                         type="email"
                         id="email"
@@ -136,6 +154,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                         className="input-field"
                         placeholder="vous@exemple.com"
                         autoComplete="email"
+                        aria-describedby="email-help"
+                        aria-invalid={error && error.includes('email') ? 'true' : 'false'}
                     />
                 </div>
 
@@ -143,6 +163,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                         Mot de passe
                     </label>
+                    <div id="password-requirements" className="text-sm text-gray-600 mb-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                        <p className="font-medium mb-1">Critères de sécurité requis :</p>
+                        <ul className="text-xs space-y-1 list-disc list-inside">
+                            <li>Minimum 12 caractères (sécurité renforcée)</li>
+                            <li>Au moins 1 lettre majuscule (A-Z)</li>
+                            <li>Au moins 1 lettre minuscule (a-z)</li>
+                            <li>Au moins 1 chiffre (0-9)</li>
+                            <li>Au moins 1 caractère spécial (!@#$%^&*)</li>
+                        </ul>
+                    </div>
                     <input
                         type="password"
                         id="password"
@@ -150,19 +180,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        minLength={6}
+                        minLength={12}
                         disabled={isLoading}
                         className="input-field"
-                        placeholder="Au moins 6 caractères"
+                        placeholder="Créez un mot de passe sécurisé"
                         autoComplete="new-password"
+                        aria-describedby="password-requirements"
+                        aria-invalid={error && error.includes('mot de passe') ? 'true' : 'false'}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Le mot de passe doit contenir au moins 6 caractères</p>
                 </div>
 
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                         Confirmer le mot de passe
                     </label>
+                    <p id="confirm-password-help" className="text-sm text-gray-500 mb-2">
+                        Saisissez exactement le même mot de passe pour confirmation
+                    </p>
                     <input
                         type="password"
                         id="confirmPassword"
@@ -174,6 +208,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                         className="input-field"
                         placeholder="Répétez votre mot de passe"
                         autoComplete="new-password"
+                        aria-describedby="confirm-password-help"
+                        aria-invalid={error && error.includes('correspondent') ? 'true' : 'false'}
                     />
                 </div>
 
@@ -181,6 +217,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                     type="submit"
                     className="btn-primary w-full flex items-center justify-center"
                     disabled={isLoading}
+                    aria-describedby={error ? 'register-error' : undefined}
+                    aria-busy={isLoading ? 'true' : 'false'}
                 >
                     {isLoading ? (
                         <>
@@ -211,6 +249,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggle, onSuccess 
                         onClick={onToggle}
                         disabled={isLoading}
                         className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        aria-label="Basculer vers le formulaire de connexion"
                     >
                         Se connecter
                     </button>

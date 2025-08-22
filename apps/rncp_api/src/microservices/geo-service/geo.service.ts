@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
     Client,
@@ -48,7 +48,7 @@ export class GeoService {
         request: GoogleRouteRequest,
     ): Promise<GoogleRouteResponse> {
         if (!this.apiKey) {
-            throw new Error('Google Maps API key not configured');
+            throw new InternalServerErrorException('Google Maps API key not configured');
         }
 
         try {
@@ -95,7 +95,7 @@ export class GeoService {
         request: GeocodingRequest,
     ): Promise<GeocodingResponse> {
         if (!this.apiKey) {
-            throw new Error('Google Maps API key not configured');
+            throw new InternalServerErrorException('Google Maps API key not configured');
         }
 
         try {
@@ -154,7 +154,7 @@ export class GeoService {
         request: CustomDistanceMatrixRequest,
     ): Promise<CustomDistanceMatrixResponse> {
         if (!this.apiKey) {
-            throw new Error('Google Maps API key not configured');
+            throw new InternalServerErrorException('Google Maps API key not configured');
         }
 
         try {
@@ -257,7 +257,7 @@ export class GeoService {
                 };
             }
 
-            throw new Error('No results from distance matrix');
+            throw new BadRequestException('No results from distance matrix');
         } catch (error) {
             this.logger.error('Error calculating ETA', error);
             throw new Error(`Failed to calculate ETA: ${error.message}`);
