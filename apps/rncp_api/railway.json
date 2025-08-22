@@ -3,7 +3,7 @@
         "builder": "NIXPACKS"
     },
     "deploy": {
-        "startCommand": "npm run build:railway-full && npm run migration:run && npm run start:railway-full",
+        "startCommand": "npm run build:railway-full && npm run migration:run:prod && npm run start:railway-full",
         "healthcheckPath": "/health",
         "healthcheckTimeout": 300,
         "restartPolicyType": "ON_FAILURE",
