@@ -137,8 +137,8 @@ describe('Role Types', () => {
         it('should return false for invalid roles', () => {
             expect(isValidRole('invalid_role')).toBe(false);
             expect(isValidRole('')).toBe(false);
-            expect(isValidRole(null as unknown as string)).toBe(false);
-            expect(isValidRole(undefined as unknown as string)).toBe(false);
+            expect(isValidRole(null as unknown as UserRole)).toBe(false);
+            expect(isValidRole(undefined as unknown as UserRole)).toBe(false);
         });
     });
 
