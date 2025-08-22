@@ -43,8 +43,10 @@
         "migration:revert": "typeorm migration:revert -d src/data-source.ts",
         "migration:run:prod": "typeorm migration:run -d dist/data-source.js",
         "migration:revert:prod": "typeorm migration:revert -d dist/data-source.js",
-        "db:init": "ts-node src/scripts/init-database.ts",
-        "db:init:prod": "node dist/src/scripts/init-database.js"
+        "db:schema": "ts-node src/scripts/init-schema.ts",
+        "db:schema:prod": "node dist/src/scripts/init-schema.js",
+        "db:seed": "ts-node src/scripts/init-database.ts",
+        "db:seed:prod": "node dist/src/scripts/init-database.js"
     },
     "dependencies": {
         "@googlemaps/google-maps-services-js": "^3.4.2",

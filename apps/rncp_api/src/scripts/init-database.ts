@@ -40,8 +40,8 @@ async function initDatabase() {
             return;
         }
 
-        console.log("📝 Création des tables si elles n'existent pas...");
-        await AppDataSource.synchronize();
+        console.log('📝 Vérification que les tables existent...');
+        // Note: Les tables doivent déjà exister (créées par migrations ou init-schema)
 
         console.log('👥 Création des utilisateurs de test...');
 
