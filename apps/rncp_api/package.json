@@ -6,6 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "postinstall": "node copy-types.js || echo 'Types copy failed, continuing...'",
+    "prebuild": "node copy-types.js",
     "build": "nest build && nest build --config nest-cli-auth.json && nest build --config nest-cli-user.json && nest build --config nest-cli-order.json && nest build --config nest-cli-geo.json",
     "build:gateway": "nest build",
     "build:auth": "nest build --config nest-cli-auth.json",
@@ -47,7 +49,6 @@
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
-    "@rncp/types": "file:../../tools",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
