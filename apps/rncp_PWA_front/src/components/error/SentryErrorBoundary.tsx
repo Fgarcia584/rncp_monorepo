@@ -1,8 +1,8 @@
 import { ErrorBoundary } from '@sentry/react';
 import PropTypes from 'prop-types';
 
-const DefaultErrorFallback = ({ error, resetError }: { error: Error; resetError: () => void }) => {
-    const errorMessage = error.message;
+const DefaultErrorFallback = ({ error, resetError }: { error: unknown; resetError: () => void }) => {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="max-w-md w-full mx-auto text-center">
@@ -33,7 +33,7 @@ const DefaultErrorFallback = ({ error, resetError }: { error: Error; resetError:
                             </summary>
                             <pre className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded overflow-auto">
                                 {errorMessage}
-                                {error.stack}
+                                {error instanceof Error && error.stack}
                             </pre>
                         </details>
                     )}
@@ -45,14 +45,14 @@ const DefaultErrorFallback = ({ error, resetError }: { error: Error; resetError:
 
 interface Props {
     children: React.ReactNode;
-    fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
+    fallback?: (errorData: { error: unknown; resetError: () => void }) => React.ReactElement;
     beforeCapture?: (scope: unknown, error: Error, errorInfo: unknown) => void;
 }
 
 export const SentryErrorBoundary: React.FC<Props> = ({ children, fallback, beforeCapture }) => {
     return (
         <ErrorBoundary
-            fallback={fallback || DefaultErrorFallback}
+            fallback={fallback || (({ error, resetError }) => DefaultErrorFallback({ error, resetError }))}
             beforeCapture={(scope: unknown, error: unknown, errorInfo: unknown) => {
                 // Add additional context to Sentry
                 (scope as { setTag: (key: string, value: string) => void }).setTag('errorBoundary', 'react');

@@ -1,7 +1,11 @@
 import * as Sentry from '@sentry/react';
 
 export const initSentry = () => {
-    const env = import.meta.env;
+    const env = (
+        import.meta as unknown as {
+            env: { VITE_SENTRY_DSN?: string; VITE_ENVIRONMENT?: string; VITE_APP_VERSION?: string; MODE?: string };
+        }
+    ).env;
     const dsn = env?.VITE_SENTRY_DSN;
     const environment = env?.VITE_ENVIRONMENT || env?.MODE || 'development';
 
