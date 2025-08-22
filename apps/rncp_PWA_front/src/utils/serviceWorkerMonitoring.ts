@@ -23,7 +23,7 @@ class ServiceWorkerMonitor {
         installations: 0
     };
 
-    private registration: ServiceWorkerRegistration | null = null;
+    // private registration: ServiceWorkerRegistration | null = null;
     private isOnline = navigator.onLine;
     private syncQueue: unknown[] = [];
 
@@ -36,7 +36,7 @@ class ServiceWorkerMonitor {
     private initializeMonitoring() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then((registration) => {
-                this.registration = registration;
+                // this.registration = registration;
                 this.metrics.installations++;
                 
                 Sentry.addBreadcrumb({
@@ -52,7 +52,7 @@ class ServiceWorkerMonitor {
                 });
 
                 this.setupUpdateListener(registration);
-                this.setupSyncMonitoring(registration);
+                this.setupSyncMonitoring();
             }).catch((error) => {
                 Sentry.captureException(error, {
                     tags: { component: 'service-worker' },
@@ -204,13 +204,13 @@ class ServiceWorkerMonitor {
 
     private addToSyncQueue(request: unknown) {
         this.syncQueue.push({
-            ...request,
+            ...(request as object),
             timestamp: Date.now()
         });
 
         Sentry.addBreadcrumb({
             category: 'pwa',
-            message: `Request queued for sync: ${request.method} ${request.url}`,
+            message: `Request queued for sync: ${(request as any)?.method} ${(request as any)?.url}`,
             level: 'info',
             data: { queueLength: this.syncQueue.length }
         });
@@ -288,7 +288,7 @@ class ServiceWorkerMonitor {
             category: 'pwa',
             message: `Offline action: ${action}`,
             level: 'info',
-            data: { action, isOnline: this.isOnline, ...data }
+            data: { action, isOnline: this.isOnline, ...(data as object) }
         });
     }
 

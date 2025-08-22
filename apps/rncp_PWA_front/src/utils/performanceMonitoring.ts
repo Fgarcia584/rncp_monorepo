@@ -69,12 +69,12 @@ class PerformanceMonitor {
         this.sendMetricsIfBufferFull();
     }
 
-    private handleNavigationEntry(entry: PerformanceNavigationTiming) {
+    private handleNavigationEntry(entry: any) {
         const metrics = {
             'Time to First Byte': entry.responseStart - entry.requestStart,
-            'DOM Content Loaded': entry.domContentLoadedEventEnd - entry.navigationStart,
-            'Load Complete': entry.loadEventEnd - entry.navigationStart,
-            'DOM Interactive': entry.domInteractive - entry.navigationStart,
+            'DOM Content Loaded': entry.domContentLoadedEventEnd - (entry.navigationStart || 0),
+            'Load Complete': entry.loadEventEnd - (entry.navigationStart || 0),
+            'DOM Interactive': entry.domInteractive - (entry.navigationStart || 0),
         };
 
         Object.entries(metrics).forEach(([name, value]) => {
@@ -126,7 +126,7 @@ class PerformanceMonitor {
         }
     }
 
-    private handleFIDEntry(entry: PerformanceEntry & { processingStart: number; startTime: number }) {
+    private handleFIDEntry(entry: any) {
         const value = entry.processingStart - entry.startTime;
         
         Sentry.addBreadcrumb({
@@ -142,8 +142,8 @@ class PerformanceMonitor {
         }
     }
 
-    private handleCLSEntry(entry: PerformanceEntry & { value: number }) {
-        if (!entry.hadRecentInput) {
+    private handleCLSEntry(entry: any) {
+        if (!entry.hadRecentInput && entry.hadRecentInput !== undefined) {
             const value = entry.value;
             
             Sentry.addBreadcrumb({

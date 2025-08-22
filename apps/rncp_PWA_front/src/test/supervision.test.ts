@@ -249,12 +249,14 @@ describe('Integration Tests', () => {
     });
 
     it('should handle concurrent monitoring operations', async () => {
-        const operations = [];
+        const operations: (() => void)[] = [];
 
         // Start multiple performance timings
         for (let i = 0; i < 10; i++) {
             const stopTiming = performanceMonitor.startTiming(`operation-${i}`);
-            operations.push(stopTiming);
+            if (stopTiming) {
+                operations.push(stopTiming);
+            }
         }
 
         // Report multiple cache events
@@ -263,7 +265,7 @@ describe('Integration Tests', () => {
         }
 
         // Stop all timings
-        operations.forEach(stop => stop());
+        operations.forEach((stop: () => void) => stop());
 
         // Should not cause any issues
         expect(true).toBe(true);
