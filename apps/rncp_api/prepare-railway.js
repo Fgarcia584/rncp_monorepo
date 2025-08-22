@@ -5,18 +5,19 @@ const path = require('path');
 
 console.log('🚀 Preparing API for Railway deployment...');
 
-// Read package.json
+// Copy package-railway.json to package.json
+const railwayPackageJsonPath = path.join(__dirname, 'package-railway.json');
 const packageJsonPath = path.join(__dirname, 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
-// Remove workspace dependencies that Railway can't handle
-if (packageJson.dependencies && packageJson.dependencies['@rncp/types']) {
-    console.log('📦 Removing workspace dependency @rncp/types...');
-    delete packageJson.dependencies['@rncp/types'];
+if (fs.existsSync(railwayPackageJsonPath)) {
+    console.log('📦 Using package-railway.json for Railway deployment...');
+    const railwayPackageJson = fs.readFileSync(railwayPackageJsonPath, 'utf8');
+    fs.writeFileSync(packageJsonPath, railwayPackageJson);
+    console.log('✅ Package.json updated for Railway deployment');
+} else {
+    console.log(
+        '⚠️ package-railway.json not found, using existing package.json',
+    );
 }
-
-// Write updated package.json
-fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-console.log('✅ Package.json updated for Railway deployment');
 
 console.log('🎯 Railway preparation complete!');

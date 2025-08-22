@@ -40,6 +40,7 @@ logs/
 *.temp
 
 # Package manager files
+package-dev.json
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
