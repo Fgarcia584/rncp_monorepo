@@ -27,6 +27,11 @@ function copyDir(src, dest) {
             fs.mkdirSync(destPath, { recursive: true });
             copyDir(srcPath, destPath);
         } else {
+            // Skip test files in frontend
+            if (entry.name.endsWith('.spec.ts') || entry.name.endsWith('.test.ts')) {
+                console.log(`Skipped test file: ${entry.name}`);
+                return;
+            }
             fs.copyFileSync(srcPath, destPath);
             console.log(`Copied: ${entry.name}`);
         }

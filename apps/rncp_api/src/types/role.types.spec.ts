@@ -4,9 +4,12 @@ import {
     hasPermission,
     getRoleDisplayName,
     isValidRole,
+} from './role.types';
+
+import {
     OrderStatus,
     OrderPriority,
-} from './role.types';
+} from './order.types';
 
 describe('Role Types', () => {
     describe('UserRole enum', () => {
@@ -111,8 +114,8 @@ describe('Role Types', () => {
         it('should return false for invalid roles', () => {
             expect(isValidRole('invalid_role')).toBe(false);
             expect(isValidRole('')).toBe(false);
-            expect(isValidRole(null as unknown)).toBe(false);
-            expect(isValidRole(undefined as unknown)).toBe(false);
+            expect(isValidRole(null as any)).toBe(false);
+            expect(isValidRole(undefined as any)).toBe(false);
         });
     });
 
