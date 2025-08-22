@@ -5,8 +5,9 @@ export const sentryMiddleware: Middleware = (store) => (next) => (action: unknow
     const typedAction = action as AnyAction;
     // Set user context when auth state changes
     if (typedAction.type === 'auth/setCredentials') {
-        const user = (typedAction as { payload: { user: { id: number; email: string; name: string; role: string } } })
-            .payload.user;
+        const user = (
+            typedAction as unknown as { payload: { user: { id: number; email: string; name: string; role: string } } }
+        ).payload.user;
         if (user) {
             Sentry.setUser({
                 id: user.id.toString(),

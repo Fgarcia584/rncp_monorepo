@@ -45,14 +45,16 @@ const DefaultErrorFallback = ({ error, resetError }: { error: unknown; resetErro
 
 interface Props {
     children: React.ReactNode;
-    fallback?: React.ComponentType<{ error: unknown; resetError: () => void }>;
+    fallback?: React.ComponentType<{ error: unknown; resetError: () => void }> | React.ReactElement;
     beforeCapture?: (scope: unknown, error: Error, errorInfo: unknown) => void;
 }
 
 export const SentryErrorBoundary: React.FC<Props> = ({ children, fallback, beforeCapture }) => {
     return (
         <ErrorBoundary
-            fallback={fallback || DefaultErrorFallback}
+            fallback={
+                fallback || (DefaultErrorFallback as React.ComponentType<{ error: unknown; resetError: () => void }>)
+            }
             beforeCapture={(scope: unknown, error: unknown, errorInfo: unknown) => {
                 // Add additional context to Sentry
                 (scope as { setTag: (key: string, value: string) => void }).setTag('errorBoundary', 'react');
