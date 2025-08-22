@@ -62,7 +62,10 @@ export function isApiError(error: unknown): error is { data: ApiError } {
     );
 }
 
-export function getErrorMessage(error: unknown, defaultMessage: string): string {
+export function getErrorMessage(
+    error: unknown,
+    defaultMessage: string,
+): string {
     if (isApiError(error)) {
         return error.data.message;
     }

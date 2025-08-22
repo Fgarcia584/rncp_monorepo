@@ -70,9 +70,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
             </div>
 
             {error && (
-                <div className="form-error animate-slide-up">
+                <div 
+                    id="login-error" 
+                    className="form-error animate-slide-up" 
+                    role="alert" 
+                    aria-live="polite"
+                >
                     <div className="flex items-center">
-                        <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <svg 
+                            className="w-5 h-5 mr-2 flex-shrink-0" 
+                            fill="currentColor" 
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                        >
                             <path
                                 fillRule="evenodd"
                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -89,6 +99,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                         Adresse email
                     </label>
+                    <p id="login-email-help" className="text-sm text-gray-500 mb-2">
+                        Utilisez l'adresse email de votre compte existant
+                    </p>
                     <input
                         type="email"
                         id="email"
@@ -97,6 +110,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                         onChange={handleChange}
                         required
                         disabled={isLoading}
+                        aria-describedby="login-email-help"
+                        aria-invalid={error && error.includes('email') ? 'true' : 'false'}
                         className="input-field"
                         placeholder="vous@exemple.com"
                         autoComplete="email"
@@ -107,6 +122,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                         Mot de passe
                     </label>
+                    <p id="login-password-help" className="text-sm text-gray-500 mb-2">
+                        Saisissez le mot de passe de votre compte
+                    </p>
                     <input
                         type="password"
                         id="password"
@@ -118,6 +136,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                         className="input-field"
                         placeholder="Votre mot de passe"
                         autoComplete="current-password"
+                        aria-describedby="login-password-help"
+                        aria-invalid={error && error.includes('mot de passe') ? 'true' : 'false'}
                     />
                 </div>
 
@@ -125,6 +145,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                     type="submit"
                     className="btn-primary w-full flex items-center justify-center"
                     disabled={isLoading}
+                    aria-describedby={error ? 'login-error' : undefined}
+                    aria-busy={isLoading ? 'true' : 'false'}
                 >
                     {isLoading ? (
                         <>
@@ -155,6 +177,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggle, onSuccess }) => 
                         onClick={onToggle}
                         disabled={isLoading}
                         className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+                        aria-label="Basculer vers le formulaire d'inscription"
                     >
                         Créer un compte
                     </button>

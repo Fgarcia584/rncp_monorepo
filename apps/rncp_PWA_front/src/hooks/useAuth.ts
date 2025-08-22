@@ -12,43 +12,39 @@ import type { LoginRequest, RegisterRequest } from '../types';
 
 export const useAuth = () => {
     const dispatch = useAppDispatch();
-    const { user, token, refreshToken, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
 
     const [loginMutation] = useLoginMutation();
     const [registerMutation] = useRegisterMutation();
     const [logoutMutation] = useLogoutMutation();
 
-    // Auto-fetch profile if token exists but no user
-    // Skip if no token, already have user, or currently refreshing
+    // Auto-fetch profile to check if user is authenticated via cookies
+    // Skip if already have user or currently loading
     const {
         data: profileData,
         isLoading: profileLoading,
         error: profileError,
     } = useGetProfileQuery(undefined, {
-        skip: !token || !!user || isLoading,
-        refetchOnMountOrArgChange: false,
-        refetchOnReconnect: false,
+        skip: !!user || isLoading,
+        refetchOnMountOrArgChange: true,
+        refetchOnReconnect: true,
     });
 
     useEffect(() => {
-        if (profileData && token) {
+        if (profileData) {
             dispatch(
                 setCredentials({
                     user: profileData,
-                    token,
-                    refreshToken: refreshToken || '',
                 }),
             );
         }
 
-        // Si erreur 401 sur le profile, nettoyer tout
+        // If 401 error on profile, user is not authenticated
         if (profileError && 'status' in profileError && profileError.status === 401) {
-            console.log('🚫 Profile fetch failed with 401, cleaning up...');
+            console.log('🚫 Profile fetch failed with 401, user not authenticated');
             dispatch(logout());
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
         }
-    }, [profileData, profileError, token, refreshToken, dispatch]);
+    }, [profileData, profileError, dispatch]);
 
     const login = useCallback(
         async (credentials: LoginRequest) => {
@@ -56,17 +52,13 @@ export const useAuth = () => {
                 dispatch(setLoading(true));
                 const result = await loginMutation(credentials).unwrap();
 
+                // Tokens are now stored in httpOnly cookies automatically
+                // Just set user data in the store
                 dispatch(
                     setCredentials({
                         user: result.user,
-                        token: result.accessToken,
-                        refreshToken: result.refreshToken,
                     }),
                 );
-
-                // Store tokens in localStorage for persistence
-                localStorage.setItem('token', result.accessToken);
-                localStorage.setItem('refreshToken', result.refreshToken);
 
                 return result;
             } catch (error) {
@@ -83,17 +75,13 @@ export const useAuth = () => {
                 dispatch(setLoading(true));
                 const result = await registerMutation(userData).unwrap();
 
+                // Tokens are now stored in httpOnly cookies automatically
+                // Just set user data in the store
                 dispatch(
                     setCredentials({
                         user: result.user,
-                        token: result.accessToken,
-                        refreshToken: result.refreshToken,
                     }),
                 );
-
-                // Store tokens in localStorage for persistence
-                localStorage.setItem('token', result.accessToken);
-                localStorage.setItem('refreshToken', result.refreshToken);
 
                 return result;
             } catch (error) {
@@ -106,46 +94,31 @@ export const useAuth = () => {
 
     const logoutUser = useCallback(async () => {
         try {
-            if (refreshToken) {
-                await logoutMutation({ refreshToken }).unwrap();
-            }
+            // The logout endpoint will use the refresh token from cookies
+            await logoutMutation().unwrap();
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
             dispatch(logout());
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
             // Clear RTK Query cache to prevent old user data from persisting
             dispatch(authApi.util.resetApiState());
         }
-    }, [dispatch, logoutMutation, refreshToken]);
+    }, [dispatch, logoutMutation]);
 
-    // Initialize auth state from localStorage on mount
+    // Clean up any old tokens from localStorage (migration from old localStorage-based auth)
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         const storedRefreshToken = localStorage.getItem('refreshToken');
 
-        // Vérifier que les tokens sont valides (non vides)
-        if (storedToken && storedRefreshToken && !token && storedToken !== 'undefined') {
-            dispatch(
-                setCredentials({
-                    user: null, // Profile will be fetched by the query above
-                    token: storedToken,
-                    refreshToken: storedRefreshToken,
-                }),
-            );
-        } else if (storedToken === 'undefined' || storedRefreshToken === 'undefined') {
-            // Nettoyer les tokens invalides
-            console.log('🧹 Cleaning invalid tokens from localStorage');
+        if (storedToken || storedRefreshToken) {
+            console.log('🧹 Cleaning legacy tokens from localStorage (now using secure cookies)');
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
         }
-    }, [dispatch, token]);
+    }, []);
 
     return {
         user,
-        token,
-        refreshToken,
         isAuthenticated,
         isLoading: isLoading || profileLoading,
         login,

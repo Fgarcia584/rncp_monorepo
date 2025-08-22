@@ -12,6 +12,7 @@ import {
     ParseIntPipe,
     DefaultValuePipe,
     ForbiddenException,
+    BadRequestException,
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
@@ -28,19 +29,45 @@ export class OrderController {
 
     @Post()
     create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+        // Debug logging
+        console.log('🔍 Order creation debug:');
+        console.log('  req.user:', JSON.stringify(req.user, null, 2));
+        console.log('  req.user.userId:', req.user?.userId);
+        console.log('  req.user.role:', req.user?.role);
+        
         // Only merchants can create orders
         if (req.user.role !== UserRole.MERCHANT) {
             throw new ForbiddenException('Only merchants can create orders');
         }
+        
+        // Additional validation for merchantId
+        if (!req.user.userId) {
+            console.error('❌ merchantId is null/undefined');
+            throw new BadRequestException('User ID is missing from authentication token');
+        }
+        
         return this.orderService.create(req.user.userId, createOrderDto);
     }
 
     @Post('create')
     createOrder(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+        // Debug logging
+        console.log('🔍 Order creation debug (create endpoint):');
+        console.log('  req.user:', JSON.stringify(req.user, null, 2));
+        console.log('  req.user.userId:', req.user?.userId);
+        console.log('  req.user.role:', req.user?.role);
+        
         // Only merchants can create orders
         if (req.user.role !== UserRole.MERCHANT) {
             throw new ForbiddenException('Only merchants can create orders');
         }
+        
+        // Additional validation for merchantId
+        if (!req.user.userId) {
+            console.error('❌ merchantId is null/undefined');
+            throw new BadRequestException('User ID is missing from authentication token');
+        }
+        
         return this.orderService.create(req.user.userId, createOrderDto);
     }
 
@@ -129,49 +156,6 @@ export class OrderController {
     @Delete(':id')
     remove(@Request() req, @Param('id', ParseIntPipe) id: number) {
         return this.orderService.remove(id, req.user.userId, req.user.role);
-    }
-
-    // Test endpoint to debug Gateway communication
-    @Post(':id/test-accept')
-    @HttpCode(HttpStatus.OK)
-    testAccept(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        console.log(
-            `🧪 TEST POST /orders/${id}/test-accept - User: ${req.user?.userId}`,
-        );
-
-        const testResponse = {
-            success: true,
-            orderId: id,
-            userId: req.user?.userId,
-            message: 'Test endpoint working',
-            timestamp: new Date().toISOString(),
-        };
-
-        console.log('🧪 Test response:', JSON.stringify(testResponse, null, 2));
-        console.log('🌐 NestJS will send test response with status 200');
-
-        return testResponse;
-    }
-
-    // Ultra-simple endpoint for debugging HTTP response
-    @Post('simple-test')
-    @HttpCode(HttpStatus.OK)
-    @Public()
-    simpleTest(): string {
-        console.log('🔥 Ultra-simple endpoint called');
-        console.log('🔥 Returning plain string "OK"');
-        return 'OK';
-    }
-
-    // Even simpler endpoint - minimal JSON response
-    @Get('ping')
-    @HttpCode(HttpStatus.OK)
-    @Public()
-    ping() {
-        console.log('🏓 Ping endpoint called');
-        const response = { ping: 'pong' };
-        console.log('🏓 Returning:', response);
-        return response;
     }
 
     @Public()

@@ -14,7 +14,10 @@ const AppDataSource = new DataSource(
               entities: [User, RefreshToken, Order],
               synchronize: false,
               logging: true,
-              ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+              ssl:
+                  process.env.NODE_ENV === 'production'
+                      ? { rejectUnauthorized: false }
+                      : false,
           }
         : {
               type: 'postgres',
@@ -40,7 +43,9 @@ async function createRoleAccounts() {
         const userRepository = AppDataSource.getRepository(User);
 
         // Mot de passe commun pour tous les comptes
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        // Use strong password that meets new security requirements
+        // Min 12 chars + uppercase + lowercase + digit + special char
+        const hashedPassword = await bcrypt.hash('SecurePass123!', 12);
 
         // Définir les comptes à créer
         const accounts = [
@@ -50,7 +55,7 @@ async function createRoleAccounts() {
                 role: UserRole.ADMIN,
             },
             {
-                email: 'merchant@rncp.com', 
+                email: 'merchant@rncp.com',
                 name: 'Commerçant',
                 role: UserRole.MERCHANT,
             },
@@ -61,7 +66,7 @@ async function createRoleAccounts() {
             },
             {
                 email: 'technicien@rncp.com',
-                name: 'Technicien Logistique', 
+                name: 'Technicien Logistique',
                 role: UserRole.LOGISTICS_TECHNICIAN,
             },
         ];
@@ -71,7 +76,7 @@ async function createRoleAccounts() {
         for (const accountData of accounts) {
             // Vérifier si l'utilisateur existe déjà
             const existingUser = await userRepository.findOne({
-                where: { email: accountData.email }
+                where: { email: accountData.email },
             });
 
             if (existingUser) {
@@ -97,7 +102,6 @@ async function createRoleAccounts() {
         console.log('  Email: merchant@rncp.com | Mot de passe: password123');
         console.log('  Email: livreur@rncp.com | Mot de passe: password123');
         console.log('  Email: technicien@rncp.com | Mot de passe: password123');
-        
     } catch (error) {
         console.error('❌ Erreur lors de la création des comptes :', error);
         process.exit(1);

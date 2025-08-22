@@ -207,7 +207,7 @@ describe('UserController', () => {
             await expect(
                 controller.update(999, updateUserDto, mockRegularUser),
             ).rejects.toThrow(
-                'Forbidden: You can only update your own profile',
+                'You can only update your own profile',
             );
 
             expect(mockUserService.update).not.toHaveBeenCalled();
@@ -325,7 +325,7 @@ describe('UserController', () => {
         it('should return health status', () => {
             const result = controller.getHealth();
 
-            expect(result).toHaveProperty('status', 'ok');
+            expect(result).toHaveProperty('status', 'healthy');
             expect(result).toHaveProperty('service', 'user-service');
             expect(result).toHaveProperty('timestamp');
             expect(typeof result.timestamp).toBe('string');
@@ -386,7 +386,7 @@ describe('UserController', () => {
             await expect(
                 controller.update(2, { name: 'Updated' }, merchantUser),
             ).rejects.toThrow(
-                'Forbidden: You can only update your own profile',
+                'You can only update your own profile',
             );
         });
     });

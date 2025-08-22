@@ -54,7 +54,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
     },
 };
 
-export function hasPermission(role: UserRole, permission: keyof RolePermissions): boolean {
+export function hasPermission(
+    role: UserRole,
+    permission: keyof RolePermissions,
+): boolean {
     return ROLE_PERMISSIONS[role][permission];
 }
 

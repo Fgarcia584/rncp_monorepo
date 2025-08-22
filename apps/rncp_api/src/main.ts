@@ -1,5 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
 import { GatewayModule } from './gateway/gateway.module';
 import { initSentry } from './sentry/sentry.config';
 import { SentryExceptionFilter } from './common/filters/sentry-exception.filter';
@@ -10,6 +12,32 @@ initSentry();
 
 async function bootstrap() {
     const app = await NestFactory.create(GatewayModule);
+
+    // Cookie parsing middleware
+    app.use(cookieParser());
+
+    // Security middleware - must be applied early
+    app.use(helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "https://maps.googleapis.com"],
+                styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+                fontSrc: ["'self'", "https://fonts.gstatic.com"],
+                imgSrc: ["'self'", "data:", "https:"],
+                connectSrc: ["'self'", "https://api.sentry.io", "https://maps.googleapis.com"]
+            },
+        },
+        hsts: {
+            maxAge: 31536000, // 1 year
+            includeSubDomains: true,
+            preload: true
+        },
+        frameguard: { action: 'sameorigin' },
+        noSniff: true,
+        xssFilter: true,
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+    }));
 
     // Global validation pipe
     app.useGlobalPipes(
@@ -48,12 +76,12 @@ async function bootstrap() {
 
     const port = process.env.PORT ?? 3001;
     const host = process.env.HOST ?? '0.0.0.0';
-    
+
     console.log(`Starting API Gateway on ${host}:${port}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    
+
     await app.listen(port, host);
-    
+
     console.log(`🚀 API Gateway is running on port ${port}`);
     console.log(`🏥 Health check available at: http://${host}:${port}/health`);
     console.log(`📡 Proxying requests to microservices:`);

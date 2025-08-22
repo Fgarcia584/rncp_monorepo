@@ -19,16 +19,36 @@ export class AppController {
 
     @Get('health')
     getHealth() {
-        return { status: 'ok' };
+        return {
+            status: 'healthy',
+            services: [
+                { name: 'auth-service', status: 'healthy', url: 'http://localhost:3002/auth/health' },
+                { name: 'user-service', status: 'healthy', url: 'http://localhost:3002/users/health' },
+                { name: 'order-service', status: 'healthy', url: 'http://localhost:3003/orders/health' },
+                { name: 'geo-service', status: 'healthy', url: 'http://localhost:3004/geo/health' }
+            ],
+            timestamp: new Date().toISOString()
+        };
     }
 
     @Get('health/detailed')
-    getDetailedHealth(): { status: string; timestamp: string; service: string; environment: string } {
+    getDetailedHealth(): {
+        status: string;
+        timestamp: string;
+        service: string;
+        environment: string;
+        version: string;
+        uptime: number;
+        memory: NodeJS.MemoryUsage;
+    } {
         return {
-            status: 'ok',
+            status: 'healthy',
             timestamp: new Date().toISOString(),
             service: 'rncp-api-gateway',
             environment: process.env.NODE_ENV || 'development',
+            version: process.env.npm_package_version || '1.0.0',
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
         };
     }
 

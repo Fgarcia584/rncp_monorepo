@@ -84,7 +84,7 @@ export default defineConfig(({ mode }) => {
             VitePWA({
                 registerType: 'autoUpdate',
                 injectRegister: 'auto',
-                
+
                 pwaAssets: {
                     disabled: true,
                     config: false,

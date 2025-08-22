@@ -81,7 +81,7 @@ Cette configuration garantit que :
 
 ### 1. CI Tests (`ci-tests.yml`)
 
-**Déclenchement** : À chaque Pull Request vers la branche `develop`
+**Déclenchement** : À chaque Pull Request vers les branches `develop` et `master`
 
 **Étapes** :
 
@@ -107,49 +107,6 @@ jobs:
 ```
 
 **Objectif** : S'assurer que votre code n'introduit pas de régressions avant la fusion.
-
-### 2. Build and Push (`build-and-push.yml`)
-
-**Déclenchement** :
-
-- Push sur `master` ou `develop`
-- Pull Requests vers `master` ou `develop`
-
-**Services construits** :
-
-- Frontend (React PWA)
-- API Gateway (NestJS)
-- User Service (Microservice)
-- Auth Service (Microservice)
-
-**Stratégie de tags** :
-
-- `latest-prod` : Version de production (branche master)
-- `latest-test` : Version de test (branche develop)
-- `pr-123` : Version de PR (pour les tests)
-- `v1a2b3c4` : Tag basé sur le hash du commit
-
-### 3. Déploiement en Production (`deploy-production.yml`)
-
-**Déclenchement** : Manuel uniquement (workflow_dispatch)
-
-**Sécurités mises en place** :
-
-- ✋ **Approbation manuelle requise** (environment: production)
-- 📦 **Sauvegarde automatique** de la version précédente
-- 🔄 **Déploiement Blue-Green** (nouvelle version testée avant bascule)
-- 🏥 **Health checks automatiques** sur les services
-- 🧪 **Smoke tests** de validation
-- 🔙 **Mécanisme de rollback** en cas d'échec
-
-**Étapes détaillées** :
-
-1. **Approbation manuelle** : Un membre de l'équipe doit approuver
-2. **Sauvegarde** : L'image actuelle est sauvegardée pour rollback
-3. **Déploiement parallèle** : Nouvelle version déployée avec suffixe `-new`
-4. **Tests de santé** : Vérification que tous les services répondent
-5. **Bascule du trafic** : L'ancienne version est remplacée
-6. **Nettoyage** : Suppression des conteneurs temporaires
 
 ### 4. Gestion des Releases (`release.yml`)
 
@@ -211,7 +168,6 @@ master (production)
 │   ├── feature/user-profile
 │   └── feature/order-tracking
 ├── hotfix/security-patch (urgence production)
-└── release/v1.2.0 (préparation release)
 ```
 
 ### 4. Résolution des échecs CI
@@ -250,24 +206,6 @@ docker build -f apps/rncp_PWA_front/Dockerfile .
 
 ## 🚨 Gestion des incidents
 
-### Rollback en production
-
-En cas de problème détecté en production :
-
-1. **Rollback automatique** : Si les health checks échouent, le pipeline s'arrête
-2. **Rollback manuel** : Relancer le workflow avec la version précédente
-3. **Hotfix** : Créer une branche `hotfix/` depuis master pour une correction urgente
-
-### Débogage des déploiements
-
-```bash
-# Logs des conteneurs Azure
-az container logs --resource-group rg-rncp-prod --name aci-rncp-prod
-
-# Health check manuel
-curl https://rncp-prod-api.francecentral.azurecontainer.io/health
-```
-
 ## 📊 Monitoring et alertes
 
 ### Métriques surveillées
@@ -285,19 +223,10 @@ curl https://rncp-prod-api.francecentral.azurecontainer.io/health
 
 ## 🔐 Sécurité
 
-### Secrets et variables d'environnement
-
-Les informations sensibles sont stockées dans **GitHub Secrets** :
-
-- `AZURE_CREDENTIALS_PROD` : Identifiants Azure pour la production
-- `DATABASE_URL_PROD` : Chaîne de connexion base de données
-- `JWT_SECRET_PROD` : Clé secrète JWT
-- `ACR_LOGIN_SERVER`, `ACR_USERNAME`, `ACR_PASSWORD` : Accès au registre de conteneurs
-
 ### Bonnes pratiques sécurisées
 
 - ❌ Jamais de secrets dans le code source
-- ✅ Utilisation des GitHub Secrets pour les données sensibles
+- ✅ Utilisation des variables des services Railway pour les données sensibles
 - ✅ Séparation des environnements (test/production)
 - ✅ Accès restreint aux environnements de production
 
@@ -307,7 +236,6 @@ Les informations sensibles sont stockées dans **GitHub Secrets** :
 
 - [Conventional Commits](https://www.conventionalcommits.org/fr/)
 - [Semantic Release](https://semantic-release.gitbook.io/)
-- [Azure Container Instances](https://docs.microsoft.com/azure/container-instances/)
 - [GitHub Actions](https://docs.github.com/actions)
 
 ### Commandes utiles
@@ -330,7 +258,3 @@ git branch -r                 # Branches distantes
 ```
 
 ---
-
-**💡 Conseil** : N'hésitez pas à poser des questions à l'équipe si vous rencontrez des difficultés avec le processus CI/CD. L'objectif est de faciliter votre travail, pas de le compliquer !
-
-**📞 Support** : En cas de problème bloquant, contactez les mainteneurs du projet ou créez une issue sur le repository.

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 import { AuthModule } from './microservices/auth-service/auth.module';
 import { User, RefreshToken } from './entities';
 import { initSentry } from './sentry/sentry.config';
@@ -31,6 +32,9 @@ class AuthServiceModule {}
 
 async function bootstrap() {
     const app = await NestFactory.create(AuthServiceModule);
+
+    // Configure cookie parser for secure token storage
+    app.use(cookieParser());
 
     app.useGlobalPipes(
         new ValidationPipe({

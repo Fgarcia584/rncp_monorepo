@@ -33,11 +33,11 @@ export const authApi = baseApi.injectEndpoints({
                 body: refreshData,
             }),
         }),
-        logout: builder.mutation<void, RefreshTokenRequest>({
-            query: (refreshData) => ({
+        logout: builder.mutation<void, void>({
+            query: () => ({
                 url: '/auth/logout',
                 method: 'POST',
-                body: refreshData,
+                body: {}, // Empty body - refresh token is in cookies
             }),
             invalidatesTags: ['Auth'],
         }),
