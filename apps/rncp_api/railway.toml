@@ -6,7 +6,7 @@ builder = "nixpacks"
 # railway run --service back npm run db:roles:prod
 # Pour peupler la DB avec des données de test :
 # railway run --service back npm run db:seed:prod
-startCommand = "npm run build:railway-full && npm run start:railway-full"
+startCommand = "npm run build:railway-full && npm run db:roles:prod && npm run start:railway-full"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 
