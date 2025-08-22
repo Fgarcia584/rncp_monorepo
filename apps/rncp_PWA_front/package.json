@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "postinstall": "node copy-types.cjs || echo 'Types copy failed, continuing...'",
+    "prebuild": "node copy-types.cjs",
     "dev": "vite",
     "dev:network": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
@@ -18,7 +20,6 @@
     "@googlemaps/js-api-loader": "^1.16.10",
     "@googlemaps/polyline-codec": "^1.0.28",
     "@reduxjs/toolkit": "^2.5.0",
-    "@rncp/types": "file:../../tools",
     "@tailwindcss/vite": "^4.1.11",
     "@types/leaflet": "^1.9.20",
     "leaflet": "^1.9.4",
