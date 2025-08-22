@@ -77,22 +77,26 @@ export default defineConfig({
         react(),
         tailwindcss(),
         VitePWA({
-            registerType: 'prompt',
-            injectRegister: false,
-
+            registerType: 'autoUpdate',
+            injectRegister: 'auto',
+            
             pwaAssets: {
                 disabled: true,
                 config: false,
             },
 
             manifest: {
-                name: 'rncp_PWA_front',
-                short_name: 'rncp_PWA_front',
-                description: 'rncp_PWA_front',
-                theme_color: '#ffffff',
-                background_color: '#ffffff',
+                name: 'Plateforme de Livraison Intelligente',
+                short_name: 'RNCP Livraison',
+                description: 'Application de gestion des livraisons et commandes en temps réel',
+                theme_color: '#16a34a',
+                background_color: '#f0fdf4',
                 display: 'standalone',
                 start_url: '/',
+                scope: '/',
+                orientation: 'portrait-primary',
+                categories: ['business', 'productivity'],
+                lang: 'fr',
                 icons: [
                     {
                         src: '/favicon.svg',
@@ -107,12 +111,13 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
                 cleanupOutdatedCaches: true,
                 clientsClaim: true,
+                skipWaiting: true,
             },
 
             devOptions: {
-                enabled: false,
+                enabled: true,
                 navigateFallback: 'index.html',
-                suppressWarnings: true,
+                suppressWarnings: false,
                 type: 'module',
             },
         }),
