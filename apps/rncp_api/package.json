@@ -21,6 +21,8 @@
     "start:users": "node dist/user-main",
     "start:orders": "node dist/order-main",
     "start:geo": "node dist/geo-main",
+    "start:railway-full": "node dist/railway-full-main",
+    "build:railway-full": "nest build",
     "healthcheck": "node healthcheck.js",
     "dev": "nest start --watch",
     "dev:gateway": "nest start --watch",

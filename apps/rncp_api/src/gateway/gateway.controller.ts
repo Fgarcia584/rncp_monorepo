@@ -1,10 +1,20 @@
-import { Controller, All, Req, Res } from '@nestjs/common';
+import { Controller, All, Get, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { GatewayService } from './gateway.service';
 
 @Controller()
 export class GatewayController {
     constructor(private readonly gatewayService: GatewayService) {}
+
+    @Get('health')
+    getHealth() {
+        return { 
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            service: 'rncp-api-gateway',
+            environment: process.env.NODE_ENV || 'development'
+        };
+    }
 
     @All('auth/*')
     async proxyAuth(@Req() req: Request, @Res() res: Response) {
