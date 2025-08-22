@@ -15,6 +15,7 @@ import { OrderService } from './microservices/order-service/order.service';
 import { GeoController } from './microservices/geo-service/geo.controller';
 import { TrackingController } from './microservices/geo-service/tracking.controller';
 import { GeoService } from './microservices/geo-service/geo.service';
+import { TrackingService } from './microservices/geo-service/tracking.service';
 import { HealthController } from './microservices/order-service/health.controller';
 
 // Import shared services and guards
@@ -60,6 +61,7 @@ import { JwtStrategy } from './microservices/auth-service/strategies/jwt.strateg
         UserService,
         OrderService,
         GeoService,
+        TrackingService,
         JwtAuthGuard,
         JwtStrategy,
     ],
