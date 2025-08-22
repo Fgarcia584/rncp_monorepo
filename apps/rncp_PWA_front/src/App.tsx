@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth';
 import { AuthModal } from './components/auth/AuthModal';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleBasedRouting } from './components/routing/RoleBasedRouting';
+import { SentryTestComponent } from './components/debug/SentryTestComponent';
 const getRoleDisplayName = (role: string): string => {
     switch (role) {
         case 'admin':
@@ -287,6 +288,9 @@ function App() {
 
             <PWABadge />
             <PWAInstallPrompt />
+
+            {/* Development-only Sentry test component */}
+            <SentryTestComponent />
         </div>
     );
 }

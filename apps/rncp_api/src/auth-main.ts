@@ -5,6 +5,12 @@ import { Module } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AuthModule } from './microservices/auth-service/auth.module';
 import { User, RefreshToken } from './entities';
+import { initSentry } from './sentry/sentry.config';
+import { SentryExceptionFilter } from './common/filters/sentry-exception.filter';
+import { SentryInterceptor } from './common/interceptors/sentry.interceptor';
+
+// Initialize Sentry as early as possible
+initSentry();
 
 @Module({
     imports: [
@@ -37,6 +43,12 @@ async function bootstrap() {
             transform: true,
         }),
     );
+
+    // Global Sentry exception filter
+    app.useGlobalFilters(new SentryExceptionFilter());
+
+    // Global Sentry interceptor for performance monitoring
+    app.useGlobalInterceptors(new SentryInterceptor());
 
     app.enableCors({
         origin: [

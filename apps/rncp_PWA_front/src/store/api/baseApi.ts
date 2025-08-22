@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { logout } from '../slices/authSlice';
+import { logout, setCredentials } from '../slices/authSlice';
+import type { RootState } from '../store';
+import { TokenPair } from '../../types';
+import { Sentry } from '../../sentry';
 
 // Flag global pour éviter les refresh parallèles
 let isRefreshing = false;
@@ -59,6 +62,22 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 
     let result = await baseQuery(args, api, extraOptions);
 
+    // Log API calls for monitoring
+    const url = typeof args === 'string' ? args : args.url;
+    const method = typeof args === 'string' ? 'GET' : args.method || 'GET';
+
+    // Add breadcrumb for API calls
+    Sentry.addBreadcrumb({
+        category: 'api',
+        message: `${method} ${url}`,
+        level: 'info',
+        data: {
+            url,
+            method,
+            status: result.error?.status || 'success',
+        },
+    });
+
     // Log des résultats pour débugger
     if (result.error) {
         console.group('❌ API Error');
@@ -66,6 +85,22 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
         console.log('Data:', result.error.data);
         console.log('Args:', args);
         console.groupEnd();
+        
+        // Log non-auth errors to Sentry
+        if (result.error.status !== 401) {
+            Sentry.captureException(new Error(`API Error: ${method} ${url}`), {
+                tags: {
+                    api_error: true,
+                    status: result.error.status,
+                    endpoint: url,
+                },
+                extra: {
+                    error: result.error.data,
+                    method,
+                    url,
+                },
+            });
+        }
     } else if (result.data) {
         console.log('✅ API Success:', typeof args === 'string' ? args : args.url);
     }
@@ -102,6 +137,11 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                     result = await baseQuery(args, api, extraOptions);
                 } else {
                     console.log('❌ Token refresh failed, logging out');
+                    Sentry.addBreadcrumb({
+                        category: 'auth',
+                        message: 'Token refresh failed, logging out user',
+                        level: 'warning',
+                    });
                     api.dispatch(logout());
                 }
             } catch {
@@ -126,6 +166,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['User', 'Auth', 'Order'],
+    tagTypes: ['User', 'Order', 'Auth'],
     endpoints: () => ({}),
 });
