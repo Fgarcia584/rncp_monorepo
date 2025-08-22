@@ -4,7 +4,7 @@ builder = "nixpacks"
 [deploy]
 # Pour initialiser la DB avec des données de test, exécutez manuellement :
 # railway run npm run db:init:prod
-startCommand = "npm run build:railway-full && npm run migration:run:prod && npm run start:railway-full"
+startCommand = "npm run build:railway-full && npm run db:init && npm run migration:run:prod && npm run start:railway-full"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 
@@ -13,10 +13,13 @@ NODE_ENV = "production"
 PORT = "3001"
 HOST = "0.0.0.0"
 JWT_SECRET = "your-super-secret-jwt-key-for-production"
-DB_HOST = "postgresql-host"
-DB_PORT = "5432"
-DB_USER = "postgres"
-DB_PASSWORD = "password"
-DB_NAME = "rncp_db"
+# Variables PostgreSQL - seront automatiquement renseignées par Railway si tu utilises leur service PostgreSQL
+# Sinon, configure-les manuellement dans l'interface Railway
+DB_HOST = "${{Postgres.PGHOST}}"
+DB_PORT = "${{Postgres.PGPORT}}"
+DB_USER = "${{Postgres.PGUSER}}"
+DB_PASSWORD = "${{Postgres.PGPASSWORD}}"
+DB_NAME = "${{Postgres.PGDATABASE}}"
+DATABASE_PUBLIC_URL="postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_TCP_PROXY_DOMAIN}}:${{RAILWAY_TCP_PROXY_PORT}}/${{PGDATABASE}}"
 # Frontend URL for CORS configuration (optional - regex fallback will catch all Railway URLs)
 FRONTEND_URL = "https://front-production-9bbd.up.railway.app"
