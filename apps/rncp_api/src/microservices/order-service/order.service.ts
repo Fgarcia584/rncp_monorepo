@@ -297,9 +297,10 @@ export class OrderService {
         };
 
         // Log any undefined fields for debugging, but let TypeORM handle them naturally
+        // Remove undefined fields from response
         Object.keys(response).forEach((key) => {
             if (response[key] === undefined) {
-                console.log(`ℹ️ Optional field is undefined: ${key}`);
+                delete response[key];
             }
         });
 

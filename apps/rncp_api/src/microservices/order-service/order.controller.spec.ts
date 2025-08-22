@@ -512,6 +512,7 @@ describe('OrderController', () => {
             expect(result).toEqual({
                 status: 'ok',
                 service: 'order-service',
+                timestamp: expect.any(String),
             });
         });
     });
