@@ -20,7 +20,6 @@ const getRoleDisplayName = (role: string): string => {
 import PWABadge from './PWABadge.tsx';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { SimplePWAInstall } from './components/SimplePWAInstall';
-import { PWADebugInfo } from './components/PWADebugInfo';
 
 function App() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -98,12 +97,13 @@ function App() {
                                     <span className="text-primary-600">Livraison Intelligente</span>
                                 </h1>
                                 <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                                    Une solution complète pour gérer vos commandes, optimiser vos livraisons et suivre vos performances en temps réel.
+                                    Une solution complète pour gérer vos commandes, optimiser vos livraisons et suivre
+                                    vos performances en temps réel.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                                        <button 
-                                            onClick={() => setIsAuthModalOpen(true)} 
+                                        <button
+                                            onClick={() => setIsAuthModalOpen(true)}
                                             className="bg-primary-600 hover:bg-primary-700 text-white font-medium px-8 py-4 rounded-lg text-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                                         >
                                             Commencer maintenant
@@ -127,7 +127,8 @@ function App() {
                                     Fonctionnalités par profil
                                 </h2>
                                 <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                    Chaque utilisateur dispose d'un tableau de bord personnalisé selon son rôle dans la chaîne logistique
+                                    Chaque utilisateur dispose d&apos;un tableau de bord personnalisé selon son rôle
+                                    dans la chaîne logistique
                                 </p>
                             </div>
 
@@ -143,7 +144,7 @@ function App() {
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">Administrateur</h3>
                                     <p className="text-gray-600 text-sm mb-4">Gestion globale de la plateforme</p>
                                     <ul className="text-sm text-gray-500 space-y-1">
-                                        <li>• Vue d'ensemble des utilisateurs</li>
+                                        <li>• Vue d&apos;ensemble des utilisateurs</li>
                                         <li>• Statistiques générales</li>
                                         <li>• Gestion des rôles</li>
                                     </ul>
@@ -160,8 +161,8 @@ function App() {
                                     <p className="text-gray-600 text-sm mb-4">Gestion de boutique et ventes</p>
                                     <ul className="text-sm text-gray-500 space-y-1">
                                         <li>• Création de commandes</li>
-                                        <li>• Suivi du chiffre d'affaires</li>
-                                        <li>• Gestion de l'inventaire</li>
+                                        <li>• Suivi du chiffre d&apos;affaires</li>
+                                        <li>• Gestion de l&apos;inventaire</li>
                                     </ul>
                                 </div>
 
@@ -184,7 +185,11 @@ function App() {
                                 {/* Logistics Technician */}
                                 <div className="feature-card text-center p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
                                     <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                                        <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <svg
+                                            className="w-8 h-8 text-purple-600"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
                                             <path d="M4 7v10c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V7c0-2.21-1.79-4-4-4H8c-2.21 0-4 1.79-4 4zm8 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zM6 7h12v2H6V7z" />
                                         </svg>
                                     </div>
@@ -202,22 +207,35 @@ function App() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
                                 <div className="text-center p-8 bg-gradient-to-br from-primary-50 to-emerald-50 rounded-2xl">
                                     <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 rounded-full mb-6">
-                                        <svg className="w-7 h-7 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <svg
+                                            className="w-7 h-7 text-primary-600"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
                                             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Temps Réel</h3>
-                                    <p className="text-gray-600">Suivi en direct des commandes, livraisons et performances avec des mises à jour instantanées</p>
+                                    <p className="text-gray-600">
+                                        Suivi en direct des commandes, livraisons et performances avec des mises à jour
+                                        instantanées
+                                    </p>
                                 </div>
 
                                 <div className="text-center p-8 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl">
                                     <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-100 rounded-full mb-6">
-                                        <svg className="w-7 h-7 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <svg
+                                            className="w-7 h-7 text-emerald-600"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
                                             <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Mobile First</h3>
-                                    <p className="text-gray-600">Interface optimisée pour mobile avec support PWA pour une expérience native</p>
+                                    <p className="text-gray-600">
+                                        Interface optimisée pour mobile avec support PWA pour une expérience native
+                                    </p>
                                 </div>
 
                                 <div className="text-center p-8 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl">
@@ -227,7 +245,9 @@ function App() {
                                         </svg>
                                     </div>
                                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Sécurisé</h3>
-                                    <p className="text-gray-600">Authentification JWT robuste et gestion des rôles pour une sécurité optimale</p>
+                                    <p className="text-gray-600">
+                                        Authentification JWT robuste et gestion des rôles pour une sécurité optimale
+                                    </p>
                                 </div>
                             </div>
 
@@ -235,7 +255,9 @@ function App() {
                             <div className="bg-primary-600 rounded-2xl p-8 text-white">
                                 <div className="text-center mb-8">
                                     <h3 className="text-2xl font-bold mb-2">Une plateforme performante</h3>
-                                    <p className="text-primary-100">Optimisée pour gérer efficacement vos opérations logistiques</p>
+                                    <p className="text-primary-100">
+                                        Optimisée pour gérer efficacement vos opérations logistiques
+                                    </p>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                                     <div>
@@ -265,7 +287,6 @@ function App() {
 
             <PWABadge />
             <PWAInstallPrompt />
-            <PWADebugInfo />
         </div>
     );
 }
