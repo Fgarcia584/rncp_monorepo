@@ -6,10 +6,25 @@ import { JwtPayload, UserRole } from '../../../types';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor() {
+        const jwtSecret = process.env.JWT_SECRET;
+
+        if (!jwtSecret) {
+            throw new Error(
+                'JWT_SECRET environment variable is required for order service JWT strategy. ' +
+                    'This must match the secret used in auth service.',
+            );
+        }
+
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: (req: Request) => {
+                // Priority: Cookie first, then Authorization header
+                return (
+                    req.cookies?.accessToken ||
+                    ExtractJwt.fromAuthHeaderAsBearerToken()(req)
+                );
+            },
             ignoreExpiration: false,
-            secretOrKey: process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+            secretOrKey: jwtSecret,
         });
     }
 

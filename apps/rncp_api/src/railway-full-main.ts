@@ -1,8 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 import { RailwayFullModule } from './railway-full.module';
 
 async function bootstrap() {
     const app = await NestFactory.create(RailwayFullModule);
+
+    // Configure cookie parser for secure token storage
+    app.use(cookieParser());
 
     // Enable CORS for cross-origin requests
     const corsOptions = {

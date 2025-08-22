@@ -92,10 +92,4 @@ export class UserController {
             timestamp: new Date().toISOString(),
         };
     }
-
-    @Public()
-    @Get('debug-test')
-    debugTest(): { message: string } {
-        return { message: 'Debug endpoint working - guard bypassed!' };
-    }
 }

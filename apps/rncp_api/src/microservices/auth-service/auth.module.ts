@@ -13,12 +13,25 @@ import { User, RefreshToken } from '../../entities';
         TypeOrmModule.forFeature([User, RefreshToken]),
         PassportModule,
         JwtModule.register({
-            secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key',
+            secret:
+                process.env.JWT_SECRET ||
+                (() => {
+                    throw new Error(
+                        'JWT_SECRET environment variable is required. ' +
+                            "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\"",
+                    );
+                })(),
             signOptions: { expiresIn: '15m' },
         }),
     ],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy, JwtAuthGuard],
-    exports: [AuthService, JwtStrategy, JwtAuthGuard, JwtModule, PassportModule],
+    exports: [
+        AuthService,
+        JwtStrategy,
+        JwtAuthGuard,
+        JwtModule,
+        PassportModule,
+    ],
 })
 export class AuthModule {}

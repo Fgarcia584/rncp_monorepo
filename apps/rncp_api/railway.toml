@@ -14,7 +14,8 @@ healthcheckTimeout = 100
 NODE_ENV = "production"
 PORT = "3001"
 HOST = "0.0.0.0"
-JWT_SECRET = "your-super-secret-jwt-key-for-production"
+# JWT_SECRET = "SECURISÉ - À DÉFINIR VIA INTERFACE RAILWAY"
+# Générer un secret fort avec : node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 # Variables PostgreSQL - à configurer dans l'interface Railway
 # Ces variables seront automatiquement injectées par Railway si le service PostgreSQL est ajouté
 # DB_HOST = (sera défini automatiquement par Railway)

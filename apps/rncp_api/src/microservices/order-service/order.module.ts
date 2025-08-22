@@ -16,7 +16,14 @@ import { HeadersInterceptor } from './interceptors/headers.interceptor';
         TypeOrmModule.forFeature([Order]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
-            secret: process.env.JWT_SECRET || 'your-secret-key',
+            secret:
+                process.env.JWT_SECRET ||
+                (() => {
+                    throw new Error(
+                        'JWT_SECRET environment variable is required for order service. ' +
+                            'Set it in your environment configuration.',
+                    );
+                })(),
             signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
         }),
     ],
