@@ -11,4 +11,4 @@ cmd = 'cd ../.. && npm install -g pnpm && node scripts/prepare-railway.js && pnp
 cmd = 'cd ../.. && pnpm build:types && cd apps/rncp_PWA_front && pnpm build'
 
 [start]
-cmd = 'pnpm preview --host 0.0.0.0 --port $PORT'
+cmd = 'npm run preview -- --host 0.0.0.0 --port $PORT'
