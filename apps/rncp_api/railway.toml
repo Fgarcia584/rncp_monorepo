@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd apps/rncp_api && npm run start:gateway"
+startCommand = "npm run build:railway-full && npm run start:railway-full"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 
