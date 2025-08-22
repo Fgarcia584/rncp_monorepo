@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- This file is auto-generated. Do not edit manually. -->
 
+## [3.0.0](https://github.com/Fgarcia584/rncp_monorepo/compare/v2.0.0...v3.0.0) (2025-08-22)
+
+### Features
+
+* add comprehensive OWASP Top 10 security analysis ([d2c80f6](https://github.com/Fgarcia584/rncp_monorepo/commit/d2c80f6ef69d5961b6fcdcc7c45d74306a324351))
+* configure Railway for production deployment with nginx ([5d748bd](https://github.com/Fgarcia584/rncp_monorepo/commit/5d748bdafdbe4f62c4b750248fbc913ac0384c44))
+* implement automated dependency management with Dependabot ([21260be](https://github.com/Fgarcia584/rncp_monorepo/commit/21260be49522d718c7ea63bc1a10542ca1580b73))
+* implement secure authentication with httpOnly cookies ([7673946](https://github.com/Fgarcia584/rncp_monorepo/commit/767394611b84aa44651ae4944d2dc68c4e46bb06))
+* **security:** implement comprehensive security enhancements and monitoring ([0a117f7](https://github.com/Fgarcia584/rncp_monorepo/commit/0a117f75c757a36141c90de310a27f5b4c8de80d))
+
+### Bug Fixes
+
+* improve copy-types.js for Railway deployment ([1b66179](https://github.com/Fgarcia584/rncp_monorepo/commit/1b66179fc39915c65a701a2d5f3b82c540da4d9a))
+* improve fallback types creation with complete type definitions ([afcd68b](https://github.com/Fgarcia584/rncp_monorepo/commit/afcd68b64922fb0d8de8e40978adba65ff4ea82a))
+* **railway:** removed unused variable ([68934b1](https://github.com/Fgarcia584/rncp_monorepo/commit/68934b150d8667a5c1097bbb793ca4f21817ab65))
+* resolve TypeScript build errors for Railway deployment ([19844ff](https://github.com/Fgarcia584/rncp_monorepo/commit/19844ff4397bfc0cbb63fccef9ada76c3f7f8b4d))
+* update API URL for Railway test environment ([1d3506c](https://github.com/Fgarcia584/rncp_monorepo/commit/1d3506c1220a89b44511e11cc4545ae7ebf17c7a))
+* update types after copy-types script execution ([2d51b60](https://github.com/Fgarcia584/rncp_monorepo/commit/2d51b60d7fb641403df2945d8a303baea56626a8))
+* use nixpacks with production start command instead of preview ([7d70ccc](https://github.com/Fgarcia584/rncp_monorepo/commit/7d70ccc324db6784e484edbb5a36f4655734a8fe))
+* use npm instead of pnpm for Railway start command ([50e0773](https://github.com/Fgarcia584/rncp_monorepo/commit/50e077338e40bd563e79ea86aeeb640e0eec84e7))
+
+### Reverts
+
+* restore original working nixpacks configuration ([a5c09ca](https://github.com/Fgarcia584/rncp_monorepo/commit/a5c09cac35039986c1459a4cad5540e8b839e6b7))
+
+### Documentation
+
+* update integration documentation ([b5ab9d0](https://github.com/Fgarcia584/rncp_monorepo/commit/b5ab9d0fa8a541afdb8e5caf1cb56090cc704d26))
+
 ## [2.0.0](https://github.com/Fgarcia584/rncp_monorepo/compare/v1.0.0...v2.0.0) (2025-08-22)
 
 ### ⚠ BREAKING CHANGES
