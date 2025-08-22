@@ -51,7 +51,7 @@ export function MerchantDashboard() {
         priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
         notes: '',
     });
-    const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
+    // const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
 
     // Helper functions for real data calculations
     const calculateBusinessStats = (orders: OrderResponse[]) => {
@@ -141,13 +141,8 @@ export function MerchantDashboard() {
                 scheduledDeliveryTime: deliveryDateTime,
                 priority: orderForm.priority as OrderPriority,
                 notes: orderForm.notes || undefined,
-                // Ajouter les coordonnées si disponibles
-                ...(selectedPlace?.geometry?.location && {
-                    deliveryCoordinates: {
-                        latitude: selectedPlace.geometry.location.lat(),
-                        longitude: selectedPlace.geometry.location.lng(),
-                    },
-                }),
+                // Note: Les coordonnées ne sont pas supportées par l'API actuellement
+                // Elles seront déduites de l'adresse par les services de géolocalisation
             };
 
             await createOrder(orderData).unwrap();
