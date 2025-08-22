@@ -29,7 +29,8 @@ export class SentryExceptionFilter implements ExceptionFilter {
             message =
                 typeof errorResponse === 'string'
                     ? errorResponse
-                    : errorResponse.message;
+                    : (errorResponse as { message?: string })?.message ||
+                      'Unknown error';
         } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = 'Internal server error';
@@ -60,7 +61,9 @@ export class SentryExceptionFilter implements ExceptionFilter {
                 scope.setContext('request', {
                     url: request.url,
                     method: request.method,
-                    headers: this.sanitizeHeaders(request.headers),
+                    headers: this.sanitizeHeaders(
+                        request.headers as Record<string, string>,
+                    ),
                     query: request.query,
                     params: request.params,
                     ip: request.ip,
@@ -108,7 +111,9 @@ export class SentryExceptionFilter implements ExceptionFilter {
 
         // Send response
         response.status(status).json({
-            ...errorResponse,
+            ...(typeof errorResponse === 'object' && errorResponse !== null
+                ? errorResponse
+                : {}),
             timestamp: errorInfo.timestamp,
             path: request.url,
             ...(process.env.NODE_ENV === 'development' && {

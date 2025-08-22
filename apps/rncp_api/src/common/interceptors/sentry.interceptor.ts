@@ -18,19 +18,19 @@ export class SentryInterceptor implements NestInterceptor {
         const request = context.switchToHttp().getRequest<Request>();
         const { method, url, headers } = request;
 
-        // Start a new transaction for performance monitoring
-        const transaction = Sentry.startTransaction({
-            name: `${method} ${url}`,
-            op: 'http.server',
+        // Add breadcrumb for request tracking
+        Sentry.addBreadcrumb({
+            category: 'http.request',
+            message: `${method} ${url}`,
+            level: 'info',
+            data: {
+                method,
+                url,
+                headers: this.sanitizeHeaders(
+                    headers as Record<string, string | string[]>,
+                ),
+            },
         });
-
-        // Set transaction context
-        transaction.setTag('http.method', method);
-        transaction.setTag('http.url', url);
-        transaction.setData(
-            'http.request.headers',
-            this.sanitizeHeaders(headers as Record<string, string | string[]>),
-        );
 
         // Set user context if available
         if (
@@ -52,32 +52,36 @@ export class SentryInterceptor implements NestInterceptor {
             tap(() => {
                 // On successful completion
                 const duration = Date.now() - startTime;
-                transaction.setTag('http.status', '2xx');
-                transaction.setData('http.response.duration_ms', duration);
 
                 // Add breadcrumb for successful requests
                 Sentry.addBreadcrumb({
-                    category: 'http',
-                    message: `${method} ${url}`,
+                    category: 'http.response',
+                    message: `${method} ${url} - Success`,
                     level: 'info',
                     data: {
                         method,
                         url,
                         duration_ms: duration,
+                        status: 'success',
                     },
                 });
-
-                transaction.finish();
             }),
             catchError((error) => {
                 // On error
                 const duration = Date.now() - startTime;
-                transaction.setTag('http.status', 'error');
-                transaction.setData('http.response.duration_ms', duration);
 
-                // The error will be handled by the exception filter
-                // Just finish the transaction here
-                transaction.finish();
+                // Add breadcrumb for failed requests
+                Sentry.addBreadcrumb({
+                    category: 'http.response',
+                    message: `${method} ${url} - Error`,
+                    level: 'error',
+                    data: {
+                        method,
+                        url,
+                        duration_ms: duration,
+                        status: 'error',
+                    },
+                });
 
                 throw error;
             }),
