@@ -47,32 +47,60 @@ pnpm lint
 
 ### Backend (API)
 
+#### 🏗️ Architecture Microservices Unifiée
+
+L'API fonctionne désormais en **architecture microservices** dans **tous** les environnements (dev local ET Docker).
+
+**Services disponibles :**
+- **API Gateway** (port 3001) : Proxy vers les microservices
+- **Auth Service** (port 3002) : Authentification et authorization
+- **User Service** (port 3002) : Gestion des utilisateurs  
+- **Order Service** (port 3003) : Gestion des commandes
+- **Geo Service** (port 3004) : Services géographiques et tracking
+
 ```bash
 cd apps/rncp_api
 
-# Development with watch mode
-pnpm run dev
+# 🚀 Développement microservices (RECOMMANDÉ)
+pnpm run dev:microservices    # Lance tous les services en parallèle
+
+# Services individuels
+pnpm run dev:gateway          # API Gateway uniquement
+pnpm run dev:auth            # Service Auth uniquement
+pnpm run dev:users           # Service Users uniquement  
+pnpm run dev:orders          # Service Orders uniquement
+pnpm run dev:geo             # Service Geo uniquement
 
 # Build application
 pnpm run build
 
-# Start production server
-pnpm run start
+# Production (services séparés)
+pnpm run start:gateway
+pnpm run start:auth
+pnpm run start:users
+pnpm run start:orders
+pnpm run start:geo
 
-# Debug mode
-pnpm run debug
-
-# Run unit tests
+# Tests
 pnpm run test
-
-# Run e2e tests
 pnpm run test:e2e
-
-# Test coverage
 pnpm run test:cov
 
 # Lint code
 pnpm run lint
+```
+
+#### Depuis la racine du monorepo
+
+```bash
+# 🎯 Frontend + API microservices en parallèle (RECOMMANDÉ)
+pnpm run dev:all-micro
+
+# Lancer uniquement les microservices API
+pnpm run dev:microservices
+
+# Mode legacy (monolithique - déprécié)
+pnpm run dev:all
 ```
 
 ### Docker Operations

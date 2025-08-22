@@ -7,7 +7,7 @@ import {
     ManyToOne,
     JoinColumn,
 } from 'typeorm';
-import { OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderStatus, OrderPriority } from '../types';
 import { User } from './user.entity';
 
 @Entity('orders')
@@ -26,6 +26,16 @@ export class Order {
 
     @Column({ name: 'delivery_address' })
     deliveryAddress: string;
+
+    @Column({
+        name: 'delivery_coordinates',
+        type: 'jsonb',
+        nullable: true,
+    })
+    deliveryCoordinates?: {
+        latitude: number;
+        longitude: number;
+    };
 
     @Column({
         name: 'scheduled_delivery_time',

@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { AuthUser } from '@rncp/types';
+import type { AuthUser } from '../../types';
 
 // Temporary workaround for CommonJS import issue in Vite build
 const UserRole = {

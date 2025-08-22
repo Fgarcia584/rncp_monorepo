@@ -8,7 +8,7 @@ import {
     authApi,
 } from '../store/api/authApi';
 import { setCredentials, logout, setLoading } from '../store/slices/authSlice';
-import type { LoginRequest, RegisterRequest } from '@rncp/types';
+import type { LoginRequest, RegisterRequest } from '../types';
 
 export const useAuth = () => {
     const dispatch = useAppDispatch();
@@ -19,8 +19,15 @@ export const useAuth = () => {
     const [logoutMutation] = useLogoutMutation();
 
     // Auto-fetch profile if token exists but no user
-    const { data: profileData, isLoading: profileLoading } = useGetProfileQuery(undefined, {
-        skip: !token || !!user,
+    // Skip if no token, already have user, or currently refreshing
+    const {
+        data: profileData,
+        isLoading: profileLoading,
+        error: profileError,
+    } = useGetProfileQuery(undefined, {
+        skip: !token || !!user || isLoading,
+        refetchOnMountOrArgChange: false,
+        refetchOnReconnect: false,
     });
 
     useEffect(() => {
@@ -33,7 +40,15 @@ export const useAuth = () => {
                 }),
             );
         }
-    }, [profileData, token, refreshToken, dispatch]);
+
+        // Si erreur 401 sur le profile, nettoyer tout
+        if (profileError && 'status' in profileError && profileError.status === 401) {
+            console.log('🚫 Profile fetch failed with 401, cleaning up...');
+            dispatch(logout());
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+        }
+    }, [profileData, profileError, token, refreshToken, dispatch]);
 
     const login = useCallback(
         async (credentials: LoginRequest) => {
@@ -110,7 +125,8 @@ export const useAuth = () => {
         const storedToken = localStorage.getItem('token');
         const storedRefreshToken = localStorage.getItem('refreshToken');
 
-        if (storedToken && storedRefreshToken && !token) {
+        // Vérifier que les tokens sont valides (non vides)
+        if (storedToken && storedRefreshToken && !token && storedToken !== 'undefined') {
             dispatch(
                 setCredentials({
                     user: null, // Profile will be fetched by the query above
@@ -118,6 +134,11 @@ export const useAuth = () => {
                     refreshToken: storedRefreshToken,
                 }),
             );
+        } else if (storedToken === 'undefined' || storedRefreshToken === 'undefined') {
+            // Nettoyer les tokens invalides
+            console.log('🧹 Cleaning invalid tokens from localStorage');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
         }
     }, [dispatch, token]);
 

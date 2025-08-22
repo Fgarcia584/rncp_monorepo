@@ -37,8 +37,13 @@ lerna-debug.log*
 
 # Project documentation (generated)
 /CLAUDE.md
+CLAUDE.md
 /DEPLOYMENT.md
 QUICK_START.md
+LEAFLET_INTEGRATION_GUIDE.md
+DEV_TESTING_GUIDE.md
+MICROSERVICES_MIGRATION.md
+RAILWAY_DEPLOYMENT.md
 
 # IDE - VSCode
 .vscode/*
@@ -48,10 +53,14 @@ QUICK_START.md
 !.vscode/extensions.json
 
 # dotenv environment variable files 
-.env.development.local
+.env.development
+**/.env.development
 .env.test.local
 .env.production.local
 .env.local
+**/.env.local
+.env
+**/.env
 
 # temp directory
 .temp

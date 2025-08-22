@@ -1,0 +1,12 @@
+{
+    "$schema": "https://raw.githubusercontent.com/nestjs/nest-cli/master/lib/configuration/schema.json",
+    "collection": "@nestjs/schematics",
+    "sourceRoot": "src",
+    "entryFile": "order-main",
+    "compilerOptions": {
+        "deleteOutDir": true,
+        "tsConfigPath": "tsconfig.json",
+        "watchAssets": true,
+        "assets": ["**/*.json"]
+    }
+}

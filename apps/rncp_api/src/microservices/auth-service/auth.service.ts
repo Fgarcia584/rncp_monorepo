@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, RefreshToken } from '../../entities';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto/auth.dto';
-import { AuthResponse, JwtPayload, TokenPair, UserRole } from '@rncp/types';
+import { AuthResponse, JwtPayload, TokenPair, UserRole } from '../../types';
 
 @Injectable()
 export class AuthService {

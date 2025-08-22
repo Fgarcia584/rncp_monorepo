@@ -15,8 +15,15 @@
         "noEmit": true,
         "jsx": "react-jsx",
 
+        /* Path mapping */
+        "baseUrl": ".",
+        "paths": {
+            "@rncp/types": ["./src/types/index.ts"]
+        },
+
         /* Linting */
         "strict": true,
+        "noImplicitAny": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,

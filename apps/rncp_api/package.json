@@ -1,19 +1,36 @@
 {
     "name": "rncp_api",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "",
     "author": "",
     "private": true,
     "license": "UNLICENSED",
     "scripts": {
-        "build": "nest build && nest build --config nest-cli-auth.json",
+        "postinstall": "node copy-types.js || echo 'Types copy failed, continuing...'",
+        "prebuild": "node copy-types.js",
+        "build": "nest build && nest build --config nest-cli-auth.json && nest build --config nest-cli-user.json && nest build --config nest-cli-order.json && nest build --config nest-cli-geo.json",
         "build:gateway": "nest build",
         "build:auth": "nest build --config nest-cli-auth.json",
+        "build:users": "nest build --config nest-cli-user.json",
+        "build:orders": "nest build --config nest-cli-order.json",
+        "build:geo": "nest build --config nest-cli-geo.json",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "nest start",
+        "start:gateway": "node dist/main",
         "start:auth": "node dist/auth-main",
+        "start:users": "node dist/user-main",
+        "start:orders": "node dist/order-main",
+        "start:geo": "node dist/geo-main",
+        "start:railway-full": "node dist/railway-full-main",
+        "build:railway-full": "nest build",
+        "healthcheck": "node healthcheck.js",
         "dev": "nest start --watch",
+        "dev:gateway": "nest start --watch",
         "dev:auth": "nest start --watch --config nest-cli-auth.json",
+        "dev:users": "nest start --watch --config nest-cli-user.json",
+        "dev:orders": "nest start --watch --config nest-cli-order.json",
+        "dev:geo": "nest start --watch --config nest-cli-geo.json",
+        "dev:microservices": "concurrently \"npm run dev:auth\" \"npm run dev:users\" \"npm run dev:orders\" \"npm run dev:geo\" \"npm run dev:gateway\"",
         "debug": "nest start --debug --watch",
         "prod": "node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -23,18 +40,27 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --config ./test/jest-e2e.json",
         "migration:run": "typeorm migration:run -d src/data-source.ts",
-        "migration:revert": "typeorm migration:revert -d src/data-source.ts"
+        "migration:revert": "typeorm migration:revert -d src/data-source.ts",
+        "migration:run:prod": "typeorm migration:run -d dist/data-source.js",
+        "migration:revert:prod": "typeorm migration:revert -d dist/data-source.js",
+        "db:seed": "ts-node src/scripts/init-database.ts",
+        "db:seed:prod": "node dist/src/scripts/init-database.js",
+        "db:roles": "ts-node src/scripts/create-roles.ts",
+        "db:roles:prod": "node dist/src/scripts/create-roles.js"
     },
     "dependencies": {
-        "@nestjs/axios": "^3.1.0",
+        "@googlemaps/google-maps-services-js": "^3.4.2",
         "@nestjs/common": "^11.0.1",
+        "@nestjs/config": "^4.0.2",
         "@nestjs/core": "^11.0.1",
         "@nestjs/jwt": "^11.0.0",
         "@nestjs/microservices": "^11.1.5",
         "@nestjs/passport": "^11.0.0",
         "@nestjs/platform-express": "^11.0.1",
         "@nestjs/typeorm": "^11.0.0",
-        "@rncp/types": "workspace:^1.0.0",
+        "@sentry/integrations": "^7.114.0",
+        "@sentry/node": "^10.5.0",
+        "@sentry/profiling-node": "^10.5.0",
         "axios": "^1.7.9",
         "bcrypt": "^5.1.1",
         "class-transformer": "^0.5.1",
@@ -62,6 +88,7 @@
         "@types/passport-jwt": "^4.0.1",
         "@types/passport-local": "^1.0.38",
         "@types/supertest": "^6.0.2",
+        "concurrently": "^9.2.0",
         "eslint": "^9.18.0",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-prettier": "^5.2.2",
@@ -70,35 +97,11 @@
         "prettier": "^3.4.2",
         "source-map-support": "^0.5.21",
         "supertest": "^7.0.0",
-        "ts-jest": "^29.2.5",
+        "ts-jest": "^29.4.1",
         "ts-loader": "^9.5.2",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.20.0"
-    },
-    "jest": {
-        "moduleFileExtensions": [
-            "js",
-            "json",
-            "ts"
-        ],
-        "rootDir": "src",
-        "testRegex": ".*\\.spec\\.ts$",
-        "transform": {
-            "^.+\\.(t|j)s$": "ts-jest"
-        },
-        "collectCoverageFrom": [
-            "**/*.(t|j)s"
-        ],
-        "coverageDirectory": "../coverage",
-        "testEnvironment": "node",
-        "moduleNameMapper": {
-            "^@rncp/types$": "<rootDir>/../../../tools/types"
-        },
-        "moduleDirectories": [
-            "node_modules",
-            "<rootDir>"
-        ]
     }
 }

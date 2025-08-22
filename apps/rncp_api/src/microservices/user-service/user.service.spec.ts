@@ -5,7 +5,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { User } from '../../entities';
-import { UpdateUserDto, UserRole } from '@rncp/types';
+import { UpdateUserDto, UserRole } from '../../types';
 
 describe('UserService', () => {
     let service: UserService;

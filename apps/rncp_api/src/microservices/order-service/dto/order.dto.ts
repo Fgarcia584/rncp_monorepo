@@ -6,14 +6,25 @@ import {
     IsDateString,
     IsNumber,
     Min,
+    ValidateNested,
+    IsLatitude,
+    IsLongitude,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
     CreateOrderRequest,
     UpdateOrderRequest,
     OrderPriority,
     OrderStatus,
-} from '@rncp/types';
+} from '../../../types';
+
+export class CoordinatesDto {
+    @IsLatitude()
+    latitude: number;
+
+    @IsLongitude()
+    longitude: number;
+}
 
 export class CreateOrderDto implements CreateOrderRequest {
     @IsString()
@@ -27,6 +38,11 @@ export class CreateOrderDto implements CreateOrderRequest {
     @IsString()
     @IsNotEmpty()
     deliveryAddress: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => CoordinatesDto)
+    deliveryCoordinates?: CoordinatesDto;
 
     @IsDateString()
     scheduledDeliveryTime: Date;
@@ -60,6 +76,11 @@ export class UpdateOrderDto implements UpdateOrderRequest {
     @IsString()
     @IsNotEmpty()
     deliveryAddress?: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => CoordinatesDto)
+    deliveryCoordinates?: CoordinatesDto;
 
     @IsOptional()
     @IsDateString()

@@ -3,7 +3,7 @@ services:
     rncp-pwa-front:
         build:
             context: .
-            dockerfile: ./apps/rncp_PWA_front/Dockerfile
+            dockerfile: ./apps/rncp_PWA_front/Dockerfile.local
         ports:
             - '${FRONTEND_PORT}:${FRONTEND_INTERNAL_PORT}'
         env_file: .env
@@ -14,28 +14,23 @@ services:
             timeout: 10s
             retries: 3
             start_period: 40s
+        depends_on:
+            - rncp-api-gateway
 
     # API Gateway (Main API)
     rncp-api-gateway:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile
+            dockerfile: ./apps/rncp_api/Dockerfile.local
         ports:
             - '${API_GATEWAY_PORT}:${API_GATEWAY_INTERNAL_PORT}'
         env_file: .env
         environment:
             - PORT=${API_GATEWAY_INTERNAL_PORT}
+            - DOCKER_ENV=true
         restart: unless-stopped
         healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--quiet',
-                    '--tries=1',
-                    '--spider',
-                    'http://localhost:${API_GATEWAY_INTERNAL_PORT}/health',
-                ]
+            test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/health']
             interval: 30s
             timeout: 10s
             retries: 3
@@ -48,7 +43,7 @@ services:
     rncp-user-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile
+            dockerfile: ./apps/rncp_api/Dockerfile.user-service.local
         ports:
             - '${USER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -78,7 +73,7 @@ services:
     rncp-auth-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.auth-service
+            dockerfile: ./apps/rncp_api/Dockerfile.auth-service.local
         ports:
             - '${AUTH_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -107,7 +102,7 @@ services:
     rncp-order-service:
         build:
             context: .
-            dockerfile: ./apps/rncp_api/Dockerfile.order-service
+            dockerfile: ./apps/rncp_api/Dockerfile.order-service.local
         ports:
             - '${ORDER_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
         env_file: .env
@@ -117,13 +112,36 @@ services:
         restart: unless-stopped
         healthcheck:
             test:
+                ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:${SERVICE_INTERNAL_PORT}/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            - redis
+            - postgres
+
+    # Geo Microservice
+    rncp-geo-service:
+        build:
+            context: .
+            dockerfile: ./apps/rncp_api/Dockerfile.geo-service.local
+        ports:
+            - '${GEO_SERVICE_PORT}:${SERVICE_INTERNAL_PORT}'
+        env_file: .env
+        environment:
+            - PORT=${SERVICE_INTERNAL_PORT}
+            - SERVICE_NAME=geo-service
+        restart: unless-stopped
+        healthcheck:
+            test:
                 [
                     'CMD',
                     'wget',
                     '--quiet',
                     '--tries=1',
                     '--spider',
-                    'http://localhost:${SERVICE_INTERNAL_PORT}/orders/health',
+                    'http://localhost:${SERVICE_INTERNAL_PORT}/geo/health',
                 ]
             interval: 30s
             timeout: 10s

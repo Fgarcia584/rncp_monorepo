@@ -2,8 +2,12 @@
 import './authApi';
 import './userApi';
 import './orderApi';
+import './geoApi';
+import './trackingApi';
 
 export * from './authApi';
 export * from './userApi';
 export * from './orderApi';
+export * from './geoApi';
+export * from './trackingApi';
 export * from './baseApi';
