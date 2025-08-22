@@ -1,8 +1,31 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { GatewayModule } from './gateway/gateway.module';
+import { initSentry } from './sentry/sentry.config';
+import { SentryExceptionFilter } from './common/filters/sentry-exception.filter';
+import { SentryInterceptor } from './common/interceptors/sentry.interceptor';
+
+// Initialize Sentry as early as possible
+initSentry();
 
 async function bootstrap() {
     const app = await NestFactory.create(GatewayModule);
+
+    // Global validation pipe
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+            disableErrorMessages: false,
+        }),
+    );
+
+    // Global Sentry exception filter
+    app.useGlobalFilters(new SentryExceptionFilter());
+
+    // Global Sentry interceptor for performance monitoring
+    app.useGlobalInterceptors(new SentryInterceptor());
 
     // Enable CORS for cross-origin requests
     app.enableCors({

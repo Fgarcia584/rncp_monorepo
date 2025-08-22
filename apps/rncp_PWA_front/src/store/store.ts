@@ -5,6 +5,7 @@ import { trackingApi } from './api/trackingApi';
 // Import all APIs to ensure endpoints are injected
 import './api';
 import authReducer from './slices/authSlice';
+import { sentryMiddleware } from './middleware/sentryMiddleware';
 
 const store = configureStore({
     reducer: {
@@ -23,7 +24,7 @@ const store = configureStore({
                     'persist/REGISTER',
                 ],
             },
-        }).concat(baseApi.middleware, trackingApi.middleware),
+        }).concat(baseApi.middleware, trackingApi.middleware, sentryMiddleware),
 });
 
 setupListeners(store.dispatch);
