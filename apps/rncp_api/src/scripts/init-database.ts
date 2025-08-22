@@ -54,8 +54,7 @@ async function initDatabase() {
             return;
         }
 
-        console.log('📝 Vérification que les tables existent...');
-        // Note: Les tables doivent déjà exister (créées par migrations ou init-schema)
+        console.log('📝 Les tables sont automatiquement créées par TypeORM synchronize...');
 
         console.log('👥 Création des utilisateurs de test...');
 

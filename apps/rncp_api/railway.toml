@@ -2,8 +2,6 @@
 builder = "nixpacks"
 
 [deploy]
-# Pour créer le schéma de base de données :
-# railway run npm run db:schema:prod
 # Pour peupler la DB avec des données de test :
 # railway run npm run db:seed:prod
 startCommand = "npm run build:railway-full && npm run start:railway-full"
