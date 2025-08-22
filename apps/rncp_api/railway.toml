@@ -1,12 +1,13 @@
 [build]
 builder = "nixpacks"
+buildCommand = "node prepare-railway.js && npm run prebuild && npm i"
 
 [deploy]
 # Pour créer les comptes utilisateurs de base :
 # railway run --service back npm run db:roles:prod
 # Pour peupler la DB avec des données de test :
 # railway run --service back npm run db:seed:prod
-startCommand = "npm run build:railway-full && (npm run db:roles:prod || echo 'Role creation skipped - will be available after next deployment') && npm run start:railway-full"
+startCommand = "node prepare-railway.js && npm run build:railway-full && (npm run db:roles:prod || echo 'Role creation skipped - will be available after next deployment') && npm run start:railway-full"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 
