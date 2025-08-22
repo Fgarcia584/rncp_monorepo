@@ -76,8 +76,8 @@ export default defineConfig({
             injectRegister: false,
 
             pwaAssets: {
-                disabled: false,
-                config: true,
+                disabled: true,
+                config: false,
             },
 
             manifest: {
@@ -85,6 +85,17 @@ export default defineConfig({
                 short_name: 'rncp_PWA_front',
                 description: 'rncp_PWA_front',
                 theme_color: '#ffffff',
+                background_color: '#ffffff',
+                display: 'standalone',
+                start_url: '/',
+                icons: [
+                    {
+                        src: '/favicon.svg',
+                        sizes: 'any',
+                        type: 'image/svg+xml',
+                        purpose: 'any maskable',
+                    },
+                ],
             },
 
             workbox: {
