@@ -1,6 +1,5 @@
 [build]
-builder = "dockerfile"
-dockerfilePath = "apps/rncp_PWA_front/Dockerfile"
+builder = "nixpacks"
 
 [deploy]
 healthcheckPath = "/"
