@@ -29,17 +29,28 @@ import { JwtStrategy } from './microservices/auth-service/strategies/jwt.strateg
             isGlobal: true,
             envFilePath: ['.env.local', '.env'],
         }),
-        TypeOrmModule.forRoot({
-            type: 'postgres',
-            host: process.env.DB_HOST || 'localhost',
-            port: parseInt(process.env.DB_PORT || '5432', 10),
-            username: process.env.DB_USER || 'rncp_user',
-            password: process.env.DB_PASSWORD || 'rncp_password',
-            database: process.env.DB_NAME || 'rncp_db',
-            entities: [User, RefreshToken, Order],
-            synchronize: process.env.NODE_ENV !== 'production',
-            logging: process.env.NODE_ENV !== 'production',
-        }),
+        TypeOrmModule.forRoot(
+            process.env.DATABASE_URL
+                ? {
+                      type: 'postgres',
+                      url: process.env.DATABASE_URL,
+                      entities: [User, RefreshToken, Order],
+                      synchronize: true, // Crée automatiquement les tables
+                      logging: process.env.NODE_ENV !== 'production',
+                      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                  }
+                : {
+                      type: 'postgres',
+                      host: process.env.DB_HOST || 'localhost',
+                      port: parseInt(process.env.DB_PORT || '5432', 10),
+                      username: process.env.DB_USER || 'rncp_user',
+                      password: process.env.DB_PASSWORD || 'rncp_password',
+                      database: process.env.DB_NAME || 'rncp_db',
+                      entities: [User, RefreshToken, Order],
+                      synchronize: process.env.NODE_ENV !== 'production',
+                      logging: process.env.NODE_ENV !== 'production',
+                  },
+        ),
         TypeOrmModule.forFeature([User, RefreshToken, Order]),
         JwtModule.register({
             secret: process.env.JWT_SECRET || 'your-default-secret-key',
