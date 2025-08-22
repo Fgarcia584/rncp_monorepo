@@ -27,7 +27,7 @@ export default defineConfig({
     preview: {
         host: '0.0.0.0',
         port: 3000,
-        allowedHosts: ['healthcheck.railway.app', 'localhost', '0.0.0.0'],
+        allowedHosts: true, // Allow all hosts for Railway deployment
     },
     server: {
         host: '0.0.0.0', // Allow access from network
