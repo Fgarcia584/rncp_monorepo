@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { User, RefreshToken, Order } from './entities';
 
 // Import all microservice controllers directly
 import { AuthController } from './microservices/auth-service/auth.controller';
@@ -26,21 +28,31 @@ import { JwtStrategy } from './microservices/auth-service/strategies/jwt.strateg
             isGlobal: true,
             envFilePath: ['.env.local', '.env'],
         }),
+        TypeOrmModule.forRoot({
+            type: 'postgres',
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT || '5432', 10),
+            username: process.env.DB_USER || 'rncp_user',
+            password: process.env.DB_PASSWORD || 'rncp_password',
+            database: process.env.DB_NAME || 'rncp_db',
+            entities: [User, RefreshToken, Order],
+            synchronize: process.env.NODE_ENV !== 'production',
+            logging: process.env.NODE_ENV !== 'production',
+        }),
+        TypeOrmModule.forFeature([User, RefreshToken, Order]),
         JwtModule.register({
             secret: process.env.JWT_SECRET || 'your-default-secret-key',
             signOptions: { expiresIn: '1h' },
         }),
-        // Note: Pas de TypeORM pour éviter les problèmes de DB sur Railway
-        // Si vous voulez ajouter la DB, décommentez AppModule complet
     ],
     controllers: [
-        AppController,     // /health endpoint principal
-        AuthController,    // /auth/* endpoints
-        UserController,    // /users/* endpoints  
-        OrderController,   // /orders/* endpoints
-        GeoController,     // /geo/* endpoints
-        TrackingController,// /tracking/* endpoints
-        HealthController,  // /orders/health endpoint supplémentaire
+        AppController, // /health endpoint principal
+        AuthController, // /auth/* endpoints
+        UserController, // /users/* endpoints
+        OrderController, // /orders/* endpoints
+        GeoController, // /geo/* endpoints
+        TrackingController, // /tracking/* endpoints
+        HealthController, // /orders/health endpoint supplémentaire
     ],
     providers: [
         AppService,
