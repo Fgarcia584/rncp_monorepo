@@ -50,16 +50,22 @@ export class GatewayService {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Internal-Service': 'gateway',
-                    ...headers, // Forward original headers including Authorization
+                    // Forward only essential headers to avoid conflicts
+                    ...(headers.authorization && {
+                        Authorization: headers.authorization,
+                    }),
+                    ...(headers.accept && { Accept: headers.accept }),
+                    ...(headers['accept-language'] && {
+                        'Accept-Language': headers['accept-language'],
+                    }),
+                    ...(headers['user-agent'] && {
+                        'User-Agent': headers['user-agent'],
+                    }),
+                    // Don't forward problematic headers like host, content-length, connection, etc.
                 },
                 timeout: 30000,
             });
 
-            // const endTime = Date.now();
-            // console.log(`📨 [${requestId}] Gateway received response at ${endTime} (${endTime - startTime}ms total)`);
-            console.log(
-                `📨  Gateway response: STATUS ${response.status} from ${fullUrl}`,
-            );
             // console.log(`📤 [${requestId}] Response headers:`, response.headers);
             // console.log(`📤 [${requestId}] Response data type:`, typeof response.data);
             // console.log(`📤 [${requestId}] Response data length:`, response.data ? JSON.stringify(response.data).length : 'null');
@@ -83,19 +89,49 @@ export class GatewayService {
                 headers: response.headers,
             };
         } catch (error) {
+            console.error(`Gateway service error for ${service}:`, {
+                url: fullUrl,
+                method: method,
+                errorType: error.code || 'unknown',
+                message: error.message,
+            });
+
             if (error.response) {
-                // Erreur HTTP du microservice
+                // Erreur HTTP du microservice - propager exactement la réponse
                 throw {
                     status: error.response.status,
                     message: error.response.data?.message || error.message,
                     data: error.response.data,
                 };
-            } else {
-                // Erreur de connectivité
+            } else if (
+                error.code === 'ECONNREFUSED' ||
+                error.code === 'ENOTFOUND'
+            ) {
+                // Erreur de connectivité spécifique
                 throw {
                     status: 503,
                     message: `Service ${service} unavailable`,
-                    data: { error: error.message },
+                    data: {
+                        error: `Cannot connect to ${service} service`,
+                        code: error.code,
+                    },
+                };
+            } else if (error.code === 'ECONNABORTED') {
+                // Timeout
+                throw {
+                    status: 504,
+                    message: `Service ${service} timeout`,
+                    data: {
+                        error: `Request to ${service} service timed out`,
+                        timeout: 30000,
+                    },
+                };
+            } else {
+                // Autres erreurs
+                throw {
+                    status: 502,
+                    message: `Gateway error communicating with ${service}`,
+                    data: { error: error.message, code: error.code },
                 };
             }
         }

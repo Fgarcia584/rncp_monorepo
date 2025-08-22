@@ -64,7 +64,7 @@ export class GatewayController {
                 }
             });
 
-            res.status(result.status).json(result.data);
+            return res.status(result.status).json(result.data);
         } catch (error) {
             console.error(`Gateway error for ${service}:`, error);
 
@@ -72,7 +72,7 @@ export class GatewayController {
             const message = error.message || 'Internal gateway error';
             const data = error.data || { error: message };
 
-            res.status(status).json(data);
+            return res.status(status).json(data);
         }
     }
 }
