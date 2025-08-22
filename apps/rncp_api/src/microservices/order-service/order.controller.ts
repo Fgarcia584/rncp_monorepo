@@ -12,6 +12,7 @@ import {
     ParseIntPipe,
     DefaultValuePipe,
     ForbiddenException,
+    BadRequestException,
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
@@ -28,19 +29,45 @@ export class OrderController {
 
     @Post()
     create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+        // Debug logging
+        console.log('🔍 Order creation debug:');
+        console.log('  req.user:', JSON.stringify(req.user, null, 2));
+        console.log('  req.user.userId:', req.user?.userId);
+        console.log('  req.user.role:', req.user?.role);
+        
         // Only merchants can create orders
         if (req.user.role !== UserRole.MERCHANT) {
             throw new ForbiddenException('Only merchants can create orders');
         }
+        
+        // Additional validation for merchantId
+        if (!req.user.userId) {
+            console.error('❌ merchantId is null/undefined');
+            throw new BadRequestException('User ID is missing from authentication token');
+        }
+        
         return this.orderService.create(req.user.userId, createOrderDto);
     }
 
     @Post('create')
     createOrder(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+        // Debug logging
+        console.log('🔍 Order creation debug (create endpoint):');
+        console.log('  req.user:', JSON.stringify(req.user, null, 2));
+        console.log('  req.user.userId:', req.user?.userId);
+        console.log('  req.user.role:', req.user?.role);
+        
         // Only merchants can create orders
         if (req.user.role !== UserRole.MERCHANT) {
             throw new ForbiddenException('Only merchants can create orders');
         }
+        
+        // Additional validation for merchantId
+        if (!req.user.userId) {
+            console.error('❌ merchantId is null/undefined');
+            throw new BadRequestException('User ID is missing from authentication token');
+        }
+        
         return this.orderService.create(req.user.userId, createOrderDto);
     }
 
