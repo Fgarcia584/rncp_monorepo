@@ -11,10 +11,17 @@ export class AppController {
     }
 
     @Get('health')
-    getHealth(): { status: string; timestamp: string } {
+    getHealth() {
+        return { status: 'ok' };
+    }
+
+    @Get('health/detailed')
+    getDetailedHealth(): { status: string; timestamp: string; service: string; environment: string } {
         return {
             status: 'ok',
             timestamp: new Date().toISOString(),
+            service: 'rncp-api-gateway',
+            environment: process.env.NODE_ENV || 'development',
         };
     }
 }

@@ -11,7 +11,7 @@ const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD || 'rncp_password',
     database: process.env.DB_NAME || 'rncp_db',
     entities: [User, RefreshToken, Order],
-    migrations: ['dist/migrations/*.js'],
+    migrations: [__dirname + '/migrations/*.js'],
     synchronize: false,
     logging: process.env.NODE_ENV !== 'production',
 });

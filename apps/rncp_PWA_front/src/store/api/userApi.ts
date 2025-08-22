@@ -1,5 +1,5 @@
 import { baseApi } from './baseApi';
-import type { User, UpdateUserDto } from '@rncp/types';
+import type { User, UpdateUserDto } from '../../types';
 
 export const userApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({

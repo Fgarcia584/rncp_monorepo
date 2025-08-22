@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { RefreshToken } from './refresh-token.entity';
-import { UserRole } from '@rncp/types';
+import { UserRole } from '../types';
 
 @Entity('users')
 export class User {

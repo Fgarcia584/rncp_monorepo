@@ -6,9 +6,10 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: '/',
     resolve: {
         alias: {
-            '@rncp/types': path.resolve(__dirname, '../../tools/dist/esm'),
+            '@rncp/types': path.resolve(__dirname, './src/types/index.ts'),
         },
     },
     build: {
@@ -23,12 +24,32 @@ export default defineConfig({
             transformMixedEsModules: true,
         },
     },
+    preview: {
+        host: '0.0.0.0',
+        port: 3000,
+        allowedHosts: true, // Allow all hosts for Railway deployment
+    },
     server: {
+        host: '0.0.0.0', // Allow access from network
+        port: 3000,
         proxy: {
             '/api': {
-                target: 'http://localhost:3000',
+                target: 'http://localhost:3001',
                 changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
+                secure: false,
+                configure: (proxy) => {
+                    proxy.on('error', (err) => {
+                        console.log('Proxy error:', err);
+                    });
+                    proxy.on('proxyReq', (_proxyReq, req) => {
+                        console.log('Sending Request to the Target:', req.method, req.url);
+                    });
+                    proxy.on('proxyRes', (proxyRes, req) => {
+                        console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+                    });
+                },
+                // Ne pas retirer le /api pour correspondre aux routes de l'API Gateway NestJS
+                // rewrite: (path) => path.replace(/^\/api/, ''),
             },
         },
         fs: {
@@ -60,8 +81,8 @@ export default defineConfig({
             injectRegister: 'auto',
             
             pwaAssets: {
-                disabled: false,
-                config: true,
+                disabled: true,
+                config: false,
             },
 
             manifest: {
@@ -76,7 +97,14 @@ export default defineConfig({
                 orientation: 'portrait-primary',
                 categories: ['business', 'productivity'],
                 lang: 'fr',
-                // Les icônes seront générées automatiquement par pwaAssets
+                icons: [
+                    {
+                        src: '/favicon.svg',
+                        sizes: 'any',
+                        type: 'image/svg+xml',
+                        purpose: 'any maskable',
+                    },
+                ],
             },
 
             workbox: {
