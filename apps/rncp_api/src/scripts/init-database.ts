@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { Order } from '../entities/order.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { UserRole, OrderStatus, OrderPriority } from '@rncp/types';
+import { UserRole, OrderStatus, OrderPriority } from '../types';
 
 // Configuration de la connexion à la base de données
 const AppDataSource = new DataSource({

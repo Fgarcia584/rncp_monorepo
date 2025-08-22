@@ -16,7 +16,7 @@ import {
     UpdateOrderRequest,
     OrderPriority,
     OrderStatus,
-} from '@rncp/types';
+} from '../../../types';
 
 export class CoordinatesDto {
     @IsLatitude()

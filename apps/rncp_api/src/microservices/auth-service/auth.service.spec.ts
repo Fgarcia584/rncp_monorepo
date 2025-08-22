@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User, RefreshToken } from '../../entities';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto/auth.dto';
-import { UserRole, JwtPayload } from '@rncp/types';
+import { UserRole, JwtPayload } from '../../types';
 
 // Mock bcrypt
 jest.mock('bcrypt');

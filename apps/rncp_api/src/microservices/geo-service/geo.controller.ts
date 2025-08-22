@@ -16,7 +16,7 @@ import {
     DistanceMatrixRequest,
     DistanceMatrixResponse,
     Coordinates,
-} from '@rncp/types';
+} from '../../types';
 
 @Controller('geo')
 export class GeoController {

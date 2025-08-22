@@ -13,7 +13,7 @@ import {
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth-service/guards/jwt-auth.guard';
 import { Public } from '../auth-service/decorators/public.decorator';
-import { User, UserRole, JwtPayload } from '@rncp/types';
+import { User, UserRole, JwtPayload } from '../../types';
 import { Roles, RolesGuard, CurrentUser } from '../../common';
 import {
     CreateUserRequestDto,

@@ -3,7 +3,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
-import { OrderStatus, OrderPriority, UserRole } from '@rncp/types';
+import { OrderStatus, OrderPriority, UserRole } from '../../types';
 
 describe('OrderController', () => {
     let controller: OrderController;

@@ -6,7 +6,7 @@ import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { Order } from '../../entities';
 import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
-import { OrderStatus, OrderPriority, UserRole } from '@rncp/types';
+import { OrderStatus, OrderPriority, UserRole } from '../../types';
 
 describe('OrderService', () => {
     let service: OrderService;

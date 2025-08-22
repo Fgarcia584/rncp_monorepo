@@ -4,7 +4,7 @@ import {
     DeliveryTrackingEvent,
     Position,
     Coordinates,
-} from '@rncp/types';
+} from '../../types';
 import { GeoService } from './geo.service';
 
 @Injectable()

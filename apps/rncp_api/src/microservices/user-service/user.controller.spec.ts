@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { UserRole, JwtPayload, User } from '@rncp/types';
+import { UserRole, JwtPayload, User } from '../../types';
 import {
     CreateUserRequestDto,
     UpdateUserRequestDto,

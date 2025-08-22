@@ -12,7 +12,7 @@ import {
     OrderPriority,
     UserRole,
     OrderResponse,
-} from '@rncp/types';
+} from '../../types';
 
 @Injectable()
 export class OrderService {

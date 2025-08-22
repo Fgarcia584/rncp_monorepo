@@ -6,7 +6,7 @@ import {
     IsEnum,
     IsOptional,
 } from 'class-validator';
-import { LoginRequest, RegisterRequest, UserRole } from '@rncp/types';
+import { LoginRequest, RegisterRequest, UserRole } from '../../../types';
 
 export class LoginDto implements LoginRequest {
     @IsEmail()

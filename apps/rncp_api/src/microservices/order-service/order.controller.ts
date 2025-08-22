@@ -19,7 +19,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { OrderService } from './order.service';
 import { CreateOrderDto, UpdateOrderDto, OrderFilters } from './dto/order.dto';
-import { OrderStatus, OrderPriority, UserRole } from '@rncp/types';
+import { OrderStatus, OrderPriority, UserRole } from '../../types';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)

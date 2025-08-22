@@ -15,7 +15,7 @@ import {
     DeliveryTrackingEvent,
     Position,
     Coordinates,
-} from '@rncp/types';
+} from '../../types';
 
 @Controller('tracking')
 export class TrackingController {

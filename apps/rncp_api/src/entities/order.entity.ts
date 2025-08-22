@@ -7,7 +7,7 @@ import {
     ManyToOne,
     JoinColumn,
 } from 'typeorm';
-import { OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderStatus, OrderPriority } from '../types';
 import { User } from './user.entity';
 
 @Entity('orders')

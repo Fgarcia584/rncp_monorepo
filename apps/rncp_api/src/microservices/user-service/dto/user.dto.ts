@@ -5,7 +5,7 @@ import {
     IsEnum,
     IsOptional,
 } from 'class-validator';
-import { CreateUserDto, UpdateUserDto, UserRole } from '@rncp/types';
+import { CreateUserDto, UpdateUserDto, UserRole } from '../../../types';
 
 export class CreateUserRequestDto implements CreateUserDto {
     @IsString()

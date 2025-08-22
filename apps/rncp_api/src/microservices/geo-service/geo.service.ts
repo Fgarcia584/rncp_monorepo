@@ -21,7 +21,7 @@ import {
     DistanceMatrixRequest as CustomDistanceMatrixRequest,
     DistanceMatrixResponse as CustomDistanceMatrixResponse,
     TravelModeType,
-} from '@rncp/types';
+} from '../../types';
 
 @Injectable()
 export class GeoService {
