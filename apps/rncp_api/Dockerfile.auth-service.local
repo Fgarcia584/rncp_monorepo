@@ -82,4 +82,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the auth service from the API directory
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/src/auth-main.js"]
+CMD ["node", "dist/apps/rncp_api/src/auth-main.js"]
