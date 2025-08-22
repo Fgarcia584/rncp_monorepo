@@ -16,3 +16,5 @@ DB_PORT = "5432"
 DB_USER = "postgres"
 DB_PASSWORD = "password"
 DB_NAME = "rncp_db"
+# Frontend URL for CORS configuration (optional - regex fallback will catch all Railway URLs)
+FRONTEND_URL = "https://front-production-9bbd.up.railway.app"
