@@ -8,11 +8,11 @@ export class GatewayController {
 
     @Get('health')
     getHealth() {
-        return { 
+        return {
             status: 'ok',
             timestamp: new Date().toISOString(),
             service: 'rncp-api-gateway',
-            environment: process.env.NODE_ENV || 'development'
+            environment: process.env.NODE_ENV || 'development',
         };
     }
 

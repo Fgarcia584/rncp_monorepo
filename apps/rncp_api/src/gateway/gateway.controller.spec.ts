@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Request, Response } from 'express';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 
 describe('GatewayController', () => {
     let controller: GatewayController;
-    let gatewayService: GatewayService;
+    // let gatewayService: GatewayService;
 
     const mockGatewayService = {
         proxyRequest: jest.fn(),
@@ -22,7 +23,7 @@ describe('GatewayController', () => {
         }).compile();
 
         controller = module.get<GatewayController>(GatewayController);
-        gatewayService = module.get<GatewayService>(GatewayService);
+        // gatewayService = module.get<GatewayService>(GatewayService);
     });
 
     afterEach(() => {
@@ -52,13 +53,13 @@ describe('GatewayController', () => {
                 url: '/auth/login',
                 body: { email: 'test@example.com', password: 'password' },
                 headers: { 'content-type': 'application/json' },
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const mockResponse = {
                 status: 200,
@@ -88,13 +89,13 @@ describe('GatewayController', () => {
                 method: 'GET',
                 url: '/users/profile',
                 headers: { authorization: 'Bearer token' },
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const mockResponse = {
                 status: 200,
@@ -125,13 +126,13 @@ describe('GatewayController', () => {
                 url: '/orders/123',
                 body: { status: 'delivered' },
                 headers: { authorization: 'Bearer token' },
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const mockResponse = {
                 status: 200,
@@ -162,13 +163,13 @@ describe('GatewayController', () => {
                 url: '/geo/geocode',
                 body: { address: '1 rue de la Paix, Paris' },
                 headers: { 'content-type': 'application/json' },
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const mockResponse = {
                 status: 200,
@@ -188,7 +189,10 @@ describe('GatewayController', () => {
                 req.headers,
             );
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith({ latitude: 48.8566, longitude: 2.3522 });
+            expect(res.json).toHaveBeenCalledWith({
+                latitude: 48.8566,
+                longitude: 2.3522,
+            });
         });
     });
 
@@ -198,17 +202,20 @@ describe('GatewayController', () => {
                 method: 'GET',
                 url: '/tracking/order-123',
                 headers: { authorization: 'Bearer token' },
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const mockResponse = {
                 status: 200,
-                data: { orderId: 'order-123', location: { lat: 48.8566, lng: 2.3522 } },
+                data: {
+                    orderId: 'order-123',
+                    location: { lat: 48.8566, lng: 2.3522 },
+                },
                 headers: {},
             };
 
@@ -224,7 +231,10 @@ describe('GatewayController', () => {
                 req.headers,
             );
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith({ orderId: 'order-123', location: { lat: 48.8566, lng: 2.3522 } });
+            expect(res.json).toHaveBeenCalledWith({
+                orderId: 'order-123',
+                location: { lat: 48.8566, lng: 2.3522 },
+            });
         });
     });
 
@@ -234,13 +244,13 @@ describe('GatewayController', () => {
                 method: 'GET',
                 url: '/auth/profile',
                 headers: {},
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const error = {
                 status: 401,
@@ -261,13 +271,13 @@ describe('GatewayController', () => {
                 method: 'GET',
                 url: '/users/profile',
                 headers: {},
-            } as any;
+            } as unknown as Request & Response;
 
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
                 setHeader: jest.fn(),
-            } as any;
+            } as unknown as Request & Response;
 
             const error = new Error('Network error');
 

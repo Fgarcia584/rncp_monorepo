@@ -8,7 +8,7 @@ import { UserRole } from '../../../types';
 
 describe('JwtStrategy', () => {
     let strategy: JwtStrategy;
-    let authService: AuthService;
+    // let authService: AuthService;
 
     const mockAuthService = {
         validateUser: jest.fn(),
@@ -26,7 +26,7 @@ describe('JwtStrategy', () => {
         }).compile();
 
         strategy = module.get<JwtStrategy>(JwtStrategy);
-        authService = module.get<AuthService>(AuthService);
+        // authService = module.get<AuthService>(AuthService);
     });
 
     afterEach(() => {

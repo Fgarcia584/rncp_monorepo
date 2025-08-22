@@ -29,14 +29,16 @@ describe('GeoService', () => {
 
     describe('constructor', () => {
         it('should initialize with config service', () => {
-            expect(configService.get).toHaveBeenCalledWith('GOOGLE_MAPS_API_KEY');
+            expect(configService.get).toHaveBeenCalledWith(
+                'GOOGLE_MAPS_API_KEY',
+            );
         });
     });
 
     describe('Error handling', () => {
         it('should handle missing API key gracefully', async () => {
             jest.spyOn(configService, 'get').mockReturnValue(undefined);
-            
+
             const newModule = await Test.createTestingModule({
                 providers: [
                     GeoService,

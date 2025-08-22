@@ -6,10 +6,7 @@ import {
     isValidRole,
 } from './role.types';
 
-import {
-    OrderStatus,
-    OrderPriority,
-} from './order.types';
+import { OrderStatus, OrderPriority } from './order.types';
 
 describe('Role Types', () => {
     describe('UserRole enum', () => {
@@ -35,7 +32,8 @@ describe('Role Types', () => {
         });
 
         it('should give logistics technicians appropriate permissions', () => {
-            const techPermissions = ROLE_PERMISSIONS[UserRole.LOGISTICS_TECHNICIAN];
+            const techPermissions =
+                ROLE_PERMISSIONS[UserRole.LOGISTICS_TECHNICIAN];
 
             expect(techPermissions.canAccessUserManagement).toBe(false);
             expect(techPermissions.canAccessGlobalStats).toBe(true);
@@ -59,11 +57,14 @@ describe('Role Types', () => {
         });
 
         it('should give delivery persons minimal permissions', () => {
-            const deliveryPermissions = ROLE_PERMISSIONS[UserRole.DELIVERY_PERSON];
+            const deliveryPermissions =
+                ROLE_PERMISSIONS[UserRole.DELIVERY_PERSON];
 
             expect(deliveryPermissions.canAccessUserManagement).toBe(false);
             expect(deliveryPermissions.canAccessGlobalStats).toBe(false);
-            expect(deliveryPermissions.canAccessInventoryManagement).toBe(false);
+            expect(deliveryPermissions.canAccessInventoryManagement).toBe(
+                false,
+            );
             expect(deliveryPermissions.canAccessOrderManagement).toBe(false);
             expect(deliveryPermissions.canAccessDeliveryManagement).toBe(true);
             expect(deliveryPermissions.canAccessReports).toBe(false);
@@ -73,28 +74,50 @@ describe('Role Types', () => {
 
     describe('hasPermission', () => {
         it('should return true when role has permission', () => {
-            const result = hasPermission(UserRole.ADMIN, 'canAccessUserManagement');
+            const result = hasPermission(
+                UserRole.ADMIN,
+                'canAccessUserManagement',
+            );
             expect(result).toBe(true);
         });
 
         it('should return false when role does not have permission', () => {
-            const result = hasPermission(UserRole.DELIVERY_PERSON, 'canAccessUserManagement');
+            const result = hasPermission(
+                UserRole.DELIVERY_PERSON,
+                'canAccessUserManagement',
+            );
             expect(result).toBe(false);
         });
 
         it('should work with all permission types', () => {
-            expect(hasPermission(UserRole.MERCHANT, 'canAccessOrderManagement')).toBe(true);
-            expect(hasPermission(UserRole.LOGISTICS_TECHNICIAN, 'canAccessInventoryManagement')).toBe(true);
-            expect(hasPermission(UserRole.DELIVERY_PERSON, 'canAccessDeliveryManagement')).toBe(true);
+            expect(
+                hasPermission(UserRole.MERCHANT, 'canAccessOrderManagement'),
+            ).toBe(true);
+            expect(
+                hasPermission(
+                    UserRole.LOGISTICS_TECHNICIAN,
+                    'canAccessInventoryManagement',
+                ),
+            ).toBe(true);
+            expect(
+                hasPermission(
+                    UserRole.DELIVERY_PERSON,
+                    'canAccessDeliveryManagement',
+                ),
+            ).toBe(true);
         });
     });
 
     describe('getRoleDisplayName', () => {
         it('should return correct display names for all roles', () => {
             expect(getRoleDisplayName(UserRole.ADMIN)).toBe('Administrateur');
-            expect(getRoleDisplayName(UserRole.LOGISTICS_TECHNICIAN)).toBe('Technicien Logistique');
+            expect(getRoleDisplayName(UserRole.LOGISTICS_TECHNICIAN)).toBe(
+                'Technicien Logistique',
+            );
             expect(getRoleDisplayName(UserRole.MERCHANT)).toBe('Commerçant');
-            expect(getRoleDisplayName(UserRole.DELIVERY_PERSON)).toBe('Livreur');
+            expect(getRoleDisplayName(UserRole.DELIVERY_PERSON)).toBe(
+                'Livreur',
+            );
         });
 
         it('should return default for unknown role', () => {
@@ -114,8 +137,8 @@ describe('Role Types', () => {
         it('should return false for invalid roles', () => {
             expect(isValidRole('invalid_role')).toBe(false);
             expect(isValidRole('')).toBe(false);
-            expect(isValidRole(null as any)).toBe(false);
-            expect(isValidRole(undefined as any)).toBe(false);
+            expect(isValidRole(null as unknown as string)).toBe(false);
+            expect(isValidRole(undefined as unknown as string)).toBe(false);
         });
     });
 
@@ -129,7 +152,13 @@ describe('Role Types', () => {
         });
 
         it('should contain all expected statuses', () => {
-            const expectedStatuses = ['pending', 'accepted', 'in_transit', 'delivered', 'cancelled'];
+            const expectedStatuses = [
+                'pending',
+                'accepted',
+                'in_transit',
+                'delivered',
+                'cancelled',
+            ];
             const actualStatuses = Object.values(OrderStatus);
 
             expect(actualStatuses).toHaveLength(expectedStatuses.length);
@@ -143,7 +172,9 @@ describe('Role Types', () => {
             expect(testStatus).toBe('pending');
 
             const isValidStatus = (status: string): status is OrderStatus => {
-                return Object.values(OrderStatus).includes(status as OrderStatus);
+                return Object.values(OrderStatus).includes(
+                    status as OrderStatus,
+                );
             };
 
             expect(isValidStatus('pending')).toBe(true);
@@ -159,7 +190,12 @@ describe('Role Types', () => {
                 OrderStatus.DELIVERED,
             ];
 
-            expect(workflowOrder).toEqual(['pending', 'accepted', 'in_transit', 'delivered']);
+            expect(workflowOrder).toEqual([
+                'pending',
+                'accepted',
+                'in_transit',
+                'delivered',
+            ]);
         });
     });
 
@@ -185,8 +221,12 @@ describe('Role Types', () => {
             const testPriority: OrderPriority = OrderPriority.HIGH;
             expect(testPriority).toBe('high');
 
-            const isValidPriority = (priority: string): priority is OrderPriority => {
-                return Object.values(OrderPriority).includes(priority as OrderPriority);
+            const isValidPriority = (
+                priority: string,
+            ): priority is OrderPriority => {
+                return Object.values(OrderPriority).includes(
+                    priority as OrderPriority,
+                );
             };
 
             expect(isValidPriority('high')).toBe(true);
@@ -195,7 +235,12 @@ describe('Role Types', () => {
 
         it('should support priority ordering', () => {
             // Test that priorities can be ordered logically
-            const priorityOrder = [OrderPriority.LOW, OrderPriority.NORMAL, OrderPriority.HIGH, OrderPriority.URGENT];
+            const priorityOrder = [
+                OrderPriority.LOW,
+                OrderPriority.NORMAL,
+                OrderPriority.HIGH,
+                OrderPriority.URGENT,
+            ];
 
             expect(priorityOrder).toEqual(['low', 'normal', 'high', 'urgent']);
         });

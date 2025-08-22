@@ -5,7 +5,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('GeoController', () => {
     let controller: GeoController;
-    let geoService: GeoService;
+    // let geoService: GeoService;
 
     const mockGeoService = {
         calculateOptimizedRoute: jest.fn(),
@@ -24,7 +24,7 @@ describe('GeoController', () => {
         }).compile();
 
         controller = module.get<GeoController>(GeoController);
-        geoService = module.get<GeoService>(GeoService);
+        // geoService = module.get<GeoService>(GeoService);
     });
 
     afterEach(() => {
@@ -52,12 +52,16 @@ describe('GeoController', () => {
                 },
             };
 
-            mockGeoService.calculateOptimizedRoute.mockResolvedValue(mockResponse);
+            mockGeoService.calculateOptimizedRoute.mockResolvedValue(
+                mockResponse,
+            );
 
             const result = await controller.calculateRoute(request);
 
             expect(result).toEqual(mockResponse);
-            expect(mockGeoService.calculateOptimizedRoute).toHaveBeenCalledWith(request);
+            expect(mockGeoService.calculateOptimizedRoute).toHaveBeenCalledWith(
+                request,
+            );
         });
 
         it('should handle service errors', async () => {
@@ -136,7 +140,9 @@ describe('GeoController', () => {
             const result = await controller.geocodeAddress(address);
 
             expect(result).toEqual(mockResponse);
-            expect(mockGeoService.geocodeAddress).toHaveBeenCalledWith({ address });
+            expect(mockGeoService.geocodeAddress).toHaveBeenCalledWith({
+                address,
+            });
         });
 
         it('should throw error for missing address', async () => {
@@ -180,7 +186,9 @@ describe('GeoController', () => {
         });
 
         it('should throw error for missing coordinates', async () => {
-            await expect(controller.reverseGeocode('', '2.3522')).rejects.toThrow(
+            await expect(
+                controller.reverseGeocode('', '2.3522'),
+            ).rejects.toThrow(
                 new HttpException(
                     {
                         status: HttpStatus.BAD_REQUEST,

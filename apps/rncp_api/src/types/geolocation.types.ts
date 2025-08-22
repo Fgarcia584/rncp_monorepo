@@ -99,7 +99,12 @@ export interface DeliveryTracking {
     route?: GoogleRoute;
     estimatedArrivalTime?: Date;
     distanceToDestination?: number; // en mètres
-    status: 'en_route_to_pickup' | 'at_pickup' | 'en_route_to_delivery' | 'at_delivery' | 'completed';
+    status:
+        | 'en_route_to_pickup'
+        | 'at_pickup'
+        | 'en_route_to_delivery'
+        | 'at_delivery'
+        | 'completed';
     lastUpdated: Date;
 }
 
@@ -129,7 +134,11 @@ export interface OptimizedRoute {
 
 // Types pour les événements WebSocket
 export interface DeliveryTrackingEvent {
-    type: 'position_update' | 'status_change' | 'eta_update' | 'route_recalculated';
+    type:
+        | 'position_update'
+        | 'status_change'
+        | 'eta_update'
+        | 'route_recalculated';
     orderId: number;
     deliveryPersonId: number;
     data: {
