@@ -156,7 +156,7 @@ export function MerchantDashboard() {
                 priority: 'normal',
                 notes: '',
             });
-            setSelectedPlace(null);
+            // setSelectedPlace(null);
             setShowOrderForm(false);
 
             // Show success message
@@ -404,9 +404,8 @@ export function MerchantDashboard() {
                                             </label>
                                             <AddressAutocomplete
                                                 value={orderForm.deliveryAddress}
-                                                onChange={(address, placeDetails) => {
+                                                onChange={(address) => {
                                                     handleFormChange('deliveryAddress', address);
-                                                    setSelectedPlace(placeDetails || null);
                                                 }}
                                                 required
                                                 className="mt-1"
