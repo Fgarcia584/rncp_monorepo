@@ -27,9 +27,17 @@ const getApiUrl = (): string => {
         return 'http://localhost:3001';
     }
 
-    // PRIORITÉ 3: En production ou dans les conteneurs, nginx ajoute déjà le préfixe /api
-    console.log('🔗 Using production API: empty baseUrl (nginx handles /api prefix)');
-    return '';
+    // PRIORITÉ 3: En production, vérifier si on a une URL d'API configurée
+    // IMPORTANT: Sur Railway, vous DEVEZ définir VITE_API_URL dans les variables d'environnement
+    // Exemple: VITE_API_URL=https://back-production-dd72.up.railway.app
+    if (!env?.VITE_API_URL) {
+        console.warn('⚠️ No VITE_API_URL configured in production!');
+        console.warn('For Railway deployment, set VITE_API_URL to your backend URL');
+    }
+
+    // PRIORITÉ 4: En production locale avec nginx, utiliser le proxy /api
+    console.log('🔗 Using production API with proxy: /api prefix');
+    return '/api';
 };
 
 const baseQuery = fetchBaseQuery({
