@@ -30,7 +30,7 @@ function copyDir(src, dest) {
             // Skip test files in frontend
             if (entry.name.endsWith('.spec.ts') || entry.name.endsWith('.test.ts')) {
                 console.log(`Skipped test file: ${entry.name}`);
-                return;
+                continue;
             }
             fs.copyFileSync(srcPath, destPath);
             console.log(`Copied: ${entry.name}`);

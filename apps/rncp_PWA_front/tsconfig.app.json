@@ -18,7 +18,7 @@
         /* Path mapping */
         "baseUrl": ".",
         "paths": {
-            "@rncp/types": ["../../tools/types"]
+            "@rncp/types": ["./src/types"]
         },
 
         /* Linting */
