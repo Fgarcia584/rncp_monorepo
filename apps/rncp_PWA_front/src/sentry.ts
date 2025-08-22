@@ -1,8 +1,9 @@
 import * as Sentry from '@sentry/react';
 
 export const initSentry = () => {
-    const dsn = import.meta.env.VITE_SENTRY_DSN;
-    const environment = import.meta.env.VITE_ENVIRONMENT || import.meta.env.MODE || 'development';
+    const env = (import.meta as { env: ImportMetaEnv }).env;
+    const dsn = env?.VITE_SENTRY_DSN;
+    const environment = env?.VITE_ENVIRONMENT || env?.MODE || 'development';
 
     // Only initialize Sentry if DSN is provided
     if (!dsn) {
@@ -35,7 +36,7 @@ export const initSentry = () => {
         replaysOnErrorSampleRate: 1.0,
 
         // Release and Debug
-        release: import.meta.env.VITE_APP_VERSION || 'unknown',
+        release: env?.VITE_APP_VERSION || 'unknown',
         debug: environment === 'development',
 
         // Error filtering

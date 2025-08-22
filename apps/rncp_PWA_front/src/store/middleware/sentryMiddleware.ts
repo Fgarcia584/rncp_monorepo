@@ -1,11 +1,12 @@
-import { Middleware } from '@reduxjs/toolkit';
+import { Middleware, AnyAction } from '@reduxjs/toolkit';
 import { Sentry } from '../../sentry';
-import type { RootState } from '../store';
 
-export const sentryMiddleware: Middleware<Record<string, never>, RootState> = (store) => (next) => (action) => {
+export const sentryMiddleware: Middleware = (store) => (next) => (action: unknown) => {
+    const typedAction = action as AnyAction;
     // Set user context when auth state changes
-    if (action.type === 'auth/setCredentials') {
-        const user = action.payload.user;
+    if (typedAction.type === 'auth/setCredentials') {
+        const user = (typedAction as { payload: { user: { id: number; email: string; name: string; role: string } } })
+            .payload.user;
         if (user) {
             Sentry.setUser({
                 id: user.id.toString(),
@@ -28,7 +29,7 @@ export const sentryMiddleware: Middleware<Record<string, never>, RootState> = (s
     }
 
     // Clear user context on logout
-    if (action.type === 'auth/logout') {
+    if (typedAction.type === 'auth/logout') {
         Sentry.setUser(null);
         Sentry.addBreadcrumb({
             category: 'auth',
@@ -38,7 +39,7 @@ export const sentryMiddleware: Middleware<Record<string, never>, RootState> = (s
     }
 
     // Log important actions as breadcrumbs
-    const actionType = action.type;
+    const actionType = typedAction.type;
     const importantActions = [
         'auth/',
         'api/',
@@ -53,13 +54,13 @@ export const sentryMiddleware: Middleware<Record<string, never>, RootState> = (s
             data: {
                 action: actionType,
                 // Be careful not to log sensitive data
-                ...(actionType.includes('auth') ? {} : { payload: action.payload }),
+                ...(actionType.includes('auth') ? {} : { payload: typedAction.payload }),
             },
         });
     }
 
     try {
-        return next(action);
+        return next(typedAction);
     } catch (error) {
         // Capture Redux middleware errors
         Sentry.captureException(error, {
@@ -68,7 +69,7 @@ export const sentryMiddleware: Middleware<Record<string, never>, RootState> = (s
                 action_type: actionType,
             },
             extra: {
-                action,
+                action: typedAction,
                 state: store.getState(),
             },
         });
