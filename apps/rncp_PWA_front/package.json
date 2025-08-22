@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "postinstall": "node railway-prebuild.cjs || echo 'Types copy failed, continuing...'",
-    "prebuild": "node railway-prebuild.cjs",
+    "postinstall": "node copy-complete-types.cjs || echo 'Types copy failed, continuing...'",
+    "prebuild": "node copy-complete-types.cjs",
     "dev": "vite",
     "dev:network": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
