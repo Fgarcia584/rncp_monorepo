@@ -24,6 +24,11 @@ export default defineConfig({
             transformMixedEsModules: true,
         },
     },
+    preview: {
+        host: '0.0.0.0',
+        port: 3000,
+        allowedHosts: ['healthcheck.railway.app', 'localhost', '0.0.0.0'],
+    },
     server: {
         host: '0.0.0.0', // Allow access from network
         port: 3000,
