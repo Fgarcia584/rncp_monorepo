@@ -1,0 +1,147 @@
+# Configuration Dependabot pour la gestion automatique des dépendances
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
+version: 2
+updates:
+  # Backend API - NestJS (apps/rncp_api)
+  - package-ecosystem: "npm"
+    directory: "/apps/rncp_api"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Fgarcia584" # Remplace par ton username GitHub
+    labels:
+      - "dependencies"
+      - "backend"
+      - "auto-update"
+    commit-message:
+      prefix: "build(api)"
+      include: "scope"
+    # Grouper les mises à jour mineures pour réduire le nombre de PRs
+    groups:
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+      testing:
+        patterns:
+          - "jest*"
+          - "@types/jest"
+          - "supertest"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+      typeorm:
+        patterns:
+          - "typeorm*"
+          - "@types/node"
+
+  # Frontend PWA - React + Vite (apps/rncp_PWA_front)
+  - package-ecosystem: "npm"
+    directory: "/apps/rncp_PWA_front"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:30"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "fabio"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "auto-update"
+    commit-message:
+      prefix: "build(pwa)"
+      include: "scope"
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      vite:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      redux:
+        patterns:
+          - "@reduxjs/*"
+          - "react-redux"
+
+  # Root package.json - Outils de développement monorepo
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "fabio"
+    labels:
+      - "dependencies"
+      - "monorepo"
+      - "auto-update"
+    commit-message:
+      prefix: "build(root)"
+      include: "scope"
+    groups:
+      dev-tools:
+        patterns:
+          - "husky"
+          - "lint-staged"
+          - "prettier"
+          - "commitlint*"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+      time: "08:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "fabio"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "build(docker)"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "fabio"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci/cd"
+    commit-message:
+      prefix: "ci"
+
+# Configuration des règles d'ignorance pour certaines dépendances
+# Si besoin, décommenter et adapter
+# ignore:
+#   - dependency-name: "node"
+#     versions: ["< 20.0.0"]
+#   - dependency-name: "typescript"
+#     update-types: ["version-update:semver-major"]

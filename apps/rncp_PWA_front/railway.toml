@@ -8,4 +8,4 @@ healthcheckTimeout = 100
 [variables]
 NODE_ENV = "production"
 # IMPORTANT: Replace with your actual Railway backend URL
-VITE_API_URL = "https://ton-api-test.up.railway.app"
+VITE_API_URL = "https://back-staging.up.railway.app"

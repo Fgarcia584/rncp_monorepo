@@ -1,0 +1,139 @@
+name: Security Audit
+
+on:
+  # Déclenchement manuel
+  workflow_dispatch:
+  
+  # Audit automatique chaque semaine
+  schedule:
+    - cron: '0 9 * * 1' # Lundi 9h00 UTC
+  
+  # Sur les PRs Dependabot avec label security
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        app: [rncp_api, rncp_PWA_front]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run npm audit for ${{ matrix.app }}
+        id: audit
+        run: |
+          cd apps/${{ matrix.app }}
+          echo "Running security audit for ${{ matrix.app }}..."
+          
+          # Audit avec format JSON pour parsing
+          npm audit --audit-level=moderate --json > audit-results.json || true
+          
+          # Compter les vulnérabilités
+          CRITICAL=$(cat audit-results.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat audit-results.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat audit-results.json | jq '.metadata.vulnerabilities.moderate // 0')
+          
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+          
+          # Afficher le résumé
+          echo "### Security Audit Results for ${{ matrix.app }}"
+          echo "- Critical: $CRITICAL"
+          echo "- High: $HIGH"
+          echo "- Moderate: $MODERATE"
+          
+          # Échec si vulnérabilités critiques ou high
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "❌ Security vulnerabilities found!"
+            exit 1
+          fi
+
+      - name: Create security issue
+        if: failure() && steps.audit.outputs.critical > 0
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = `🚨 Security Alert: Critical vulnerabilities in ${{ matrix.app }}`;
+            const body = `
+            ## Security Vulnerabilities Detected
+            
+            **App**: ${{ matrix.app }}
+            **Critical**: ${{ steps.audit.outputs.critical }}
+            **High**: ${{ steps.audit.outputs.high }}
+            **Moderate**: ${{ steps.audit.outputs.moderate }}
+            
+            ### Action Required
+            - [ ] Review vulnerabilities with \`npm audit\`
+            - [ ] Update affected packages
+            - [ ] Test thoroughly after updates
+            - [ ] Verify fixes with \`npm audit\`
+            
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            `;
+            
+            // Vérifier si une issue similaire existe déjà
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'security,vulnerability',
+              state: 'open'
+            });
+            
+            const existingIssue = issues.find(issue => 
+              issue.title.includes('Security Alert') && 
+              issue.title.includes('${{ matrix.app }}')
+            );
+            
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security', 'vulnerability', 'critical', '${{ matrix.app }}'],
+                assignees: ['fabio'] // Remplace par ton username
+              });
+            }
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+          comment-summary-in-pr: true
