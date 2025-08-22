@@ -131,49 +131,6 @@ export class OrderController {
         return this.orderService.remove(id, req.user.userId, req.user.role);
     }
 
-    // Test endpoint to debug Gateway communication
-    @Post(':id/test-accept')
-    @HttpCode(HttpStatus.OK)
-    testAccept(@Request() req, @Param('id', ParseIntPipe) id: number) {
-        console.log(
-            `🧪 TEST POST /orders/${id}/test-accept - User: ${req.user?.userId}`,
-        );
-
-        const testResponse = {
-            success: true,
-            orderId: id,
-            userId: req.user?.userId,
-            message: 'Test endpoint working',
-            timestamp: new Date().toISOString(),
-        };
-
-        console.log('🧪 Test response:', JSON.stringify(testResponse, null, 2));
-        console.log('🌐 NestJS will send test response with status 200');
-
-        return testResponse;
-    }
-
-    // Ultra-simple endpoint for debugging HTTP response
-    @Post('simple-test')
-    @HttpCode(HttpStatus.OK)
-    @Public()
-    simpleTest(): string {
-        console.log('🔥 Ultra-simple endpoint called');
-        console.log('🔥 Returning plain string "OK"');
-        return 'OK';
-    }
-
-    // Even simpler endpoint - minimal JSON response
-    @Get('ping')
-    @HttpCode(HttpStatus.OK)
-    @Public()
-    ping() {
-        console.log('🏓 Ping endpoint called');
-        const response = { ping: 'pong' };
-        console.log('🏓 Returning:', response);
-        return response;
-    }
-
     @Public()
     @Get('health')
     health() {

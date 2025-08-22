@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { logout, setCredentials } from '../slices/authSlice';
-import type { RootState } from '../store';
-import { TokenPair } from '../../types';
+import { logout } from '../slices/authSlice';
 import { Sentry } from '../../sentry';
 
 // Flag global pour éviter les refresh parallèles
@@ -43,15 +41,9 @@ const getApiUrl = (): string => {
 
 const baseQuery = fetchBaseQuery({
     baseUrl: getApiUrl(),
-    prepareHeaders: (headers, { getState }) => {
-        const token = (getState() as RootState).auth.token;
-
+    credentials: 'include', // Always include cookies in requests
+    prepareHeaders: (headers) => {
         headers.set('Content-Type', 'application/json');
-
-        if (token) {
-            headers.set('Authorization', `Bearer ${token}`);
-        }
-
         return headers;
     },
 });
@@ -91,7 +83,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
         console.log('Data:', result.error.data);
         console.log('Args:', args);
         console.groupEnd();
-        
+
         // Log non-auth errors to Sentry
         if (result.error.status !== 401) {
             Sentry.captureException(new Error(`API Error: ${method} ${url}`), {
@@ -112,21 +104,18 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
     }
 
     if (result.error && result.error.status === 401) {
-        // Ne pas tenter de refresh pour les endpoints d'auth
         const url = typeof args === 'string' ? args : args.url;
-        if (url?.includes('/auth/refresh') || url?.includes('/auth/login')) {
+
+        // Don't attempt refresh for auth endpoints (prevent infinite loops)
+        if (url?.includes('/auth/refresh') || url?.includes('/auth/login') || url?.includes('/auth/register')) {
             console.log('🚫 Auth endpoint failed, logging out');
             api.dispatch(logout());
-            // Nettoyer localStorage immédiatement
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
             return result;
         }
 
-        const refreshToken = (api.getState() as RootState).auth.refreshToken;
-
-        if (refreshToken && !isRefreshing) {
-            console.log('🔄 Attempting token refresh...');
+        // Try token refresh with cookies if not already refreshing
+        if (!isRefreshing) {
+            console.log('🔄 Attempting token refresh via cookies...');
             isRefreshing = true;
 
             try {
@@ -134,28 +123,15 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                     {
                         url: '/auth/refresh',
                         method: 'POST',
-                        body: { refreshToken },
+                        body: {}, // Empty body since refresh token is in cookies
                     },
                     api,
                     extraOptions,
                 );
 
-                if (refreshResult.data) {
-                    console.log('✅ Token refresh successful');
-                    const tokens = refreshResult.data as TokenPair;
-                    // Store the new tokens
-                    api.dispatch(
-                        setCredentials({
-                            user: (api.getState() as RootState).auth.user,
-                            token: tokens.accessToken,
-                            refreshToken: tokens.refreshToken,
-                        }),
-                    );
-                    // Update localStorage
-                    localStorage.setItem('token', tokens.accessToken);
-                    localStorage.setItem('refreshToken', tokens.refreshToken);
-
-                    // Retry the original query
+                if (refreshResult.data && !refreshResult.error) {
+                    console.log('✅ Token refresh successful via cookies');
+                    // Retry the original query - new tokens are automatically in cookies
                     result = await baseQuery(args, api, extraOptions);
                 } else {
                     console.log('❌ Token refresh failed, logging out');
@@ -165,29 +141,20 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
                         level: 'warning',
                     });
                     api.dispatch(logout());
-                    // Nettoyer localStorage
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('refreshToken');
                 }
+            } catch {
+                console.log('❌ Token refresh error, logging out');
+                api.dispatch(logout());
             } finally {
                 isRefreshing = false;
             }
-        } else if (isRefreshing) {
-            console.log('⏳ Refresh already in progress, skipping...');
-            // Un refresh est déjà en cours, on attend un peu et on réessaye
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            result = await baseQuery(args, api, extraOptions);
         } else {
-            console.log('🚫 No refresh token available, logging out');
-            Sentry.addBreadcrumb({
-                category: 'auth',
-                message: 'No refresh token available, logging out user',
-                level: 'warning',
-            });
-            api.dispatch(logout());
-            // Nettoyer localStorage
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
+            console.log('⏳ Refresh already in progress, waiting...');
+            // Wait a bit and retry the original request
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            if (!isRefreshing) {
+                result = await baseQuery(args, api, extraOptions);
+            }
         }
     }
 

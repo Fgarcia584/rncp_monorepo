@@ -37,7 +37,10 @@ import { JwtStrategy } from './microservices/auth-service/strategies/jwt.strateg
                       entities: [User, RefreshToken, Order],
                       synchronize: true, // Crée automatiquement les tables
                       logging: process.env.NODE_ENV !== 'production',
-                      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                      ssl:
+                          process.env.NODE_ENV === 'production'
+                              ? { rejectUnauthorized: false }
+                              : false,
                   }
                 : {
                       type: 'postgres',
@@ -53,7 +56,14 @@ import { JwtStrategy } from './microservices/auth-service/strategies/jwt.strateg
         ),
         TypeOrmModule.forFeature([User, RefreshToken, Order]),
         JwtModule.register({
-            secret: process.env.JWT_SECRET || 'your-default-secret-key',
+            secret:
+                process.env.JWT_SECRET ||
+                (() => {
+                    throw new Error(
+                        'JWT_SECRET environment variable is required for Railway deployment. ' +
+                            'Set it via Railway dashboard or CLI.',
+                    );
+                })(),
             signOptions: { expiresIn: '1h' },
         }),
     ],

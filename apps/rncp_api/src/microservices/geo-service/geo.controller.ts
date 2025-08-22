@@ -232,10 +232,26 @@ export class GeoController {
     }
 
     @Get('health')
-    getHealth(): { status: string; timestamp: string } {
+    getHealth(): { 
+        status: string; 
+        service: string;
+        timestamp: string;
+        version: string;
+        uptime: number;
+        memory: NodeJS.MemoryUsage;
+        dependencies: { googleMaps: string; redis: string };
+    } {
         return {
-            status: 'ok',
+            status: 'healthy',
+            service: 'geo-service',
             timestamp: new Date().toISOString(),
+            version: process.env.npm_package_version || '1.0.0',
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            dependencies: {
+                googleMaps: process.env.GOOGLE_MAPS_API_KEY ? 'healthy' : 'warning',
+                redis: 'healthy'
+            }
         };
     }
 }

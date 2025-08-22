@@ -54,12 +54,15 @@ async function initDatabase() {
             return;
         }
 
-        console.log('📝 Les tables sont automatiquement créées par TypeORM synchronize...');
+        console.log(
+            '📝 Les tables sont automatiquement créées par TypeORM synchronize...',
+        );
 
         console.log('👥 Création des utilisateurs de test...');
 
         // Créer un mot de passe hashé pour tous les utilisateurs de test
-        const hashedPassword = await bcrypt.hash('password123', 10);
+        // Using strong password that meets security requirements
+        const hashedPassword = await bcrypt.hash('TestSecure123!', 12);
 
         // Créer un admin
         const admin = userRepository.create({

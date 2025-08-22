@@ -2,6 +2,7 @@ import {
     Injectable,
     NotFoundException,
     ForbiddenException,
+    BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
@@ -35,7 +36,7 @@ export class OrderService {
                 '⚠️ Invalid scheduledDeliveryTime provided:',
                 createOrderDto.scheduledDeliveryTime,
             );
-            throw new Error('Invalid scheduled delivery time provided');
+            throw new BadRequestException('Invalid scheduled delivery time provided');
         }
 
         const order = this.orderRepository.create({
@@ -194,7 +195,7 @@ export class OrderService {
                     '⚠️ Invalid scheduledDeliveryTime in update:',
                     updateOrderDto.scheduledDeliveryTime,
                 );
-                throw new Error('Invalid scheduled delivery time provided');
+                throw new BadRequestException('Invalid scheduled delivery time provided');
             }
             order.scheduledDeliveryTime = updatedDate;
         }

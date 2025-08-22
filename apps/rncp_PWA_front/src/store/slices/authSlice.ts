@@ -13,16 +13,12 @@ type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 interface AuthState {
     user: AuthUser | null;
-    token: string | null;
-    refreshToken: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
-    token: null,
-    refreshToken: null,
     isAuthenticated: false,
     isLoading: false,
 };
@@ -35,21 +31,15 @@ const authSlice = createSlice({
             state,
             action: PayloadAction<{
                 user: AuthUser | null;
-                token: string;
-                refreshToken: string;
             }>,
         ) => {
-            const { user, token, refreshToken } = action.payload;
+            const { user } = action.payload;
             state.user = user;
-            state.token = token;
-            state.refreshToken = refreshToken;
             state.isAuthenticated = true;
             state.isLoading = false;
         },
         logout: (state) => {
             state.user = null;
-            state.token = null;
-            state.refreshToken = null;
             state.isAuthenticated = false;
             state.isLoading = false;
         },

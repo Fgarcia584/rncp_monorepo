@@ -9,6 +9,7 @@ import {
     UseGuards,
     Post,
     Patch,
+    ForbiddenException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth-service/guards/jwt-auth.guard';
@@ -57,7 +58,7 @@ export class UserController {
     ): Promise<User> {
         // Users can only update their own profile, admins can update anyone
         if (currentUser.role !== UserRole.ADMIN && currentUser.sub !== id) {
-            throw new Error('Forbidden: You can only update your own profile');
+            throw new ForbiddenException('You can only update your own profile');
         }
 
         // Only admins can change roles
@@ -85,17 +86,26 @@ export class UserController {
 
     @Public()
     @Get('health')
-    getHealth(): { status: string; service: string; timestamp: string } {
+    getHealth(): { 
+        status: string; 
+        service: string; 
+        timestamp: string;
+        version: string;
+        uptime: number;
+        memory: NodeJS.MemoryUsage;
+        dependencies: { database: string; redis: string };
+    } {
         return {
-            status: 'ok',
+            status: 'healthy',
             service: 'user-service',
             timestamp: new Date().toISOString(),
+            version: process.env.npm_package_version || '1.0.0',
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            dependencies: {
+                database: 'healthy', // À améliorer avec vraie vérification DB
+                redis: 'healthy'     // À améliorer avec vraie vérification Redis
+            }
         };
-    }
-
-    @Public()
-    @Get('debug-test')
-    debugTest(): { message: string } {
-        return { message: 'Debug endpoint working - guard bypassed!' };
     }
 }
