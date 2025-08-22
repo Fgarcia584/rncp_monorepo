@@ -59,7 +59,7 @@ async function initDatabase() {
         console.log('  ✅ Admin créé: admin@rncp.com');
 
         // Créer des marchands
-        const merchants = [];
+        const merchants: User[] = [];
         for (let i = 1; i <= 3; i++) {
             const merchant = userRepository.create({
                 email: `merchant${i}@rncp.com`,
@@ -72,7 +72,7 @@ async function initDatabase() {
         }
 
         // Créer des livreurs
-        const deliveryPersons = [];
+        const deliveryPersons: User[] = [];
         for (let i = 1; i <= 5; i++) {
             const deliveryPerson = userRepository.create({
                 email: `livreur${i}@rncp.com`,
@@ -84,14 +84,14 @@ async function initDatabase() {
             console.log(`  ✅ Livreur créé: livreur${i}@rncp.com`);
         }
 
-        // Créer des clients
-        const customers = [];
+        // Créer des techniciens logistiques (clients)
+        const customers: User[] = [];
         for (let i = 1; i <= 10; i++) {
             const customer = userRepository.create({
                 email: `client${i}@rncp.com`,
                 name: `Client ${i}`,
                 password: hashedPassword,
-                role: UserRole.CUSTOMER,
+                role: UserRole.LOGISTICS_TECHNICIAN,
             });
             customers.push(await userRepository.save(customer));
             console.log(`  ✅ Client créé: client${i}@rncp.com`);
@@ -102,8 +102,7 @@ async function initDatabase() {
         // Créer des commandes pour chaque marchand
         const orderStatuses = [
             OrderStatus.PENDING,
-            OrderStatus.ASSIGNED,
-            OrderStatus.PICKED_UP,
+            OrderStatus.ACCEPTED,
             OrderStatus.IN_TRANSIT,
             OrderStatus.DELIVERED,
         ];
@@ -158,6 +157,10 @@ async function initDatabase() {
                         .toString()
                         .padStart(8, '0')}`,
                     deliveryAddress: randomAddress,
+                    deliveryCoordinates: {
+                        latitude: 48.8566 + (Math.random() - 0.5) * 0.1, // Autour de Paris
+                        longitude: 2.3522 + (Math.random() - 0.5) * 0.1,
+                    },
                     scheduledDeliveryTime: deliveryDate,
                     status: randomStatus,
                     priority: randomPriority,
@@ -168,14 +171,10 @@ async function initDatabase() {
                                       Math.random() * deliveryPersons.length,
                                   )
                               ].id
-                            : null,
+                            : undefined,
                     notes: `Commande test ${++orderCount}`,
                     estimatedDeliveryDuration:
                         Math.floor(Math.random() * 60) + 15, // Entre 15 et 75 minutes
-                    deliveryCoordinates: {
-                        latitude: 48.8566 + (Math.random() - 0.5) * 0.1, // Autour de Paris
-                        longitude: 2.3522 + (Math.random() - 0.5) * 0.1,
-                    },
                 });
 
                 await orderRepository.save(order);

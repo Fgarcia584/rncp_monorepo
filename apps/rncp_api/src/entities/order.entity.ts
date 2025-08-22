@@ -28,6 +28,16 @@ export class Order {
     deliveryAddress: string;
 
     @Column({
+        name: 'delivery_coordinates',
+        type: 'jsonb',
+        nullable: true,
+    })
+    deliveryCoordinates?: {
+        latitude: number;
+        longitude: number;
+    };
+
+    @Column({
         name: 'scheduled_delivery_time',
         type: 'timestamp',
     })
