@@ -44,7 +44,9 @@
         "migration:run:prod": "typeorm migration:run -d dist/data-source.js",
         "migration:revert:prod": "typeorm migration:revert -d dist/data-source.js",
         "db:seed": "ts-node src/scripts/init-database.ts",
-        "db:seed:prod": "node dist/src/scripts/init-database.js"
+        "db:seed:prod": "node dist/src/scripts/init-database.js",
+        "db:roles": "ts-node src/scripts/create-roles.ts",
+        "db:roles:prod": "node dist/src/scripts/create-roles.js"
     },
     "dependencies": {
         "@googlemaps/google-maps-services-js": "^3.4.2",

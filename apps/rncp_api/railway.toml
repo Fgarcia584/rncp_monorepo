@@ -2,8 +2,10 @@
 builder = "nixpacks"
 
 [deploy]
+# Pour créer les comptes utilisateurs de base :
+# railway run --service back npm run db:roles:prod
 # Pour peupler la DB avec des données de test :
-# railway run npm run db:seed:prod
+# railway run --service back npm run db:seed:prod
 startCommand = "npm run build:railway-full && npm run start:railway-full"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
