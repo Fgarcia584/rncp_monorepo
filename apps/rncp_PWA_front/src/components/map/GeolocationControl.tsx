@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Position } from '@rncp/types';
+import { Position } from '../../types';
 
 interface GeolocationControlProps {
     onLocationUpdate?: (position: Position) => void;

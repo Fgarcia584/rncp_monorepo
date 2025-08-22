@@ -25,8 +25,14 @@ async function bootstrap() {
 
     const port = process.env.PORT ?? 3001;
     const host = process.env.HOST ?? '0.0.0.0';
+    
+    console.log(`Starting API Gateway on ${host}:${port}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    
     await app.listen(port, host);
+    
     console.log(`🚀 API Gateway is running on port ${port}`);
+    console.log(`🏥 Health check available at: http://${host}:${port}/health`);
     console.log(`📡 Proxying requests to microservices:`);
     console.log(
         `  - Auth: ${process.env.AUTH_SERVICE_URL || 'http://localhost:3002'}`,

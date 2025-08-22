@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Order } from '@rncp/types';
+import { Order } from '../../types';
 
 interface OrderListModalProps {
     isOpen: boolean;

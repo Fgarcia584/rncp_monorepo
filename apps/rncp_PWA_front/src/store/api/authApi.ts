@@ -6,7 +6,7 @@ import type {
     TokenPair,
     RefreshTokenRequest,
     AuthUser,
-} from '@rncp/types';
+} from '../../types';
 
 export const authApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({

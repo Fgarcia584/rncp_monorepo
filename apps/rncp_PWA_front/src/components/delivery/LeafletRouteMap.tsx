@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
 import { LatLngExpression, Icon } from 'leaflet';
-import { OrderResponse, Position } from '@rncp/types';
+import { OrderResponse, Position } from '../../types';
 import { extractRouteCoordinates, extractWaypoints } from '../../utils/polylineUtils';
 import { useOfflineMode } from '../../hooks/useOfflineMode';
 import { CachedTileLayer } from '../map/CachedTileLayer';

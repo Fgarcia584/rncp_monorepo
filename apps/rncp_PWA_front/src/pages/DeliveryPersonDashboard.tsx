@@ -3,7 +3,7 @@ import { DashboardLayout } from '../components/layouts/DashboardLayout';
 import { useGetAvailableOrdersQuery, useAcceptOrderMutation, useGetOrdersQuery } from '../store/api/orderApi';
 import { DeliveryPersonMap } from '../components/map';
 import { MapErrorBoundary } from '../components/map/MapErrorBoundary';
-import { OrderStatus, OrderPriority, Coordinates, OrderResponse } from '@rncp/types';
+import { OrderStatus, OrderPriority, Coordinates, OrderResponse } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { StartDeliveryRoundModal } from '../components/delivery/StartDeliveryRoundModal';
 import { LeafletRouteMap } from '../components/delivery/LeafletRouteMap';

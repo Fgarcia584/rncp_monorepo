@@ -1,7 +1,7 @@
 import React from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import { divIcon } from 'leaflet';
-import { Coordinates } from '@rncp/types';
+import { Coordinates } from '../../types';
 import { renderToString } from 'react-dom/server';
 
 interface MarkerIconProps {

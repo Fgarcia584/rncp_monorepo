@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import { Map as LeafletMap } from 'leaflet';
-import { Coordinates } from '@rncp/types';
+import { Coordinates } from '../../types';
 import { MapController } from './MapController';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore - Vite handles CSS imports at runtime

@@ -38,4 +38,6 @@ USER nestjs
 
 EXPOSE 3001
 
+# Railway handles healthchecks via railway.json configuration
+
 CMD ["npm", "run", "start:gateway"]

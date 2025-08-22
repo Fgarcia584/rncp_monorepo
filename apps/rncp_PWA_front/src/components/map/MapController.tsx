@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
-import { Coordinates } from '@rncp/types';
+import { Coordinates } from '../../types';
 
 interface MapControllerProps {
     center?: Coordinates;

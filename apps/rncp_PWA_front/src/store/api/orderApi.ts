@@ -6,7 +6,7 @@ import type {
     UpdateOrderRequest,
     OrderStatus,
     OrderPriority,
-} from '@rncp/types';
+} from '../../types';
 
 export interface OrderFilters {
     page?: number;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { OrderResponse } from '@rncp/types';
+import { OrderResponse } from '../../types';
 import { AddressAutocomplete } from '../forms/AddressAutocomplete';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';

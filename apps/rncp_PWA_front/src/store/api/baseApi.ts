@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { logout, setCredentials } from '../slices/authSlice';
 import type { RootState } from '../store';
-import { TokenPair } from '@rncp/types';
+import { TokenPair } from '../../types';
 
 // Flag global pour éviter les refresh parallèles
 let isRefreshing = false;

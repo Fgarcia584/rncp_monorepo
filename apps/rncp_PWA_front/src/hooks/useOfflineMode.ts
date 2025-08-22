@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useOnlineStatus } from './useOnlineStatus';
 import { useGeolocation } from './useGeolocation';
-import { OrderResponse } from '@rncp/types';
+import { OrderResponse } from '../types';
 import { LatLngExpression } from 'leaflet';
 
 interface CachedRouteData {

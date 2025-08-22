@@ -9,7 +9,7 @@ import {
     useUpdateDeliveryStatusMutation,
     useGetDeliveryPersonTrackingsQuery,
 } from '../../store/api';
-import { Order, DeliveryStatus, Position, Coordinates, GoogleRoute } from '@rncp/types';
+import { Order, DeliveryStatus, Position, Coordinates, GoogleRoute } from '../../types';
 import { MapErrorBoundary } from './MapErrorBoundary';
 
 interface DeliveryPersonMapProps {

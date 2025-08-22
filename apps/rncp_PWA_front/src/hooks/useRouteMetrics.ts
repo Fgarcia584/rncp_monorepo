@@ -1,5 +1,5 @@
 import React from 'react';
-import { GoogleRoute } from '@rncp/types';
+import { GoogleRoute } from '../types';
 
 // Hook personnalisé pour calculer des métriques de route
 export const useRouteMetrics = (route: GoogleRoute) => {

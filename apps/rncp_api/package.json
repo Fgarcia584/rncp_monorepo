@@ -21,6 +21,7 @@
     "start:users": "node dist/user-main",
     "start:orders": "node dist/order-main",
     "start:geo": "node dist/geo-main",
+    "healthcheck": "node healthcheck.js",
     "dev": "nest start --watch",
     "dev:gateway": "nest start --watch",
     "dev:auth": "nest start --watch --config nest-cli-auth.json",

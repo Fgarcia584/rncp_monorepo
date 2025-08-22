@@ -8,7 +8,7 @@ import {
     authApi,
 } from '../store/api/authApi';
 import { setCredentials, logout, setLoading } from '../store/slices/authSlice';
-import type { LoginRequest, RegisterRequest } from '@rncp/types';
+import type { LoginRequest, RegisterRequest } from '../types';
 
 export const useAuth = () => {
     const dispatch = useAppDispatch();

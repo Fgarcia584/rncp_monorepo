@@ -1,4 +1,4 @@
-import { Position } from '@rncp/types';
+import { Position } from '../types';
 
 // Fonction utilitaire pour obtenir un nom d'affichage pour une position
 export const getLocationDisplayName = (position: Position): string => {

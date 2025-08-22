@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { RegisterRequest } from '@rncp/types';
+import { RegisterRequest } from '../../types';
 
 interface RegisterFormProps {
     onToggle: () => void;

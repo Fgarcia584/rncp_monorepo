@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Circle } from 'react-leaflet';
 import { BaseMap, CustomMarker, DeliveryPersonMarker, OrderMarker, RoutePolyline } from './';
 import { useCalculateETAMutation } from '../../store/api';
-import { Order, DeliveryTracking, Coordinates } from '@rncp/types';
+import { Order, DeliveryTracking, Coordinates } from '../../types';
 
 interface MerchantTrackingMapProps {
     orders: Order[];

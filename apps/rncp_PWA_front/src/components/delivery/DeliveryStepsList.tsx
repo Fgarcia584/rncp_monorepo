@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { OrderResponse, OrderStatus } from '@rncp/types';
+import { OrderResponse, OrderStatus } from '../../types';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
 interface DeliveryStepsListProps {

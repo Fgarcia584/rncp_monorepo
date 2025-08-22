@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Position } from '@rncp/types';
+import { Position } from '../types';
 
 // Hook personnalisé pour la géolocalisation
 export const useGeolocation = (options?: {

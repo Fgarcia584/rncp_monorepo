@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LoginRequest } from '@rncp/types';
+import { LoginRequest } from '../../types';
 
 interface LoginFormProps {
     onToggle: () => void;

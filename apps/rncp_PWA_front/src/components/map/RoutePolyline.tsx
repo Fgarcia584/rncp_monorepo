@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Polyline, useMap, Marker, Popup } from 'react-leaflet';
 import { decode as decodePolyline } from '@googlemaps/polyline-codec';
-import { GoogleRoute, GoogleRouteStep } from '@rncp/types';
+import { GoogleRoute, GoogleRouteStep } from '../../types';
 import L from 'leaflet';
 
 interface RoutePolylineProps {

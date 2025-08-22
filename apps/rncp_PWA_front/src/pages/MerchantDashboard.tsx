@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { DashboardLayout } from '../components/layouts/DashboardLayout';
 import { useCreateOrderMutation, useGetOrdersQuery } from '../store/api/orderApi';
 import { MerchantTrackingMap } from '../components/map';
-import { OrderPriority, Coordinates, OrderStatus, OrderResponse } from '@rncp/types';
+import { OrderPriority, Coordinates, OrderStatus, OrderResponse } from '../types';
 import { AddressAutocomplete } from '../components/forms/AddressAutocomplete';
 import { DeliveryTimeSelector } from '../components/forms/DeliveryTimeSelector';
 

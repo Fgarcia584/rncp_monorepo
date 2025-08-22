@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { OrderResponse, Coordinates } from '@rncp/types';
+import { OrderResponse, Coordinates } from '../../types';
 
 interface OptimizedRouteMapProps {
     orders: OrderResponse[];

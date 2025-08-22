@@ -18,7 +18,7 @@
         /* Path mapping */
         "baseUrl": ".",
         "paths": {
-            "@rncp/types": ["./src/types"]
+            "@rncp/types": ["./src/types/index.ts"]
         },
 
         /* Linting */

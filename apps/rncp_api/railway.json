@@ -3,6 +3,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run start:gateway"
+    "startCommand": "npm run start:gateway",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 600
   }
 }

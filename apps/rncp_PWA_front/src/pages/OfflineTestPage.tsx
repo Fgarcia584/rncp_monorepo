@@ -3,7 +3,7 @@ import { LeafletRouteMap } from '../components/delivery/LeafletRouteMap';
 import { DeliveryStepsList } from '../components/delivery/DeliveryStepsList';
 import { StartDeliveryRoundModal } from '../components/delivery/StartDeliveryRoundModal';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { OrderResponse, OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderResponse, OrderStatus, OrderPriority } from '../types';
 
 // Données de test pour la démonstration
 const testOrders: any[] = [

@@ -9,7 +9,7 @@ export default defineConfig({
     base: '/',
     resolve: {
         alias: {
-            '@rncp/types': path.resolve(__dirname, './src/types'),
+            '@rncp/types': path.resolve(__dirname, './src/types/index.ts'),
         },
     },
     build: {
