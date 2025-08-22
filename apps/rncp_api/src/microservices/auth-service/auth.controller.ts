@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto/auth.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AuthResponse, TokenPair } from '@rncp/types';
+import { AuthResponse, TokenPair } from '../../types';
 
 @Controller('auth')
 @UseGuards(JwtAuthGuard)

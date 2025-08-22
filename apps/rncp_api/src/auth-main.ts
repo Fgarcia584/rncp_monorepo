@@ -35,11 +35,18 @@ async function bootstrap() {
     );
 
     app.enableCors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: [
+            'http://localhost:5174', // Frontend dev (alternative port)
+            'http://localhost:3000', // Frontend dev (Vite dev server)
+            'http://192.168.1.14:3000', // Network access for mobile testing
+            'http://rncp-pwa-front', // Docker internal
+            'http://localhost:80', // Docker compose frontend
+            process.env.FRONTEND_URL,
+        ].filter(Boolean),
         credentials: true,
     });
 
-    const port = process.env.PORT || 3001;
+    const port = process.env.PORT || process.env.SERVICE_INTERNAL_PORT || 3001;
     await app.listen(port);
 
     console.log(`🔐 Auth Service is running on port ${port}`);

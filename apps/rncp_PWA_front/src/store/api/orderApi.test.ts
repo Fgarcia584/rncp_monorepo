@@ -5,7 +5,7 @@ import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import { baseApi } from './baseApi';
 import { orderApi, OrderFilters } from './orderApi';
-import { OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderStatus, OrderPriority } from '../../types';
 
 // Mock order data
 const mockOrder = {

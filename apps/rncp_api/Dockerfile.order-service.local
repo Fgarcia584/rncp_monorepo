@@ -24,7 +24,7 @@ RUN pnpm --filter @rncp/types build
 
 # Build the API application
 WORKDIR /app/apps/rncp_api
-RUN pnpm build
+RUN pnpm build:orders
 
 # Production stage
 FROM node:20-alpine AS production
@@ -74,12 +74,12 @@ USER nestjs
 WORKDIR /app/apps/rncp_api
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+    CMD node -e "require('http').get('http://localhost:3001/orders/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the application from the API directory
+# Start the order service from the API directory
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main"] 
+CMD ["node", "dist/apps/rncp_api/src/order-main.js"]

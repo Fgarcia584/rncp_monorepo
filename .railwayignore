@@ -1,0 +1,14 @@
+# Ignore Docker files to force nixpacks usage
+Dockerfile*
+**/Dockerfile*
+
+# Development files
+*.local
+.env.development
+.env.local
+
+# Testing and build artifacts
+coverage/
+dist/
+node_modules/
+.pnpm-store/

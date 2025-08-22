@@ -1,0 +1,6 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "echo 'Please deploy frontend and backend separately using their specific Railway configurations'"
+restartPolicyType = "never"

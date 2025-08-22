@@ -1,0 +1,14 @@
+[variables]
+NODE_ENV = 'production'
+
+[phases.setup]
+nixPkgs = ['nodejs_20']
+
+[phases.install]
+cmd = 'cd ../.. && npm install -g pnpm && node scripts/prepare-railway.js && pnpm install --frozen-lockfile'
+
+[phases.build]
+cmd = 'cd ../.. && pnpm build:types && cd apps/rncp_api && pnpm build'
+
+[start]
+cmd = 'pnpm start:gateway'

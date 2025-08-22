@@ -24,7 +24,7 @@ RUN pnpm --filter @rncp/types build
 
 # Build the API application
 WORKDIR /app/apps/rncp_api
-RUN pnpm build:auth
+RUN pnpm build:geo
 
 # Production stage
 FROM node:20-alpine AS production
@@ -78,8 +78,8 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3001/auth/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+    CMD node -e "require('http').get('http://localhost:3001/geo/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the auth service from the API directory
+# Start the geo service from the API directory
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/auth-main.js"]
+CMD ["node", "dist/apps/rncp_api/src/geo-main.js"]

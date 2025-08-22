@@ -1,0 +1,6 @@
+# Types copied from tools - should not be committed
+*.ts
+!.gitignore
+
+# This folder contains copies of types from ../../tools/types
+# They are copied automatically by copy-types.js script

@@ -11,7 +11,7 @@ import { DeliveryPersonDashboard } from './DeliveryPersonDashboard';
 import { baseApi } from '../store/api/baseApi';
 import '../store/api'; // Import to ensure endpoints are injected
 import authReducer from '../store/slices/authSlice';
-import { OrderStatus, OrderPriority } from '@rncp/types';
+import { OrderStatus, OrderPriority } from '../types';
 
 // Mock alert
 const mockAlert = vi.spyOn(window, 'alert').mockImplementation(() => {});
